@@ -8,23 +8,24 @@
 
 package ru.orangesoftware.financisto.activity;
 
-import android.app.TabActivity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.widget.TabHost;
+import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.fragment.WebViewFragment;
 import ru.orangesoftware.financisto.utils.MyPreferences;
-import ru.orangesoftware.financisto.utils.Utils;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Denis Solonenko
  * Date: 3/24/11 10:20 PM
  */
-public class AboutActivity extends TabActivity {
+public class AboutActivity extends AppCompatActivity {
+    private static final int ABOUT_TAB_COUNT = 3;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -34,39 +35,52 @@ public class AboutActivity extends TabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
-        setTitle("Financisto ("+getAppVersion(this)+")");
-
-        addTabForFile("whatsnew", R.string.whats_new);
-        addTabForUrl("http://financisto.com/privacy.html", R.string.privacy_policy);
-        addTabForFile("gpl-2.0-standalone", R.string.license);
-        addTabForFile("about", R.string.about);
+        setContentView(R.layout.view_pager_activity);
+        String[] tabTitles = new String[ABOUT_TAB_COUNT];
+        tabTitles[0] = getString(R.string.about);
+        tabTitles[1] = getString(R.string.whats_new);
+        tabTitles[2] = getString(R.string.license);
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getFragmentManager(), tabTitles);
+        viewPager.setAdapter(adapter);
     }
 
-    private void addTabForFile(String name, int titleId) {
-        Intent intent = new Intent(this, WebViewActivity.class);
-        intent.putExtra(WebViewActivity.FILENAME, name);
-        TabHost tabHost = getTabHost();
-        tabHost.addTab(tabHost.newTabSpec(name)
-                .setIndicator(getString(titleId), getResources().getDrawable(R.drawable.ic_tab_about))
-                .setContent(intent));
-    }
+    private static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+        private final String[] mTabTitles;
 
-    private void addTabForUrl(String url, int titleId) {
-        Intent intent = new Intent(this, WebViewActivity.class);
-        intent.putExtra(WebViewActivity.URL, url);
-        TabHost tabHost = getTabHost();
-        tabHost.addTab(tabHost.newTabSpec(String.valueOf(titleId))
-                .setIndicator(getString(titleId), getResources().getDrawable(R.drawable.ic_tab_about))
-                .setContent(intent));
-    }
+        MyFragmentPagerAdapter(FragmentManager fragmentManager, String[] tabTitles) {
+            super(fragmentManager);
+            mTabTitles = tabTitles;
+        }
 
-    public static String getAppVersion(Context context) {
-        try {
-            PackageInfo info = Utils.getPackageInfo(context);
-            return "v. "+info.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            return "";
+        @Override
+        public Fragment getItem(int position) {
+            String fileName = "file:///android_asset/";
+            switch (position) {
+                case 0:
+                    fileName += "about";
+                    break;
+                case 1:
+                    fileName += "whatsnew";
+                    break;
+                case 2:
+                    fileName += "gpl-2.0-standalone";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown position");
+            }
+            fileName += ".htm";
+            return WebViewFragment.newInstance(fileName);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mTabTitles[position];
+        }
+
+        @Override
+        public int getCount() {
+            return mTabTitles.length;
         }
     }
-
 }
