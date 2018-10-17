@@ -30,12 +30,12 @@ public class SmsTemplateBuilder {
         return this;
     }
 
-    public SmsTemplateBuilder accountId(int id) {
+    public SmsTemplateBuilder accountId(long id) {
         t.accountId = id;
         return this;
     }
 
-    public SmsTemplateBuilder categoryId(int id) {
+    public SmsTemplateBuilder categoryId(long id) {
         t.categoryId = id;
         return this;
     }

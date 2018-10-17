@@ -1,11 +1,7 @@
 package ru.orangesoftware.financisto.service;
 
 import android.util.Log;
-import ru.orangesoftware.financisto.db.DatabaseAdapter;
-import ru.orangesoftware.financisto.model.SmsTemplate;
-import ru.orangesoftware.financisto.model.Transaction;
-import ru.orangesoftware.financisto.model.TransactionStatus;
-import ru.orangesoftware.financisto.utils.StringUtil;
+import android.util.Pair;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -15,10 +11,21 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.SmsTemplate;
+import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.model.TransactionStatus;
+import ru.orangesoftware.financisto.utils.StringUtil;
+
 import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.util.regex.Pattern.DOTALL;
-import static ru.orangesoftware.financisto.service.SmsTransactionProcessor.Placeholder.*;
+import static ru.orangesoftware.financisto.model.Category.NO_CATEGORY_ID;
+import static ru.orangesoftware.financisto.service.SmsTransactionProcessor.Placeholder.ACCOUNT;
+import static ru.orangesoftware.financisto.service.SmsTransactionProcessor.Placeholder.ANY;
+import static ru.orangesoftware.financisto.service.SmsTransactionProcessor.Placeholder.BALANCE;
+import static ru.orangesoftware.financisto.service.SmsTransactionProcessor.Placeholder.PRICE;
 
 public class SmsTransactionProcessor {
     private static final String TAG = SmsTransactionProcessor.class.getSimpleName();
@@ -34,24 +41,38 @@ public class SmsTransactionProcessor {
      * Parses sms and adds new transaction if it matches any sms template
      * @return new transaction or null if not matched/parsed
      */
-    public Transaction createTransactionBySms(String addr, String fullSmsBody, TransactionStatus status, boolean updateNote) {
+    public Pair<Transaction, Transaction> createTransactionBySmsAndCorrect(
+            String addr, String fullSmsBody, TransactionStatus status, boolean updateNote, double correctionThreshold) {
         List<SmsTemplate> addrTemplates = db.getSmsTemplatesByNumber(addr);
+        Transaction transaction = null, correction = null;
         for (final SmsTemplate t : addrTemplates) {
             String[] match = findTemplateMatches(t.template, fullSmsBody);
             if (match != null) {
                 Log.d(TAG, format("Found template`%s` with matches `%s`", t, Arrays.toString(match)));
 
-                String account = match[ACCOUNT.ordinal()];
+                String parsedAccount = match[ACCOUNT.ordinal()];
                 String parsedPrice = match[PRICE.ordinal()];
+                final long accountId = findAccount(parsedAccount, t.accountId);
                 try {
                     BigDecimal price = toBigDecimal(parsedPrice);
-                    return createNewTransaction(price, account, t, updateNote ? fullSmsBody : "", status);
+                    transaction = createNewTransaction(price, accountId, t, updateNote ? fullSmsBody : "", status);
                 } catch (Exception e) {
                     Log.e(TAG, format("Failed to parse price value: `%s`", parsedPrice), e);
                 }
+                String parsedBalance = match[BALANCE.ordinal()];
+                if (correctionThreshold > 0 && parsedBalance != null) {
+                    long balance = toBigDecimal(parsedBalance).multiply(HUNDRED).longValue();
+                    Account account = db.getAccount(accountId);
+                    long difference = balance - account.totalAmount;
+                    if (Math.abs(difference) > correctionThreshold) {
+                        // todo.mb get status from prefs and note from resources
+                        correction = createCorrectionTransaction(difference, accountId, "sms correction", status);
+                    }
+                }
+
             }
         }
-        return null;
+        return Pair.create(transaction, correction);
     }
 
     /**
@@ -112,13 +133,14 @@ public class SmsTransactionProcessor {
         throw new NumberFormatException("Unexpected number format. Cannot convert '" + value + "' to BigDecimal.");
     }
 
-    private Transaction createNewTransaction(BigDecimal price,
-        String accountDigits,
-        SmsTemplate smsTemplate,
-        String note,
-        TransactionStatus status) {
-        Transaction res = null;
-        long accountId = findAccount(accountDigits, smsTemplate.accountId);
+    private Transaction createNewTransaction(
+            BigDecimal price,
+            long accountId,
+            SmsTemplate smsTemplate,
+            String note,
+            TransactionStatus status) {
+            Transaction res = null;
+
         if (price.compareTo(ZERO) > 0 && accountId > 0) {
             res = new Transaction();
             res.isTemplate = 0;
@@ -134,6 +156,25 @@ public class SmsTransactionProcessor {
         } else {
             Log.e(TAG, format("Account not found or price wrong for `%s` sms template", smsTemplate));
         }
+        return res;
+    }
+
+    private Transaction createCorrectionTransaction(
+            long difference,
+            long accountId,
+            String note,
+            TransactionStatus status) {
+        Transaction res = new Transaction();
+        res.isTemplate = 0;
+        res.fromAccountId = accountId;
+        res.fromAmount = difference;
+        res.note = note;
+        res.categoryId = NO_CATEGORY_ID;
+        res.status = status;
+        long id = db.insertOrUpdate(res);
+        res.id = id;
+
+        Log.i(TAG, format("Correction `%s` was added with id=%s", res, id));
         return res;
     }
 
