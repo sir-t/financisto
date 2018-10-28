@@ -38,7 +38,7 @@ public class SmsTransactionProcessor {
     }
 
     /**
-     * Parses sms and adds new transaction if it matches any sms template
+     * Parses sms and adds new transaction and/or balance correction if it matches any sms template
      * @return new transaction or null if not matched/parsed
      */
     public Pair<Transaction, Transaction> createTransactionBySmsAndCorrect(
@@ -53,11 +53,13 @@ public class SmsTransactionProcessor {
                 String parsedAccount = match[ACCOUNT.ordinal()];
                 String parsedPrice = match[PRICE.ordinal()];
                 final long accountId = findAccount(parsedAccount, t.accountId);
-                try {
-                    BigDecimal price = toBigDecimal(parsedPrice);
-                    transaction = createNewTransaction(price, accountId, t, updateNote ? fullSmsBody : "", status);
-                } catch (Exception e) {
-                    Log.e(TAG, format("Failed to parse price value: `%s`", parsedPrice), e);
+                if (parsedPrice != null) {
+                    try {
+                        BigDecimal price = toBigDecimal(parsedPrice);
+                        transaction = createNewTransaction(price, accountId, t, updateNote ? fullSmsBody : "", status);
+                    } catch (Exception e) {
+                        Log.e(TAG, format("Failed to parse price value: `%s`", parsedPrice), e);
+                    }
                 }
                 String parsedBalance = match[BALANCE.ordinal()];
                 if (correctionThreshold > 0 && parsedBalance != null) {
@@ -69,10 +71,10 @@ public class SmsTransactionProcessor {
                         correction = createCorrectionTransaction(difference, accountId, "sms correction", status);
                     }
                 }
-
+                if (transaction != null || correction != null) return Pair.create(transaction, correction);
             }
         }
-        return Pair.create(transaction, correction);
+        return null;
     }
 
     /**
@@ -256,7 +258,7 @@ public class SmsTransactionProcessor {
         for (Placeholder p : Placeholder.values()) {
             int i = template.indexOf(p.code);
             if (i >= 0) {
-                if (p == PRICE) {
+                if (p == PRICE || p == BALANCE) {
                     foundPrice = true;
                 }
                 if (p != ANY) {

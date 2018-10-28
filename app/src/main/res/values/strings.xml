@@ -932,6 +932,8 @@
     <string name="sms_delete_alert">Delete this SMS template?</string>
     <string name="new_sms_transaction_text">New transaction added by SMS from %s</string>
     <string name="new_sms_transaction_title">SMS transaction from %s</string>
+    <string name="new_sms_correction_text">New correction added by SMS from %s</string>
+    <string name="new_sms_correction_title">SMS correction by %s</string>
     <string name="choose_sms_template_type_and_account">Choose type and account (optional)</string>
     <string name="pref_sms">SMS</string>
     <string name="pref_sms_transaction_status_title">Transaction Status</string>
