@@ -28,6 +28,7 @@ import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.BlotterActivity;
 import ru.orangesoftware.financisto.activity.BlotterOperations;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.fragment.BlotterFragment;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.Category;
@@ -62,10 +63,10 @@ public class TransactionInfoDialog {
         this.u = new Utils(context);
     }
 
-    public void show(BlotterActivity blotterActivity, long transactionId) {
+    public void show(BlotterFragment blotterFragment, long transactionId) {
         TransactionInfo ti = db.getTransactionInfo(transactionId);
         if (ti == null) {
-            Toast t = Toast.makeText(blotterActivity, R.string.no_transaction_found, Toast.LENGTH_LONG);
+            Toast t = Toast.makeText(blotterFragment.getActivity(), R.string.no_transaction_found, Toast.LENGTH_LONG);
             t.show();
             return;
         }
@@ -79,7 +80,7 @@ public class TransactionInfoDialog {
         createMainInfoNodes(ti, layout);
         createAdditionalInfoNodes(ti, layout);
 
-        showDialog(blotterActivity, transactionId, v, titleView);
+        showDialog(blotterFragment, transactionId, v, titleView);
     }
 
     private void createMainInfoNodes(TransactionInfo ti, LinearLayout layout) {
@@ -206,8 +207,8 @@ public class TransactionInfoDialog {
         return titleView;
     }
 
-    private void showDialog(final BlotterActivity blotterActivity, final long transactionId, final View v, View titleView) {
-        final Dialog d = new AlertDialog.Builder(blotterActivity)
+    private void showDialog(final BlotterFragment blotterFragment, final long transactionId, final View v, View titleView) {
+        final Dialog d = new AlertDialog.Builder(blotterFragment.getActivity())
                 .setCustomTitle(titleView)
                 .setView(v)
                 .create();
@@ -216,7 +217,7 @@ public class TransactionInfoDialog {
         Button bEdit = v.findViewById(R.id.bEdit);
         bEdit.setOnClickListener(arg0 -> {
             d.dismiss();
-            new BlotterOperations(blotterActivity, db, transactionId).editTransaction();
+            new BlotterOperations(blotterFragment, db, transactionId).editTransaction();
         });
 
         Button bClose = v.findViewById(R.id.bClose);

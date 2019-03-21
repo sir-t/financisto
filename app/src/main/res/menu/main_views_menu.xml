@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/accounts_tab"
+        android:icon="@drawable/ic_tab_accounts"
+        android:title="@string/accounts" />
+    <item
+        android:id="@+id/blotter_tab"
+        android:icon="@drawable/ic_tab_blotter"
+        android:title="@string/blotter"/>
+    <item
+        android:id="@+id/budgets_tab"
+        android:icon="@drawable/ic_tab_budgets"
+        android:title="@string/budgets"/>
+    <item
+        android:id="@+id/reports_tab"
+        android:icon="@drawable/ic_tab_reports"
+        android:title="@string/reports" />
+    <item
+        android:id="@+id/menu_tab"
+        android:icon="@drawable/ic_tab_menu"
+        android:title="@string/menu" />
+
+</menu>

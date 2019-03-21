@@ -7,6 +7,7 @@
  */
 package ru.orangesoftware.financisto.dialog;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -28,14 +29,14 @@ import static ru.orangesoftware.financisto.utils.Utils.isNotEmpty;
 
 public class AccountInfoDialog {
 
-    private final AccountListActivity parentActivity;
+    private final Activity parentActivity;
     private final long accountId;
     private final DatabaseAdapter db;
     private final NodeInflater inflater;
     private final LayoutInflater layoutInflater;
     private final Utils u;
 
-    public AccountInfoDialog(AccountListActivity parentActivity, long accountId,
+    public AccountInfoDialog(Activity parentActivity, long accountId,
                              DatabaseAdapter db, NodeInflater inflater) {
         this.parentActivity = parentActivity;
         this.accountId = accountId;
@@ -117,7 +118,7 @@ public class AccountInfoDialog {
                 d.dismiss();
                 Intent intent = new Intent(parentActivity, AccountActivity.class);
                 intent.putExtra(AccountActivity.ACCOUNT_ID_EXTRA, accountId);
-                parentActivity.startActivityForResult(intent, AccountListActivity.EDIT_ACCOUNT_REQUEST);
+                parentActivity.startActivityForResult(intent, 2);
             }
         });
 

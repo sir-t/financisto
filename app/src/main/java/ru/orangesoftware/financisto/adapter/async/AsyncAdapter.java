@@ -1,15 +1,16 @@
 package ru.orangesoftware.financisto.adapter.async;
 
-import android.support.annotation.NonNull;
-import android.support.v7.util.AsyncListUtil;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+
+import androidx.recyclerview.widget.AsyncListUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Based on <a href=https://github.com/jasonwyatt/AsyncListUtil-Example>AsyncListUtil-Example</a> and 
  * <a href=https://medium.com/@ipaulpro/drag-and-swipe-with-recyclerview-b9456d2b1aaf>drag-and-swipe-with-recyclerview</a>
  */
-public abstract class AsyncAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> { 
+public abstract class AsyncAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private final ItemSource<T> itemSource;
     private final RecyclerView recyclerView;

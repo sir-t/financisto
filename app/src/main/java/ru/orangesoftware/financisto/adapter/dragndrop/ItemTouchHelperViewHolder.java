@@ -1,7 +1,5 @@
 package ru.orangesoftware.financisto.adapter.dragndrop;
 
-import android.support.v7.widget.helper.ItemTouchHelper;
-
 public interface ItemTouchHelperViewHolder {
 
     /**

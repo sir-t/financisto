@@ -8,7 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.content.FileProvider;
+import androidx.core.content.FileProvider;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 import java.io.File;
@@ -381,9 +381,9 @@ public enum MenuListItem implements SummaryEntityEnum {
 
         @Override
         protected void onPostExecute(Void o) {
-            if (context instanceof MainActivity) {
-                ((MainActivity) context).refreshCurrentTab();
-            }
+//            if (context instanceof MainActivity) {
+//                ((MainActivity) context).refreshCurrentTab();
+//            }
             progressDialog.dismiss();
         }
 
