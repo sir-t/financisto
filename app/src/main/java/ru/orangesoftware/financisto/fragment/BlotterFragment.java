@@ -1,6 +1,5 @@
 package ru.orangesoftware.financisto.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +32,6 @@ import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.BlotterOperations;
 import ru.orangesoftware.financisto.activity.BlotterTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.FilterState;
-import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
 import ru.orangesoftware.financisto.activity.MonthlyViewActivity;
 import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.SelectTemplateActivity;
@@ -50,7 +48,6 @@ import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.Transaction;
-import ru.orangesoftware.financisto.utils.IntegrityCheckRunningBalance;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.view.NodeInflater;
@@ -98,11 +95,9 @@ public class BlotterFragment extends AbstractListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater,container,savedInstanceState);
-
         this.inflater = new NodeInflater(inflater);
         integrityCheck();
-        return view;
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     protected void calculateTotals() {
@@ -131,8 +126,8 @@ public class BlotterFragment extends AbstractListFragment {
 
 
     @Override
-    protected void initAddButton(Bundle savedInstanceState) {
-        super.initAddButton(savedInstanceState);
+    protected void initUI(Bundle savedInstanceState) {
+        super.initUI(savedInstanceState);
 
         bFilter = view.findViewById(R.id.bFilter);
         bFilter.setOnClickListener(v -> {
@@ -506,6 +501,7 @@ public class BlotterFragment extends AbstractListFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILTER_REQUEST) {
             if (resultCode == RESULT_FIRST_USER) {
                 blotterFilter.clear();
@@ -522,7 +518,6 @@ public class BlotterFragment extends AbstractListFragment {
         }
         if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
             calculateTotals();
-            recreateCursor();
         }
     }
 
@@ -584,7 +579,7 @@ public class BlotterFragment extends AbstractListFragment {
 
     private void showTransactionInfo(long id) {
         TransactionInfoDialog transactionInfoView = new TransactionInfoDialog(context, db, inflater);
-            transactionInfoView.show(this, id);
+        transactionInfoView.show(this, id);
     }
 
     @Override
@@ -601,6 +596,4 @@ public class BlotterFragment extends AbstractListFragment {
 //            super.onBackPressed();
 //        }
 //    }
-
-
 }

@@ -1,8 +1,8 @@
 package ru.orangesoftware.financisto.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -19,14 +19,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import androidx.fragment.app.ListFragment;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.RefreshSupportedActivity;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.PinProtection;
+
+import static android.app.Activity.RESULT_OK;
 
 abstract class AbstractListFragment extends ListFragment implements RefreshSupportedActivity {
 
@@ -65,8 +64,8 @@ abstract class AbstractListFragment extends ListFragment implements RefreshSuppo
 
         view = inflater.inflate(contentId, container, false);
 
-        initAddButton(savedInstanceState);
-        
+        initUI(savedInstanceState);
+
 //        getLoaderManager().initLoader(LOADER_ID, null, this);
 //        if (cursor != null) {
 //            startManagingCursor(cursor);
@@ -124,7 +123,7 @@ abstract class AbstractListFragment extends ListFragment implements RefreshSuppo
 
     protected abstract ListAdapter createAdapter(Cursor cursor);
 
-    protected void initAddButton(Bundle savedInstanceState) {
+    protected void initUI(Bundle savedInstanceState) {
         bAdd = view.findViewById(R.id.bAdd);
         bAdd.setOnClickListener(arg0 -> addItem());
     }
@@ -211,5 +210,12 @@ abstract class AbstractListFragment extends ListFragment implements RefreshSuppo
 
     @Override
     public void integrityCheck() {
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            recreateCursor();
+        }
     }
 }
