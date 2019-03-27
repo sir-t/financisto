@@ -58,9 +58,6 @@ import static ru.orangesoftware.financisto.utils.MyPreferences.isQuickMenuEnable
 
 public class BlotterFragment extends AbstractListFragment {
 
-    public static final String SAVE_FILTER = "saveFilter";
-    public static final String EXTRA_FILTER_ACCOUNTS = "filterAccounts";
-
     private static final int NEW_TRANSACTION_REQUEST = 1;
     private static final int NEW_TRANSFER_REQUEST = 3;
     private static final int NEW_TRANSACTION_FROM_TEMPLATE_REQUEST = 5;
@@ -83,7 +80,7 @@ public class BlotterFragment extends AbstractListFragment {
 
     private TotalCalculationTask calculationTask;
 
-    protected boolean saveFilter;
+    protected boolean saveFilter = true;
     protected WhereFilter blotterFilter = WhereFilter.empty();
 
     protected boolean isAccountBlotter = false;
@@ -143,7 +140,6 @@ public class BlotterFragment extends AbstractListFragment {
         Intent intent = context.getIntent();
         if (intent != null) {
             blotterFilter = WhereFilter.fromIntent(intent);
-            saveFilter = intent.getBooleanExtra(SAVE_FILTER, false);
             isAccountBlotter = intent.getBooleanExtra(BlotterFilterActivity.IS_ACCOUNT_FILTER, false);
         }
         if (savedInstanceState != null) {
@@ -550,7 +546,7 @@ public class BlotterFragment extends AbstractListFragment {
         }
         String title = blotterFilter.getTitle();
         if (title != null) {
-//TODO            setTitle(getString(R.string.blotter) + " : " + title);
+            context.setTitle(getString(R.string.blotter) + " : " + title);
         }
         updateFilterImage();
     }
