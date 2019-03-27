@@ -10,6 +10,7 @@
  ******************************************************************************/
 package ru.orangesoftware.financisto.dialog;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -25,7 +26,6 @@ import android.widget.Toast;
 import java.util.List;
 
 import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.activity.BlotterActivity;
 import ru.orangesoftware.financisto.activity.BlotterOperations;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.fragment.BlotterFragment;
@@ -47,14 +47,14 @@ import static ru.orangesoftware.financisto.utils.Utils.isNotEmpty;
 
 public class TransactionInfoDialog {
 
-    private final Context context;
+    private final Activity context;
     private final DatabaseAdapter db;
     private final NodeInflater inflater;
     private final LayoutInflater layoutInflater;
     private final int splitPadding;
     private final Utils u;
 
-    public TransactionInfoDialog(Context context, DatabaseAdapter db, NodeInflater inflater) {
+    public TransactionInfoDialog(Activity context, DatabaseAdapter db, NodeInflater inflater) {
         this.context = context;
         this.db = db;
         this.inflater = inflater;

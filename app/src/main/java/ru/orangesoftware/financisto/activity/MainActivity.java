@@ -14,12 +14,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.FrameLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -27,7 +23,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -39,9 +34,12 @@ import ru.orangesoftware.financisto.bus.SwitchToMenuTabEvent;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper;
 import ru.orangesoftware.financisto.dialog.WebViewDialog;
+import ru.orangesoftware.financisto.fragment.AbstractListFragment;
 import ru.orangesoftware.financisto.fragment.AccountListFragment;
 import ru.orangesoftware.financisto.fragment.BlotterFragment;
 import ru.orangesoftware.financisto.fragment.BudgetListFragment;
+import ru.orangesoftware.financisto.fragment.MenuFragment;
+import ru.orangesoftware.financisto.fragment.ReportsListFragment;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.PinProtection;
@@ -49,7 +47,6 @@ import ru.orangesoftware.financisto.utils.PinProtection;
 public class MainActivity extends FragmentActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private GreenRobotBus greenRobotBus;
-    private FrameLayout main;
     private Fragment accListFragment;
     private Fragment blotterFragment;
     private Fragment budgetsFragment;
@@ -73,47 +70,52 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
 
         initialLoad();
 
-//        RelativeLayout content = new RelativeLayout(this);
-//        main = new FrameLayout(this);
-//
-//        FrameLayout.LayoutParams mainLP = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//        content.addView(main, mainLP);
-//
-//        BottomNavigationView bottomNavigationView = new BottomNavigationView(this);
-//        bottomNavigationView.inflateMenu(R.menu.main_views_menu);
-//        bottomNavigationView.setOnNavigationItemSelectedListener(this);
-//        bottomNavigationView.setBackgroundResource(R.color.bottom_bar_tint);
-//
-//
-//        BottomNavigationView.LayoutParams bottomNavViewLP = new BottomNavigationView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//        bottomNavViewLP.gravity = Gravity.BOTTOM;
-//
-//        content.addView(bottomNavigationView, bottomNavViewLP);
-//
-//        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         setContentView(R.layout.main_layout);
+
+        accListFragment = new AccountListFragment();
+        blotterFragment = new BlotterFragment();
+        budgetsFragment = new BudgetListFragment();
+        reportsFragment = new ReportsListFragment();
+        menuFragment = new MenuFragment();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.inflateMenu(R.menu.main_views_menu);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
-        accListFragment = new AccountListFragment();
-        blotterFragment = new BlotterFragment();
-        budgetsFragment = new BudgetListFragment();
-        reportsFragment = new ReportsFragment();
-        menuFragment = new MenuFragment();
+        MyPreferences.StartupScreen screen = MyPreferences.getStartupScreen(this);
+        switch (screen) {
+            case ACCOUNTS:
+                fragment = accListFragment;
+                break;
+            case BUDGETS:
+                fragment = budgetsFragment;
+                break;
+            case REPORTS:
+                fragment = reportsFragment;
+                break;
+            case BLOTTER:
+            default:
+                fragment = blotterFragment;
+                break;
+        }
 
+        refreshTab();
+    }
+
+    private void refreshTab() {
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.main_container, fragment).commit();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSwitchToMenuTab(SwitchToMenuTabEvent event) {
-
-//        getTabHost().setCurrentTabByTag("menu");
+        fragment = menuFragment;
+        refreshTab();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRefreshCurrentTab(RefreshCurrentTab e) {
-//        refreshCurrentTab();
+        refreshCurrentTab();
     }
 
     @Override
@@ -201,77 +203,14 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
                 break;
 
         }
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.main_container, fragment).commit();
+        refreshTab();
         return true;
     }
 
-//    @Override
-//    public void onTabChanged(String tabId) {
-//        Log.d("Financisto", "About to update tab " + tabId);
-//        long t0 = System.currentTimeMillis();
-//        refreshCurrentTab();
-//        long t1 = System.currentTimeMillis();
-//        Log.d("Financisto", "Tab " + tabId + " updated in " + (t1 - t0) + "ms");
-//    }
-
-//    public void refreshCurrentTab() {
-//        Activity currentActivity = getLocalActivityManager().getCurrentActivity();
-//        if (currentActivity instanceof RefreshSupportedActivity) {
-//            RefreshSupportedActivity activity = (RefreshSupportedActivity) currentActivity;
-//            activity.recreateCursor();
-//            activity.integrityCheck();
-//        }
-//    }
-
-
-//    private void setupAccountsTab(BottomNavigationView tabHost) {
-//        addTab(tabHost.newTabSpec("accounts")
-//                .setIndicator(getString(R.string.accounts), getResources().getDrawable(R.drawable.ic_tab_accounts))
-//                .setContent(new Intent(this, AccountListActivity.class)));
-//    }
-//
-//    private void setupBlotterTab(TabHost tabHost) {
-//        Intent intent = new Intent(this, BlotterActivity.class);
-//        intent.putExtra(BlotterActivity.SAVE_FILTER, true);
-//        intent.putExtra(BlotterActivity.EXTRA_FILTER_ACCOUNTS, true);
-//        tabHost.addTab(tabHost.newTabSpec("blotter")
-//                .setIndicator(getString(R.string.blotter), getResources().getDrawable(R.drawable.ic_tab_blotter))
-//                .setContent(intent));
-//    }
-//
-//    private void setupBudgetsTab(TabHost tabHost) {
-//        tabHost.addTab(tabHost.newTabSpec("budgets")
-//                .setIndicator(getString(R.string.budgets), getResources().getDrawable(R.drawable.ic_tab_budgets))
-//                .setContent(new Intent(this, BudgetListActivity.class)));
-//    }
-//
-//    private void setupReportsTab(TabHost tabHost) {
-//        tabHost.addTab(tabHost.newTabSpec("reports")
-//                .setIndicator(getString(R.string.reports), getResources().getDrawable(R.drawable.ic_tab_reports))
-//                .setContent(new Intent(this, ReportsListActivity.class)));
-//    }
-//
-//    private void setupMenuTab(TabHost tabHost) {
-//        tabHost.addTab(tabHost.newTabSpec("menu")
-//                .setIndicator(getString(R.string.menu), getResources().getDrawable(R.drawable.ic_tab_menu))
-//                .setContent(new Intent(this, MenuListActivity_.class)));
-//    }
-
-
-    public static class ReportsFragment extends Fragment {
-        @Nullable
-        @Override
-        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.reports_list, container, false);
-        }
-    }
-
-    public static class MenuFragment extends Fragment {
-        @Nullable
-        @Override
-        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.activity_menu_list, container, false);
+    public void refreshCurrentTab() {
+        if (fragment instanceof AbstractListFragment) {
+            ((AbstractListFragment) fragment).recreateCursor();
+            ((AbstractListFragment) fragment).integrityCheck();
         }
     }
 }

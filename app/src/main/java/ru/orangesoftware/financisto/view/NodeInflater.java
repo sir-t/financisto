@@ -11,15 +11,22 @@
 package ru.orangesoftware.financisto.view;
 
 import android.Manifest;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.core.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import androidx.core.content.FileProvider;
 import ru.orangesoftware.financisto.BuildConfig;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.utils.PicturesUtil;
@@ -200,7 +207,7 @@ public class NodeInflater {
             return super.withButtonId(buttonId, listener);
         }
 
-        public PictureBuilder withPicture(final Context context, String pictureFileName) {
+        public PictureBuilder withPicture(final Activity context, String pictureFileName) {
             final ImageView imageView = v.findViewById(R.id.picture);
             imageView.setOnClickListener(arg0 -> {
                 if (isRequestingPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)) {

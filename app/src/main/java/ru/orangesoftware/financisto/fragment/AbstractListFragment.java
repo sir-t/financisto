@@ -27,7 +27,7 @@ import ru.orangesoftware.financisto.utils.PinProtection;
 
 import static android.app.Activity.RESULT_OK;
 
-abstract class AbstractListFragment extends ListFragment implements RefreshSupportedActivity {
+public abstract class AbstractListFragment extends ListFragment implements RefreshSupportedActivity {
 
     protected static final int MENU_VIEW = Menu.FIRST + 1;
     protected static final int MENU_EDIT = Menu.FIRST + 2;

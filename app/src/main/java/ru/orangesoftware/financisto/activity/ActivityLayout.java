@@ -10,20 +10,32 @@
  ******************************************************************************/
 package ru.orangesoftware.financisto.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
-import androidx.core.util.Pair;
 import android.view.View;
-import android.widget.*;
+import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import java.util.List;
+
+import androidx.core.util.Pair;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.model.MultiChoiceItem;
 import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.financisto.view.NodeInflater;
-import ru.orangesoftware.financisto.view.NodeInflater.*;
-
-import java.util.List;
+import ru.orangesoftware.financisto.view.NodeInflater.Builder;
+import ru.orangesoftware.financisto.view.NodeInflater.CheckBoxBuilder;
+import ru.orangesoftware.financisto.view.NodeInflater.EditBuilder;
+import ru.orangesoftware.financisto.view.NodeInflater.ListBuilder;
+import ru.orangesoftware.financisto.view.NodeInflater.PictureBuilder;
 
 public class ActivityLayout {
 
@@ -266,7 +278,7 @@ public class ActivityLayout {
 		plusImageView.setVisibility(View.VISIBLE);
 	}
 
-	public ImageView addPictureNodeMinus(Context context, LinearLayout layout, int id, int minusId, int labelId, int defaultLabelResId) {
+	public ImageView addPictureNodeMinus(Activity context, LinearLayout layout, int id, int minusId, int labelId, int defaultLabelResId) {
 		PictureBuilder b = inflater.new PictureBuilder(layout);
 		View v = b.withPicture(context, null).withButtonId(minusId, listener).withId(id, listener)
 				.withLabel(labelId).withData(defaultLabelResId).create();
