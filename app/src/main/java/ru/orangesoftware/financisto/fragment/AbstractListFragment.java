@@ -59,12 +59,13 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
 
         db = new DatabaseAdapter(context);
         db.open();
-        cursor = createCursor();
         context = getActivity();
 
         view = inflater.inflate(contentId, container, false);
 
         initUI(savedInstanceState);
+
+        cursor = createCursor();
 
 //        getLoaderManager().initLoader(LOADER_ID, null, this);
 //        if (cursor != null) {

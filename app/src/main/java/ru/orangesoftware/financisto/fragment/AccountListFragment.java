@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -17,15 +16,15 @@ import android.widget.TextView;
 
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.Nullable;
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.AbstractTransactionActivity;
 import ru.orangesoftware.financisto.activity.AccountActivity;
 import ru.orangesoftware.financisto.activity.AccountListTotalsDetailsActivity;
-import ru.orangesoftware.financisto.activity.BlotterActivity;
-import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
+import ru.orangesoftware.financisto.activity.MainActivity;
 import ru.orangesoftware.financisto.activity.MenuListItem;
 import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.PurgeAccountActivity;
@@ -211,11 +210,18 @@ public class AccountListFragment extends AbstractListFragment {
     private void showAccountTransactions(long id) {
         Account account = db.getAccount(id);
         if (account != null) {
-            Intent intent = new Intent(context, BlotterActivity.class);
+            MainActivity mainActivity = (MainActivity) this.context;
             Criteria.eq(BlotterFilter.FROM_ACCOUNT_ID, String.valueOf(id))
-                    .toIntent(account.title, intent);
-            intent.putExtra(BlotterFilterActivity.IS_ACCOUNT_FILTER, true);
-            startActivityForResult(intent, VIEW_ACCOUNT_REQUEST);
+                    .toIntent(account.title, mainActivity.getIntent());
+            mainActivity.switchToBlotterWithFilter();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VIEW_ACCOUNT_REQUEST || requestCode == PURGE_ACCOUNT_REQUEST) {
+            recreateCursor();
         }
     }
 

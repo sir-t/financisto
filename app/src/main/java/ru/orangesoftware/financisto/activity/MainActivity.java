@@ -15,7 +15,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.FrameLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -54,6 +56,7 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
     private Fragment menuFragment;
 
     Fragment fragment;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -78,7 +81,7 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         reportsFragment = new ReportsListFragment();
         menuFragment = new MenuFragment();
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.inflateMenu(R.menu.main_views_menu);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
@@ -86,19 +89,29 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         switch (screen) {
             case ACCOUNTS:
                 fragment = accListFragment;
+                bottomNavigationView.setSelectedItemId(R.id.accounts_tab);
                 break;
             case BUDGETS:
                 fragment = budgetsFragment;
+                bottomNavigationView.setSelectedItemId(R.id.budgets_tab);
                 break;
             case REPORTS:
                 fragment = reportsFragment;
+                bottomNavigationView.setSelectedItemId(R.id.reports_tab);
                 break;
             case BLOTTER:
             default:
                 fragment = blotterFragment;
+                bottomNavigationView.setSelectedItemId(R.id.blotter_tab);
                 break;
         }
 
+        refreshTab();
+    }
+
+    public void switchToBlotterWithFilter() {
+        fragment = blotterFragment;
+        bottomNavigationView.setSelectedItemId(R.id.blotter_tab);
         refreshTab();
     }
 
@@ -205,6 +218,16 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         }
         refreshTab();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        FrameLayout searchLayout = blotterFragment.getView().findViewById(R.id.search_text_frame);
+        if (searchLayout != null && searchLayout.getVisibility() == View.VISIBLE) {
+            searchLayout.setVisibility(View.GONE);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     public void refreshCurrentTab() {
