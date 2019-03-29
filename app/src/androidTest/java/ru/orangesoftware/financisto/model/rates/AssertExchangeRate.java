@@ -12,6 +12,8 @@ import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.rates.ExchangeRate;
 import ru.orangesoftware.financisto.test.DateTime;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Created by IntelliJ IDEA.
  * User: denis.solonenko

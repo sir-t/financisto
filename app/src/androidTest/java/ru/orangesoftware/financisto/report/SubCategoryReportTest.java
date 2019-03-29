@@ -1,12 +1,17 @@
 package ru.orangesoftware.financisto.report;
 
+import org.junit.Test;
+
+import java.util.List;
+
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.graph.GraphUnit;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.RateBuilder;
 import ru.orangesoftware.financisto.test.TransactionBuilder;
 
-import java.util.List;
+import static androidx.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,6 +27,7 @@ public class SubCategoryReportTest extends AbstractReportTest {
         filter = r.createFilterForSubCategory(db, WhereFilter.empty(), categories.get("A").id);
     }
 
+    @Test
     public void test_should_calculate_correct_report_with_one_currency() {
         // A  -3400
         //    +250
@@ -48,6 +54,7 @@ public class SubCategoryReportTest extends AbstractReportTest {
         assertExpense(units.get(2), -1100);
     }
 
+    @Test
     public void test_should_calculate_correct_report_with_one_currency_2() {
         // A       = +6500
         // - A1    +4000 = +5000
@@ -64,6 +71,7 @@ public class SubCategoryReportTest extends AbstractReportTest {
         assertUnit(units.get(3), "A2", 0, 1500);
     }
 
+    @Test
     public void test_should_calculate_correct_report_with_multiple_currencies_1() {
         // A  -120$
         //    -100$$
@@ -76,6 +84,7 @@ public class SubCategoryReportTest extends AbstractReportTest {
         assertIncome(units.get(0), 0);
     }
 
+    @Test
     public void test_should_calculate_correct_report_with_multiple_currencies_2() {
         RateBuilder.withDb(db).at(DateTime.today()).from(c2).to(c1).rate(0.1f).create();
         TransactionBuilder.withDb(db).account(a1).category(categories.get("A")).dateTime(DateTime.today()).amount(-100).create();

@@ -9,8 +9,12 @@
 package ru.orangesoftware.financisto.blotter;
 
 import android.content.Intent;
-import android.test.AndroidTestCase;
+
 import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.filter.Criteria;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 
@@ -19,7 +23,8 @@ import ru.orangesoftware.financisto.filter.WhereFilter;
  * User: Denis Solonenko
  * Date: 8/1/11 10:35 PM
  */
-public class WhereFilterTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class WhereFilterTest {
 
     // todo.mb: check later on other versions >>
     /*public void test_many_operands_criteria() {
@@ -57,12 +62,14 @@ public class WhereFilterTest extends AndroidTestCase {
         Assert.assertArrayEquals(new String[]{"1", "2", "11", "12", "21", "22", "11", "12", "21", "31", "32", "41", "42", "43", "51", "52", "53", "54"}, restoredFilter.getSelectionArgs());
         
     }*/
-    
+
+    @Test
     public void test_filter_should_support_raw_criteria() {
         WhereFilter filter = givenFilterWithRawCriteria();
         assertFilterSelection(filter);
     }
 
+    @Test
     public void test_should_save_and_restore_raw_criteria() {
         //given
         WhereFilter filter = givenFilterWithRawCriteria();

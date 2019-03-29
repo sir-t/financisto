@@ -8,9 +8,15 @@
 
 package ru.orangesoftware.financisto.rates;
 
+import org.junit.Test;
+
 import java.util.List;
 
 import ru.orangesoftware.financisto.utils.FileUtils;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,6 +33,7 @@ public class OpenExchangeRatesDownloaderTest extends AbstractRatesDownloaderTest
         return openRates;
     }
 
+    @Test
     public void test_should_download_single_rate_usd_to_cur() {
         //given
         givenResponseFromWebService("http://openexchangerates.org/api/latest.json?app_id=MY_APP_ID",
@@ -39,6 +46,7 @@ public class OpenExchangeRatesDownloaderTest extends AbstractRatesDownloaderTest
         assertEquals(1361034009000L, downloadedExchangeRate.date);
     }
 
+    @Test
     public void test_should_download_single_rate_cur_to_cur() {
         //given
         givenResponseFromWebService(anyUrl(), "open_exchange_normal_response.json");
@@ -47,6 +55,7 @@ public class OpenExchangeRatesDownloaderTest extends AbstractRatesDownloaderTest
         assertEquals(0.00010655, downloadRate("BYR", "CHF").rate, 0.00001);
     }
 
+    @Test
     public void test_should_download_multiple_rates() {
         //given
         givenResponseFromWebService(anyUrl(), "open_exchange_normal_response.json");
@@ -59,6 +68,7 @@ public class OpenExchangeRatesDownloaderTest extends AbstractRatesDownloaderTest
         assertRate(rates.get(2), "SGD", "RUB", 24.352785, 1361034009000L);
     }
 
+    @Test
     public void test_should_skip_unknown_currency() {
         //given
         givenResponseFromWebService(anyUrl(), "open_exchange_normal_response.json");
@@ -69,6 +79,7 @@ public class OpenExchangeRatesDownloaderTest extends AbstractRatesDownloaderTest
         assertRate(rate, "USD", "AAA");
     }
 
+    @Test
     public void test_should_handle_error_from_webservice_properly() {
         //given
         givenResponseFromWebService(anyUrl(), "open_exchange_error_response.json");
@@ -80,6 +91,7 @@ public class OpenExchangeRatesDownloaderTest extends AbstractRatesDownloaderTest
         assertEquals("400 (invalid_app_id): Invalid App ID", downloadedRate.getErrorMessage());
     }
 
+    @Test
     public void test_should_handle_runtime_error_properly() {
         //given
         givenExceptionWhileRequestingWebService();

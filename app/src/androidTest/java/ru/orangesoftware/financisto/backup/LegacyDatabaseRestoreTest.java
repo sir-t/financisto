@@ -8,7 +8,7 @@
 
 package ru.orangesoftware.financisto.backup;
 
-import android.content.Context;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,11 +25,15 @@ import ru.orangesoftware.financisto.model.MyLocation;
 import ru.orangesoftware.financisto.model.TransactionInfo;
 import ru.orangesoftware.financisto.utils.FileUtils;
 
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class LegacyDatabaseRestoreTest extends AbstractDbTest {
 
+    @Test
     public void test_should_restore_database_from_legacy_financisto1_backup_file() throws Exception {
         //given
         String backupFileContent = "PACKAGE:ru.orangesoftware.financisto\n" +
@@ -114,6 +118,7 @@ public class LegacyDatabaseRestoreTest extends AbstractDbTest {
         assertTrue(transaction.isSplitParent());
     }
 
+    @Test
     public void test_should_restore_account_totals() throws Exception {
         // given
         String backupFileContent = FileUtils.testFileAsString("20180116_125426_694.backup");
@@ -124,6 +129,7 @@ public class LegacyDatabaseRestoreTest extends AbstractDbTest {
         assertThat(account.totalAmount, is(375L));
     }
 
+    @Test
     public void test_should_restore_titles_for_attributes_and_locations() throws Exception {
         // given
         String backupFileContent = FileUtils.testFileAsString("20180116_125426_694.backup");
@@ -152,13 +158,11 @@ public class LegacyDatabaseRestoreTest extends AbstractDbTest {
     }
 
     private String backupDatabase(boolean useGzip) throws Exception {
-        Context context = getContext();
         DatabaseExport databaseExport = new DatabaseExport(context, db.db(), useGzip);
         return databaseExport.export();
     }
 
     private void restoreDatabase(String fileContent) throws IOException {
-        Context context = getContext();
         String fileName = createBackupFile(fileContent);
         try {
             DatabaseImport databaseImport = DatabaseImport.createFromFileBackup(context, db, fileName);
@@ -170,7 +174,7 @@ public class LegacyDatabaseRestoreTest extends AbstractDbTest {
 
     private String createBackupFile(String fileContent) throws IOException {
         String fileName = "backup_" + System.currentTimeMillis() + ".backup";
-        FileOutputStream out = new FileOutputStream(new File(Export.getBackupFolder(getContext()), fileName));
+        FileOutputStream out = new FileOutputStream(new File(Export.getBackupFolder(context), fileName));
         out.write(fileContent.getBytes());
         out.flush();
         out.close();
@@ -178,7 +182,7 @@ public class LegacyDatabaseRestoreTest extends AbstractDbTest {
     }
 
     private void deleteBackupFile(String fileName) {
-        new File(Export.getBackupFolder(getContext()), fileName).delete();
+        new File(Export.getBackupFolder(context), fileName).delete();
     }
 
 }

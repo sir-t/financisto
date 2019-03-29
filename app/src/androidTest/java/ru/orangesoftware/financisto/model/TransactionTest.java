@@ -1,17 +1,23 @@
 package ru.orangesoftware.financisto.model;
 
 import android.content.Intent;
-import ru.orangesoftware.financisto.db.AbstractDbTest;
-import ru.orangesoftware.financisto.test.AccountBuilder;
-import ru.orangesoftware.financisto.test.CategoryBuilder;
-import ru.orangesoftware.financisto.test.CurrencyBuilder;
-import ru.orangesoftware.financisto.test.TransactionBuilder;
+
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ru.orangesoftware.financisto.db.AbstractDbTest;
+import ru.orangesoftware.financisto.test.AccountBuilder;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.CurrencyBuilder;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 import static ru.orangesoftware.financisto.test.AttributeBuilder.attributeValue;
 
 /**
@@ -35,6 +41,7 @@ public class TransactionTest extends AbstractDbTest {
         categories = CategoryBuilder.createDefaultHierarchy(db);
     }
 
+    @Test
     public void test_should_create_splits() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(200).payee("P1").category(CategoryBuilder.split(db))
                 .withSplit(categories.get("A1"), 60)
@@ -61,6 +68,7 @@ public class TransactionTest extends AbstractDbTest {
         assertEquals(50, split3.toAmount);
     }
 
+    @Test
     public void test_should_insert_and_update_attributes() {
         //given
         Category aa1 = categories.get("AA1");
@@ -108,6 +116,7 @@ public class TransactionTest extends AbstractDbTest {
         }
     }
 
+    @Test
     public void test_should_duplicate_splits() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(-150).category(CategoryBuilder.split(db))
                 .withSplit(categories.get("A1"), -60)
@@ -123,6 +132,7 @@ public class TransactionTest extends AbstractDbTest {
         assertEquals(-150, newSplits.get(0).fromAmount+newSplits.get(1).fromAmount+newSplits.get(2).fromAmount);
     }
 
+    @Test
     public void test_should_convert_split_into_regular_transaction() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(2000)
                 .withSplit(categories.get("A1"), 500)
@@ -137,6 +147,7 @@ public class TransactionTest extends AbstractDbTest {
         assertEquals(0, splits.size());
     }
 
+    @Test
     public void test_should_update_splits() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(-150).category(CategoryBuilder.split(db))
                 .withSplit(categories.get("A1"), -60)
@@ -156,6 +167,7 @@ public class TransactionTest extends AbstractDbTest {
         assertEquals(3, splits.size());
     }
 
+    @Test
     public void test_should_delete_splits() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(-150).category(CategoryBuilder.split(db))
                 .withSplit(categories.get("A1"), -60)
@@ -169,6 +181,7 @@ public class TransactionTest extends AbstractDbTest {
         assertEquals(0, splits.size());
     }
 
+    @Test
     public void test_should_store_transaction_in_the_database() {
         Transaction t = new Transaction();
         t.fromAccountId = 1;
@@ -187,11 +200,12 @@ public class TransactionTest extends AbstractDbTest {
         assertEquals(t.categoryId, restored.categoryId);
         assertEquals(t.note, restored.note);
         assertEquals(t.status, restored.status);
-        assertEquals(t.accuracy, restored.accuracy);
-        assertEquals(t.latitude, restored.latitude);
+        assertEquals(t.accuracy, restored.accuracy, 0);
+        assertEquals(t.latitude, restored.latitude, 0);
         assertEquals(t.isCCardPayment, restored.isCCardPayment);
     }
 
+    @Test
     public void test_should_restore_split_from_intent() {
         Transaction split = new Transaction();
         split.id = -2;
@@ -215,6 +229,7 @@ public class TransactionTest extends AbstractDbTest {
         assertEquals(split.note, restored.note);
     }
 
+    @Test
     public void test_should_update_original_amount_for_splits() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).category(CategoryBuilder.split(db))
                 .amount(120).originalAmount(a2.currency, 100)

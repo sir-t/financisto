@@ -9,16 +9,25 @@
 package ru.orangesoftware.financisto.db;
 
 import android.database.Cursor;
-import ru.orangesoftware.financisto.blotter.BlotterFilter;
-import ru.orangesoftware.financisto.filter.WhereFilter;
-import ru.orangesoftware.financisto.filter.Criteria;
-import ru.orangesoftware.financisto.model.Account;
-import ru.orangesoftware.financisto.model.Category;
-import ru.orangesoftware.financisto.model.Total;
-import ru.orangesoftware.financisto.test.*;
+
+import org.junit.Test;
 
 import java.util.Map;
 
+import ru.orangesoftware.financisto.blotter.BlotterFilter;
+import ru.orangesoftware.financisto.filter.Criteria;
+import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.Total;
+import ru.orangesoftware.financisto.test.AccountBuilder;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.DateTime;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+import ru.orangesoftware.financisto.test.TransferBuilder;
+
+import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertEquals;
 import static ru.orangesoftware.financisto.db.DatabaseAdapter.enhanceFilterForAccountBlotter;
 import static ru.orangesoftware.financisto.test.DateTime.date;
 
@@ -36,6 +45,7 @@ public class AccountBlotterTest extends AbstractDbTest {
         categoriesMap = CategoryBuilder.createDefaultHierarchy(db);
     }
 
+    @Test
     public void test_should_include_transfer_splits_into_blotter_for_account() {
         // regular transactions and transfers
         TransactionBuilder.withDb(db).dateTime(date(2012, 2, 8)).account(a1).amount(1000).create();
@@ -75,6 +85,7 @@ public class AccountBlotterTest extends AbstractDbTest {
         assertAccountBlotterTotal(a2, date(2012, 2, 1), date(2012, 2, 12), 130);
     }
 
+    @Test
     public void test_should_verify_running_balance_on_blotter_for_account() {
         // regular transactions and transfers
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();

@@ -8,10 +8,7 @@
 
 package ru.orangesoftware.financisto.rates;
 
-import android.test.InstrumentationTestCase;
 import org.apache.http.conn.ConnectTimeoutException;
-import ru.orangesoftware.financisto.http.FakeHttpClientWrapper;
-import ru.orangesoftware.financisto.model.Currency;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,13 +16,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import ru.orangesoftware.financisto.http.FakeHttpClientWrapper;
+import ru.orangesoftware.financisto.model.Currency;
+
+import static org.junit.Assert.assertEquals;
+
 /**
  * Created with IntelliJ IDEA.
  * User: dsolonenko
  * Date: 2/18/13
  * Time: 10:33 PM
  */
-public abstract class AbstractRatesDownloaderTest extends InstrumentationTestCase {
+public abstract class AbstractRatesDownloaderTest {
 
     private final Map<String, Currency> nameToCurrency = new HashMap<String, Currency>();
     private final AtomicLong counter = new AtomicLong(1);

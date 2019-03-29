@@ -9,12 +9,19 @@
 package ru.orangesoftware.financisto.db;
 
 import android.util.Log;
+
+import org.junit.Test;
+
+import java.util.Calendar;
+
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.Currency;
-import ru.orangesoftware.financisto.test.*;
-
-import java.util.Calendar;
+import ru.orangesoftware.financisto.test.AccountBuilder;
+import ru.orangesoftware.financisto.test.CurrencyBuilder;
+import ru.orangesoftware.financisto.test.DateTime;
+import ru.orangesoftware.financisto.test.RateBuilder;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,6 +48,7 @@ public class TransactionsTotalCalculatorBenchmark extends AbstractDbTest {
         a1 = AccountBuilder.withDb(db).title("Cash").currency(c1).create();
     }
 
+    @Test
     public void test_should_benchmark_blotter_total_in_home_currency() {
         long t0 = System.currentTimeMillis();
         int count = 366;

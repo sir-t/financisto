@@ -9,19 +9,32 @@
 package ru.orangesoftware.financisto.export;
 
 import android.util.Log;
-import ru.orangesoftware.financisto.filter.WhereFilter;
+
+import org.junit.Test;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import ru.orangesoftware.financisto.export.csv.CsvImport;
 import ru.orangesoftware.financisto.export.csv.CsvImportOptions;
 import ru.orangesoftware.financisto.export.csv.CsvTransaction;
-import ru.orangesoftware.financisto.model.*;
+import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.CategoryTree;
 import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.model.Payee;
+import ru.orangesoftware.financisto.model.Project;
 import ru.orangesoftware.financisto.model.TransactionInfo;
 import ru.orangesoftware.financisto.test.CategoryBuilder;
 import ru.orangesoftware.financisto.test.DateTime;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.util.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Default format described here
@@ -41,6 +54,7 @@ public class CsvImportTest extends AbstractImportExportTest {
         defaultAccountId = defaultOptions.selectedAccountId;
     }
 
+    @Test
     public void test_should_collect_all_categories_from_transactions() {
         //given
         csvImport = new CsvImport(db, defaultOptions);
@@ -58,6 +72,7 @@ public class CsvImportTest extends AbstractImportExportTest {
         assertEquals(asCategoryInfoSet("A", "A:A1", "A:A2", "A:A1:AA1", "B:B1:BB1", "B:B2"), categories);
     }
 
+    @Test
     public void test_should_insert_all_categories_from_transactions() {
         //given
         csvImport = new CsvImport(db, defaultOptions);
@@ -86,6 +101,7 @@ public class CsvImportTest extends AbstractImportExportTest {
         assertEquals(7, categories.size());
     }
 
+    @Test
     public void test_should_insert_all_projects_from_transactions() {
         //given
         csvImport = new CsvImport(db, defaultOptions);
@@ -113,6 +129,7 @@ public class CsvImportTest extends AbstractImportExportTest {
         assertEquals(3, projects.size());
     }
 
+    @Test
     public void test_should_insert_all_payees_from_transactions() {
         //given
         csvImport = new CsvImport(db, defaultOptions);
@@ -139,10 +156,12 @@ public class CsvImportTest extends AbstractImportExportTest {
         assertEquals(3, payees.size());
     }
 
+    @Test
     public void test_should_import_empty_file() throws Exception {
         doImport("", defaultOptions);
     }
 
+    @Test
     public void test_should_import_one_transaction_into_the_selected_account() throws Exception {
         categories = CategoryBuilder.createDefaultHierarchy(db);
         doImport("date,time,account,amount,currency,category,parent,payee,location,project,note\n" +
@@ -159,6 +178,7 @@ public class CsvImportTest extends AbstractImportExportTest {
         assertEquals("P1", t.payee.title);
     }
 
+    @Test
     public void test_should_import_one_transaction_without_the_header() throws Exception {
         categories = CategoryBuilder.createDefaultHierarchy(db);
         defaultOptions.useHeaderFromFile = false;

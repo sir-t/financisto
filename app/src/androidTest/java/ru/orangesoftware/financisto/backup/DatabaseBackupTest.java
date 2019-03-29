@@ -8,10 +8,10 @@
 
 package ru.orangesoftware.financisto.backup;
 
-import android.content.Context;
 import android.content.pm.PackageInfo;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +33,7 @@ import ru.orangesoftware.financisto.test.TransactionBuilder;
 import ru.orangesoftware.financisto.utils.Utils;
 
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class DatabaseBackupTest extends AbstractImportExportTest {
@@ -49,6 +50,7 @@ public class DatabaseBackupTest extends AbstractImportExportTest {
                 .account(a1).amount(-123456).category(categoriesMap.get("AA1")).payee("P1").location("Home").project("P1").note("My note").create();
     }
 
+    @Test
     public void test_should_backup_and_restore_total_amount_for_accounts() throws Exception {
         // given
         String backupFile = backupDatabase(false);
@@ -63,6 +65,7 @@ public class DatabaseBackupTest extends AbstractImportExportTest {
         assertEquals(expectedTotalAmount, accounts.get(0).totalAmount);
     }
 
+    @Test
     public void test_should_restore_database_from_plain_text() throws Exception {
         String fileName = backupDatabase(false);
         assertHeader(fileName, false);
@@ -70,6 +73,7 @@ public class DatabaseBackupTest extends AbstractImportExportTest {
         assertAccounts();
     }
 
+    @Test
     public void test_should_restore_database_from_gzipped_text() throws Exception {
         String fileName = backupDatabase(true);
         assertHeader(fileName, true);
@@ -78,20 +82,18 @@ public class DatabaseBackupTest extends AbstractImportExportTest {
     }
 
     private String backupDatabase(boolean useGzip) throws Exception {
-        Context context = getContext();
         DatabaseExport databaseExport = new DatabaseExport(context, db.db(), useGzip);
         return databaseExport.export();
     }
 
     private void restoreDatabase(String fileName) throws IOException {
-        Context context = getContext();
         DatabaseImport databaseImport = DatabaseImport.createFromFileBackup(context, db, fileName);
         databaseImport.importDatabase();
     }
 
     private void assertHeader(String fileName, boolean useGzip) throws Exception {
         try (BufferedReader br = createFileReader(fileName, useGzip)) {
-            PackageInfo pi = Utils.getPackageInfo(getContext());
+            PackageInfo pi = Utils.getPackageInfo(context);
             assertEquals("PACKAGE:" + pi.packageName, br.readLine());
             assertEquals("VERSION_CODE:" + pi.versionCode, br.readLine());
             assertEquals("VERSION_NAME:" + pi.versionName, br.readLine());
@@ -102,7 +104,7 @@ public class DatabaseBackupTest extends AbstractImportExportTest {
     }
 
     private BufferedReader createFileReader(String fileName, boolean useGzip) throws IOException {
-        File backupPath = Export.getBackupFolder(getContext());
+        File backupPath = Export.getBackupFolder(context);
         File file = new File(backupPath, fileName);
         InputStream in = new FileInputStream(file);
         if (useGzip) {

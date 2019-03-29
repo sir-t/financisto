@@ -1,7 +1,10 @@
 package ru.orangesoftware.financisto.report;
 
-import ru.orangesoftware.financisto.filter.WhereFilter;
+import java.util.List;
+import java.util.Map;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
+import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.graph.GraphUnit;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.Category;
@@ -11,8 +14,8 @@ import ru.orangesoftware.financisto.test.CategoryBuilder;
 import ru.orangesoftware.financisto.test.CurrencyBuilder;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 
-import java.util.List;
-import java.util.Map;
+import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.

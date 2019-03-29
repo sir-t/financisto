@@ -8,9 +8,15 @@
 
 package ru.orangesoftware.financisto.utils;
 
-import android.test.AndroidTestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.datetime.Period;
 import ru.orangesoftware.financisto.datetime.PeriodType;
+import ru.orangesoftware.financisto.test.DateTime;
+
+import static org.junit.Assert.assertEquals;
 import static ru.orangesoftware.financisto.datetime.PeriodType.LAST_MONTH;
 import static ru.orangesoftware.financisto.datetime.PeriodType.LAST_WEEK;
 import static ru.orangesoftware.financisto.datetime.PeriodType.NEXT_3_MONTHS;
@@ -24,7 +30,6 @@ import static ru.orangesoftware.financisto.datetime.PeriodType.THIS_WEEK;
 import static ru.orangesoftware.financisto.datetime.PeriodType.TODAY;
 import static ru.orangesoftware.financisto.datetime.PeriodType.TOMORROW;
 import static ru.orangesoftware.financisto.datetime.PeriodType.YESTERDAY;
-import ru.orangesoftware.financisto.test.DateTime;
 import static ru.orangesoftware.financisto.test.DateTime.date;
 
 /**
@@ -32,10 +37,13 @@ import static ru.orangesoftware.financisto.test.DateTime.date;
  * User: denis.solonenko
  * Date: 8/28/12 11:39 PM
  */
-public class DateUtilsTest extends AndroidTestCase {
+
+@RunWith(AndroidJUnit4.class)
+public class DateUtilsTest {
 
     long refTime;
 
+    @Test
     public void test_should_support_different_periods_for_blotter_filter() {
         givenRefTime(date(2012, 8, 28).at(23, 52, 0, 0));
         assertPeriod(TODAY, date(2012, 8, 28), date(2012, 8, 28));

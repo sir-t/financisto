@@ -1,7 +1,5 @@
 package ru.orangesoftware.financisto.activity;
 
-import android.test.ActivityInstrumentationTestCase2;
-
 /**
  * This is a simple framework for a test of an Application.  See
  * {@link android.test.ApplicationTestCase ApplicationTestCase} for more information on
@@ -12,10 +10,10 @@ import android.test.ActivityInstrumentationTestCase2;
  * -e class ru.orangesoftware.financisto.activity.MainActivityTest \
  * ru.orangesoftware.financisto.tests/android.test.InstrumentationTestRunner
  */
-public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
+public class MainActivityTest {
 
     public MainActivityTest() {
-        super("ru.orangesoftware.financisto", MainActivity.class);
+//        super("ru.orangesoftware.financisto", MainActivity.class);
     }
 
 }

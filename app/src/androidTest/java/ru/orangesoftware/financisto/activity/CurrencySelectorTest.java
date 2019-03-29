@@ -8,8 +8,13 @@
 
 package ru.orangesoftware.financisto.activity;
 
+import org.junit.Test;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.model.Currency;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,14 +30,10 @@ public class CurrencySelectorTest extends AbstractDbTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        selector = new CurrencySelector(getContext(), db, new CurrencySelector.OnCurrencyCreatedListener() {
-            @Override
-            public void onCreated(long currencyId) {
-                CurrencySelectorTest.this.currencyId = currencyId;
-            }
-        });
+        selector = new CurrencySelector(context, db, currencyId -> CurrencySelectorTest.this.currencyId = currencyId);
     }
 
+    @Test
     public void test_should_add_selected_currency_as_default_if_it_is_the_very_first_currency_added() {
         //given
         givenNoCurrenciesYetExist();

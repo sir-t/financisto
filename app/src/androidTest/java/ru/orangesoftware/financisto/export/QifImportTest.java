@@ -8,18 +8,36 @@
 
 package ru.orangesoftware.financisto.export;
 
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
-import ru.orangesoftware.financisto.export.qif.*;
-import ru.orangesoftware.financisto.model.*;
+import ru.orangesoftware.financisto.export.qif.QifCategory;
+import ru.orangesoftware.financisto.export.qif.QifDateFormat;
+import ru.orangesoftware.financisto.export.qif.QifImport;
+import ru.orangesoftware.financisto.export.qif.QifImportOptions;
+import ru.orangesoftware.financisto.export.qif.QifParser;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.AccountType;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.CategoryTree;
 import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.model.Project;
 import ru.orangesoftware.financisto.model.TransactionInfo;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.orb.Expressions;
 import ru.orangesoftware.orb.Query;
 
-import java.io.IOException;
-import java.util.*;
-
+import static androidx.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static ru.orangesoftware.financisto.export.qif.QifDateFormat.EU_FORMAT;
 
 /**
@@ -38,6 +56,7 @@ public class QifImportTest extends AbstractDbTest {
         db.db().execSQL("insert into currency(_id,title,name,symbol) values(0,'Default','?','$')");
     }
 
+    @Test
     public void test_should_import_empty_account() throws IOException {
         qifParserTest.test_should_parse_empty_account();
         doImport();
@@ -48,6 +67,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals(AccountType.CASH.name(), accounts.get(0).type);
     }
 
+    @Test
     public void test_should_import_a_couple_of_empty_accounts() throws IOException {
         qifParserTest.test_should_parse_a_couple_of_empty_accounts();
         doImport();
@@ -62,6 +82,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals(AccountType.BANK.name(), accounts.get(1).type);
     }
 
+    @Test
     public void test_should_import_categories() throws Exception {
         QifParser p = new QifParser(null, QifDateFormat.EU_FORMAT);
         //P1
@@ -88,13 +109,13 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals(2, categories.size());
 
         Category c = categories.getAt(0);
-        assertCategory("P1", true, c);
+        assertCategory("P1", false, c);
         assertEquals(2, c.children.size());
 
-        assertCategory("cc1", true, c.children.getAt(0));
+        assertCategory("cc1", false, c.children.getAt(0));
         assertEquals(2, c.children.getAt(0).children.size());
 
-        assertCategory("cc2", true, c.children.getAt(1));
+        assertCategory("cc2", false, c.children.getAt(1));
         assertFalse(c.children.getAt(1).hasChildren());
 
         c = categories.getAt(1);
@@ -104,6 +125,7 @@ public class QifImportTest extends AbstractDbTest {
         assertCategory("x1", false, c.children.getAt(0));
     }
 
+    @Test
     public void test_should_import_classes_as_projects() throws Exception {
         qifParserTest.test_should_parse_classes();
         doImport();
@@ -141,6 +163,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals("Class2", t.project.title);
     }
 
+    @Test
     public void test_should_import_account_with_a_couple_of_transactions() throws Exception {
         qifParserTest.test_should_parse_account_with_a_couple_of_transactions();
         doImport();
@@ -165,6 +188,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals("Some note here...", t.note);
     }
 
+    @Test
     public void test_should_import_multiple_accounts() throws Exception {
         qifParserTest.test_should_parse_multiple_accounts();
         doImport();
@@ -207,6 +231,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals(-6780, t.fromAmount);
     }
 
+    @Test
     public void test_should_import_transfers() throws Exception {
         qifParserTest.test_should_parse_transfers();
         doImport();
@@ -238,6 +263,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals(0, transactions.size());
     }
 
+    @Test
     public void test_should_import_convert_unknown_transfers_into_regular_transactions_with_a_special_note() throws Exception {
         qifParserTest.parseQif(
             "!Account\n" +
@@ -315,6 +341,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals("Transfer: Some Account 1", t.note);
     }
 
+    @Test
     public void test_should_import_splits() throws Exception {
         qifParserTest.test_should_parse_splits();
         doImport();
@@ -350,6 +377,7 @@ public class QifImportTest extends AbstractDbTest {
         assertEquals("Note on third split", s.note);
     }
 
+    @Test
     public void test_should_import_transfer_splits() throws Exception {
         qifParserTest.test_should_parse_transfer_splits();
         doImport();

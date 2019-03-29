@@ -8,30 +8,39 @@
 
 package ru.orangesoftware.financisto.utils;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.test.AccountBuilder;
 import ru.orangesoftware.financisto.test.TransactionBuilder;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
  * User: denis.solonenko
  * Date: 8/16/12 7:55 PM
  */
+@RunWith(AndroidJUnit4.class)
 public class IntegrityCheckRunningBalanceTest extends AbstractDbTest {
 
     Account a1;
     Account a2;
     IntegrityCheckRunningBalance integrity;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         a1 = AccountBuilder.createDefault(db);
         a2 = AccountBuilder.createDefault(db);
-        integrity = new IntegrityCheckRunningBalance(getContext(), db);
+        integrity = new IntegrityCheckRunningBalance(context, db);
     }
 
+    @Test
     public void test_should_detect_that_running_balance_is_broken() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         TransactionBuilder.withDb(db).account(a1).amount(2000).create();

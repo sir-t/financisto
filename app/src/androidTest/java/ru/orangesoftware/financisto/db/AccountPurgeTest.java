@@ -9,15 +9,28 @@
 package ru.orangesoftware.financisto.db;
 
 import android.database.Cursor;
-import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.blotter.BlotterFilter;
-import ru.orangesoftware.financisto.filter.WhereFilter;
-import ru.orangesoftware.financisto.model.*;
-import ru.orangesoftware.financisto.test.*;
+
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Map;
 
+import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.blotter.BlotterFilter;
+import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.Payee;
+import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.model.TransactionStatus;
+import ru.orangesoftware.financisto.test.AccountBuilder;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.DateTime;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+import ru.orangesoftware.financisto.test.TransferBuilder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static ru.orangesoftware.financisto.test.DateTime.date;
 
 /**
@@ -69,7 +82,8 @@ public class AccountPurgeTest extends AbstractDbTest {
         TransactionBuilder.withDb(db).dateTime(date(2012, 5, 22)).account(a1).amount(-20).create();
         TransactionBuilder.withDb(db).dateTime(date(2012, 5, 21)).account(a1).amount(10).create();
     }
-    
+
+    @Test
     public void test_should_delete_first_account_correctly() {
         db.deleteAccount(a1.id);
         assertAccount(a2, -40);
@@ -77,6 +91,7 @@ public class AccountPurgeTest extends AbstractDbTest {
         assertAccountRunningBalance(a2, -40, -60, -10, 10);
     }
 
+    @Test
     public void test_should_delete_second_account_correctly() {
         db.deleteAccount(a2.id);
         assertAccount(a1, 40);
@@ -84,6 +99,7 @@ public class AccountPurgeTest extends AbstractDbTest {
         assertAccountRunningBalance(a1, 40, 30, 50, 150, 50, 40, -160, -10, 10);
     }
 
+    @Test
     public void test_should_purge_transactions_older_than_specified_date() {
         //given
         assertAccounts();
@@ -202,7 +218,7 @@ public class AccountPurgeTest extends AbstractDbTest {
     private void assertArchiveTransaction(Account account, DateTime date, long expectedAmount) {
         Transaction t = assertOldestTransaction(account, date, expectedAmount);
         Payee payee = db.get(Payee.class, t.payeeId);
-        assertEquals(getContext().getString(R.string.purge_account_payee), payee.title);
+        assertEquals(context.getString(R.string.purge_account_payee), payee.title);
         assertEquals(TransactionStatus.CL, t.status);
     }
 

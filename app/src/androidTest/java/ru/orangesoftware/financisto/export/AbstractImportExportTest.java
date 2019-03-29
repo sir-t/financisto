@@ -14,6 +14,8 @@ import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.test.CurrencyBuilder;
 
+import static junit.framework.TestCase.assertNotNull;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Denis Solonenko

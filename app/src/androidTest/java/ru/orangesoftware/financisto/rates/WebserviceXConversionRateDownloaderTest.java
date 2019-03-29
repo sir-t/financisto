@@ -8,7 +8,12 @@
 
 package ru.orangesoftware.financisto.rates;
 
+import org.junit.Test;
+
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,15 +31,17 @@ public class WebserviceXConversionRateDownloaderTest extends AbstractRatesDownlo
         return webserviceX;
     }
 
+    @Test
     public void test_should_download_single_rate_cur_to_cur() {
         //given
         givenResponseFromWebService("USD","SGD",1.2387);
         //when
         ExchangeRate exchangeRate = downloadRate("USD", "SGD");
         //then
-        assertEquals(1.2387, exchangeRate.rate);
+        assertEquals(1.2387, exchangeRate.rate, 0);
     }
 
+    @Test
     public void test_should_download_multiple_rates() {
         //given
         givenResponseFromWebService("USD", "SGD", 1.2);
@@ -49,6 +56,7 @@ public class WebserviceXConversionRateDownloaderTest extends AbstractRatesDownlo
         assertRate(rates.get(2), "SGD", "RUB", 25, dateTime);
     }
 
+    @Test
     public void test_should_skip_unknown_currency() {
         //given
         givenResponseFromWebService(anyUrl(), "Exception: Unable to convert ToCurrency to Currency\r\nStacktrace...");
@@ -59,6 +67,7 @@ public class WebserviceXConversionRateDownloaderTest extends AbstractRatesDownlo
         assertRate(rate, "USD", "AAA");
     }
 
+    @Test
     public void test_should_handle_error_from_webservice_properly() {
         //given
         givenResponseFromWebService(anyUrl(), "System.IO.IOException: There is not enough space on the disk.\r\nStacktrace...");
@@ -70,6 +79,7 @@ public class WebserviceXConversionRateDownloaderTest extends AbstractRatesDownlo
                 downloadedRate.getErrorMessage());
     }
 
+    @Test
     public void test_should_handle_runtime_error_properly() {
         //given
         givenExceptionWhileRequestingWebService();

@@ -8,16 +8,26 @@
 
 package ru.orangesoftware.financisto.export;
 
-import ru.orangesoftware.financisto.filter.WhereFilter;
+import org.junit.Test;
+
+import java.util.Map;
+
 import ru.orangesoftware.financisto.export.csv.CsvExport;
 import ru.orangesoftware.financisto.export.csv.CsvExportOptions;
+import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.Currency;
-import ru.orangesoftware.financisto.test.*;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.CurrencyBuilder;
+import ru.orangesoftware.financisto.test.DateTime;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+import ru.orangesoftware.financisto.test.TransferBuilder;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 
-import java.util.Map;
+import static androidx.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Created by IntelliJ IDEA.
@@ -39,11 +49,13 @@ public class CsvExportTest extends AbstractExportTest<CsvExport, CsvExportOption
         CurrencyCache.initialize(db);
     }
 
+    @Test
     public void test_should_include_header() throws Exception {
         CsvExportOptions options = new CsvExportOptions(Currency.EMPTY, ',', true, false, false, WhereFilter.empty(), false);
         assertEquals("date,time,account,amount,currency,original amount,original currency,category,parent,payee,location,project,note\n", exportAsString(options));
     }
 
+    @Test
     public void test_should_export_regular_transaction() throws Exception {
         CsvExportOptions options = new CsvExportOptions(createExportCurrency(), ',', false, false, false, WhereFilter.empty(), false);
         TransactionBuilder.withDb(db).dateTime(DateTime.date(2011, 8, 3).at(22, 34, 55, 10))
@@ -56,6 +68,7 @@ public class CsvExportTest extends AbstractExportTest<CsvExport, CsvExportOption
                 exportAsString(options));
     }
 
+    @Test
     public void test_should_export_regular_transfer() throws Exception {
         CsvExportOptions options = new CsvExportOptions(createExportCurrency(), ',', false, false, false, WhereFilter.empty(), false);
         TransferBuilder.withDb(db).dateTime(DateTime.date(2011, 8, 3).at(22, 46, 0, 0))
@@ -66,6 +79,7 @@ public class CsvExportTest extends AbstractExportTest<CsvExport, CsvExportOption
                 exportAsString(options));
     }
 
+    @Test
     public void test_should_export_split_transaction() throws Exception {
         CsvExportOptions options = new CsvExportOptions(createExportCurrency(), ',', false, true, false, WhereFilter.empty(), false);
         TransactionBuilder.withDb(db).dateTime(DateTime.date(2011, 8, 3).at(22, 34, 55, 10))
@@ -80,6 +94,7 @@ public class CsvExportTest extends AbstractExportTest<CsvExport, CsvExportOption
                 exportAsString(options));
     }
 
+    @Test
     public void test_should_export_split_transfer() throws Exception {
         CsvExportOptions options = new CsvExportOptions(createExportCurrency(), ',', false, true, false, WhereFilter.empty(), false);
         TransactionBuilder.withDb(db).dateTime(DateTime.date(2011, 8, 3).at(22, 34, 55, 10))
@@ -93,6 +108,7 @@ public class CsvExportTest extends AbstractExportTest<CsvExport, CsvExportOption
                 exportAsString(options));
     }
 
+    @Test
     public void test_should_not_export_split_transactions_if_not_set_in_options() throws Exception {
         CsvExportOptions options = new CsvExportOptions(createExportCurrency(), ',', false, false, false, WhereFilter.empty(), false);
         TransactionBuilder.withDb(db).dateTime(DateTime.date(2011, 8, 3).at(22, 34, 55, 10))

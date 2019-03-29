@@ -8,6 +8,11 @@
 
 package ru.orangesoftware.financisto.model.rates;
 
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.rates.ExchangeRate;
@@ -16,8 +21,7 @@ import ru.orangesoftware.financisto.test.CurrencyBuilder;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.RateBuilder;
 
-import java.util.Arrays;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,6 +42,7 @@ public class ExchangeRateTest extends AbstractDbTest {
         c3 = CurrencyBuilder.withDb(db).name("RUB").title("Ruble").symbol("p.").create();
     }
 
+    @Test
     public void test_should_calculate_opposite_rate() {
         ExchangeRate rate = RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 17)).rate(0.78592f).create();
         ExchangeRate flip = rate.flip();
@@ -52,17 +57,20 @@ public class ExchangeRateTest extends AbstractDbTest {
         assertEquals(rate.rate, rate1.rate, 0.00001f);
     }
 
+    @Test
     public void test_should_reset_time_to_midnight() {
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 17).at(12, 23, 45, 456)).rate(0.78592f).create();
         assertEquals(DateTime.date(2012, 1, 17).atMidnight().asLong(), db.findRate(c1, c2, DateTime.date(2012, 1, 17).asLong()).date);
     }
 
+    @Test
     public void test_should_insert_currency_rate_for_both_sides() {
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 17)).rate(0.78592f).create();
         assertEquals(0.78592f, db.findRate(c1, c2, DateTime.date(2012, 1, 17).asLong()).rate, 0.00001f);
         assertEquals(1.27239f, db.findRate(c2, c1, DateTime.date(2012, 1, 17).asLong()).rate, 0.00001f);
     }
 
+    @Test
     public void test_should_update_existing_rate() {
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 17)).rate(0.78592f).create();
         assertEquals(0.78592f, db.findRate(c1, c2, DateTime.date(2012, 1, 17).asLong()).rate, 0.00001f);
@@ -81,6 +89,7 @@ public class ExchangeRateTest extends AbstractDbTest {
         assertEquals(1.5f, db.findRate(c2, c1, DateTime.date(2012, 1, 17).asLong()).rate, 0.00001f);
     }
 
+    @Test
     public void test_should_save_multiple_rates() {
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 17)).rate(0.78592f).create();
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 18)).rate(0.78635f).create();
@@ -98,6 +107,7 @@ public class ExchangeRateTest extends AbstractDbTest {
         assertEquals(1.0f/0.78592f, rates.get(1).rate, 0.00001f);
     }
 
+    @Test
     public void test_should_delete_rate() {
         ExchangeRate r = RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 17)).rate(0.78592f).create();
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 18)).rate(0.78635f).create();
@@ -113,6 +123,7 @@ public class ExchangeRateTest extends AbstractDbTest {
         assertEquals(0.78635f, rates.getRate(c1, c2, DateTime.date(2012, 1, 20).asLong()).rate, 0.00001f);
     }
 
+    @Test
     public void test_should_replace_rate() {
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 17)).rate(0.78592f).create();
 
@@ -130,6 +141,7 @@ public class ExchangeRateTest extends AbstractDbTest {
         assertEquals(1f/0.888f, db.findRate(c2, c1, DateTime.date(2012, 1, 18).asLong()).rate, 0.00001f);
     }
 
+    @Test
     public void test_should_save_downloaded_rates() {
         //given
         List<ExchangeRate> downloadedRates = Arrays.asList(

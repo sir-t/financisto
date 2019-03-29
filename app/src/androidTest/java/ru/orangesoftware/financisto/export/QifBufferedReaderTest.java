@@ -8,18 +8,29 @@
 
 package ru.orangesoftware.financisto.export;
 
-import android.test.AndroidTestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.export.qif.QifBufferedReader;
 
-import java.io.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Denis Solonenko
  * Date: 10/11/11 10:13 PM
  */
-public class QifBufferedReaderTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class QifBufferedReaderTest {
 
+    @Test
     public void test_should_read_qif_file_line_by_line_trimming_each_line_and_skipping_empty_lines() throws IOException {
         String content =
                 "!Account \n"+

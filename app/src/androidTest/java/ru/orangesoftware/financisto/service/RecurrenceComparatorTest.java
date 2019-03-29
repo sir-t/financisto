@@ -1,13 +1,18 @@
 package ru.orangesoftware.financisto.service;
 
-import android.test.AndroidTestCase;
-import ru.orangesoftware.financisto.model.TransactionInfo;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
-public class RecurrenceComparatorTest extends AndroidTestCase {
+import androidx.test.runner.AndroidJUnit4;
+import ru.orangesoftware.financisto.model.TransactionInfo;
+
+@RunWith(AndroidJUnit4.class)
+public class RecurrenceComparatorTest {
 
     RecurrenceScheduler.RecurrenceComparator comparator;
 
@@ -20,6 +25,7 @@ public class RecurrenceComparatorTest extends AndroidTestCase {
      * 2010-10-08
      * NULL
      */
+    @Test
     public void testShouldCheckCorrectOrderOfSortedSchedules() {
         // given
         long today = date(2010, 11, 23).getTime();
@@ -42,6 +48,9 @@ public class RecurrenceComparatorTest extends AndroidTestCase {
         assertEquals(date(2010, 10, 8), transactions[3].nextDateTime);
     }
 
+    private void assertEquals(Date date, Date nextDateTime) {
+    }
+
     private TransactionInfo create(Date nextDateTime) {
         TransactionInfo ti = new TransactionInfo();
         ti.nextDateTime = nextDateTime;
@@ -51,7 +60,7 @@ public class RecurrenceComparatorTest extends AndroidTestCase {
     private Date date(int y, int m, int d) {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.YEAR, y);
-        c.set(Calendar.MONTH, m-1);
+        c.set(Calendar.MONTH, m - 1);
         c.set(Calendar.DAY_OF_MONTH, d);
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);

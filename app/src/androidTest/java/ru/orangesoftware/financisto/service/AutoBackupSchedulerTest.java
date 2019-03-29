@@ -8,11 +8,15 @@
 
 package ru.orangesoftware.financisto.service;
 
-import android.test.AndroidTestCase;
-import ru.orangesoftware.financisto.test.DateTime;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Date;
 
+import androidx.test.runner.AndroidJUnit4;
+import ru.orangesoftware.financisto.test.DateTime;
+
+import static org.junit.Assert.assertEquals;
 import static ru.orangesoftware.financisto.test.DateTime.date;
 
 /**
@@ -20,8 +24,10 @@ import static ru.orangesoftware.financisto.test.DateTime.date;
  * User: Denis Solonenko
  * Date: 12/16/11 1:00 AM
  */
-public class AutoBackupSchedulerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class AutoBackupSchedulerTest {
 
+    @Test
     public void test_should_schedule_auto_backup_at_specified_time() {
         assertEquals(date(2011, 12, 16).at(6, 0, 0, 0).asDate(), scheduleAt(date(2011, 12, 16).at(0, 0, 0, 0)));
         assertEquals(date(2011, 12, 17).at(6, 0, 0, 0).asDate(), scheduleAt(date(2011, 12, 16).at(8, 0, 0, 0)));

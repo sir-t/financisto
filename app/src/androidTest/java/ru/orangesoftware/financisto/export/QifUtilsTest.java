@@ -8,12 +8,18 @@
 
 package ru.orangesoftware.financisto.export;
 
-import android.test.AndroidTestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.test.DateTime;
 
+import static org.junit.Assert.assertEquals;
 import static ru.orangesoftware.financisto.export.qif.QifDateFormat.EU_FORMAT;
 import static ru.orangesoftware.financisto.export.qif.QifDateFormat.US_FORMAT;
-import static ru.orangesoftware.financisto.export.qif.QifUtils.*;
+import static ru.orangesoftware.financisto.export.qif.QifUtils.parseDate;
+import static ru.orangesoftware.financisto.export.qif.QifUtils.parseMoney;
+import static ru.orangesoftware.financisto.export.qif.QifUtils.trimFirstChar;
 
 
 /**
@@ -21,13 +27,16 @@ import static ru.orangesoftware.financisto.export.qif.QifUtils.*;
  * User: Denis Solonenko
  * Date: 10/12/11 12:27 AM
  */
-public class QifUtilsTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class QifUtilsTest {
 
+    @Test
     public void test_should_trim_first_char() {
         assertEquals("My Cash Account", trimFirstChar("NMy Cash Account"));
         assertEquals("-10.5", trimFirstChar("X-10.5"));
     }
 
+    @Test
     public void test_should_parse_dates() {
         assertEquals(DateTime.date(2011, 2, 7).atMidnight().asDate(), parseDate("07/02/2011", EU_FORMAT));
         assertEquals(DateTime.date(2011, 2, 7).atMidnight().asDate(), parseDate("07/02/2011", EU_FORMAT));
@@ -37,6 +46,7 @@ public class QifUtilsTest extends AndroidTestCase {
         assertEquals(DateTime.date(2011, 1, 23).atMidnight().asDate(), parseDate("1.23'11", US_FORMAT));
     }
 
+    @Test
     public void test_should_parse_money() {
         assertEquals(100, parseMoney("1.0"));
         assertEquals(-100, parseMoney("-1."));

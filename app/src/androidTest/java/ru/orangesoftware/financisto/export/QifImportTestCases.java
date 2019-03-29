@@ -9,6 +9,15 @@
 package ru.orangesoftware.financisto.export;
 
 import android.util.Log;
+
+import org.junit.Test;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.export.qif.QifImport;
 import ru.orangesoftware.financisto.export.qif.QifImportOptions;
@@ -18,12 +27,9 @@ import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.TransactionInfo;
 import ru.orangesoftware.financisto.test.DateTime;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
+import static androidx.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static ru.orangesoftware.financisto.export.qif.QifDateFormat.EU_FORMAT;
 
 /**
@@ -41,6 +47,7 @@ public class QifImportTestCases extends AbstractDbTest {
         db.db().execSQL("insert into currency(_id,title,name,symbol) values(0,'Default','?','$')");
     }
 
+    @Test
     public void test_should_import_homebank_case_1() throws Exception {
         doImport("!Account\n" +
                 "NMy Bank Account\n" +
@@ -122,6 +129,7 @@ public class QifImportTestCases extends AbstractDbTest {
         assertEquals("c1", t.category.title);
     }
 
+    @Test
     public void test_should_import_financisto_qif_export_case_1() throws IOException {
         doImport(
             "!Type:Cat\n" +

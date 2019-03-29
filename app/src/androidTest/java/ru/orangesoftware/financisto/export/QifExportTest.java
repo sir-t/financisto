@@ -1,15 +1,27 @@
 package ru.orangesoftware.financisto.export;
 
-import ru.orangesoftware.financisto.blotter.BlotterFilter;
-import ru.orangesoftware.financisto.filter.WhereFilter;
-import ru.orangesoftware.financisto.export.qif.QifExport;
-import ru.orangesoftware.financisto.export.qif.QifExportOptions;
-import ru.orangesoftware.financisto.model.*;
-import ru.orangesoftware.financisto.test.*;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+import ru.orangesoftware.financisto.blotter.BlotterFilter;
+import ru.orangesoftware.financisto.export.qif.QifExport;
+import ru.orangesoftware.financisto.export.qif.QifExportOptions;
+import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Attribute;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.DateTime;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+import ru.orangesoftware.financisto.test.TransferBuilder;
+
+import static androidx.test.InstrumentationRegistry.getContext;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static ru.orangesoftware.financisto.test.DateTime.date;
 
 /**
@@ -22,12 +34,14 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
     Account a1;
     Account a2;
 
+    @Test
     public void test_should_export_empty_file() throws Exception {
         String output = exportAsString();
         assertNotNull(output);
         assertTrue(output.length() == 0);
     }
 
+    @Test
     public void test_should_export_empty_account() throws Exception {
         createFirstAccount();
         assertEquals(
@@ -38,6 +52,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString());
     }
 
+    @Test
     public void test_should_export_transaction_amount_according_to_the_config() throws Exception {
         Account a = createFirstAccount();
         Currency c = new Currency();
@@ -59,6 +74,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString(c));
     }
 
+    @Test
     public void test_should_export_transaction_date_according_to_the_config() throws Exception {
         Account a = createFirstAccount();
         TransactionBuilder.withDb(db).account(a).amount(-210056).payee("Payee 1").dateTime(date(2011, 7, 10)).create();
@@ -97,6 +113,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString("yyyy-MM-dd"));
     }
 
+    @Test
     public void test_should_export_account_with_a_couple_of_transactions() throws Exception {
         Account a = createFirstAccount();
         Category p1 = createExpenseCategory("P1");
@@ -129,6 +146,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString());
     }
 
+    @Test
     public void test_should_export_multiple_accounts() throws Exception {
         createSampleData();
         assertEquals(
@@ -160,6 +178,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString());
     }
 
+    @Test
     public void test_should_export_only_selected_accounts() throws Exception {
         createSampleData();
         assertEquals(
@@ -177,6 +196,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString(new long[]{a2.id}));
     }
 
+    @Test
     public void test_should_export_only_transactions_in_the_specified_range() throws Exception {
         createSampleData();
         WhereFilter filter = createFebruaryOnlyFilter();
@@ -203,6 +223,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString(filter));
     }
 
+    @Test
     public void test_should_export_transfers() throws Exception {
         Account a1 = createFirstAccount();
         Account a2 = createSecondAccount();
@@ -229,6 +250,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString());
     }
 
+    @Test
     public void test_should_export_splits() throws Exception {
         a1 = createFirstAccount();
         Map<String, Category> categoriesMap = CategoryBuilder.createDefaultHierarchy(db);
@@ -259,6 +281,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString());
     }
 
+    @Test
     public void test_should_export_transfer_splits() throws Exception {
         a1 = createFirstAccount();
         a2 = createSecondAccount();
@@ -289,6 +312,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString());
     }
 
+    @Test
     public void test_should_export_multiple_transfer_splits() throws Exception {
         a1 = createFirstAccount();
         a2 = createSecondAccount();
@@ -339,6 +363,7 @@ public class QifExportTest extends AbstractExportTest<QifExport, QifExportOption
                 exportAsString());
     }
 
+    @Test
     public void test_should_export_categories() throws Exception {
         createCategories();
         assertEquals(

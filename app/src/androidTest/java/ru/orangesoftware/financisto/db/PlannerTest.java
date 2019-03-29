@@ -9,10 +9,14 @@
 package ru.orangesoftware.financisto.db;
 
 import android.util.Log;
+
+import org.junit.Test;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import ru.orangesoftware.financisto.filter.DateTimeCriteria;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
@@ -24,8 +28,6 @@ import ru.orangesoftware.financisto.test.AccountBuilder;
 import ru.orangesoftware.financisto.test.CategoryBuilder;
 import ru.orangesoftware.financisto.test.CurrencyBuilder;
 import ru.orangesoftware.financisto.test.DateTime;
-import static ru.orangesoftware.financisto.test.DateTime.NULL_DATE;
-import static ru.orangesoftware.financisto.test.DateTime.date;
 import ru.orangesoftware.financisto.test.RateBuilder;
 import ru.orangesoftware.financisto.test.TransactionBuilder;
 import ru.orangesoftware.financisto.test.TransferBuilder;
@@ -34,6 +36,13 @@ import ru.orangesoftware.financisto.utils.FuturePlanner;
 import ru.orangesoftware.financisto.utils.MonthlyViewPlanner;
 import ru.orangesoftware.financisto.utils.TransactionList;
 import ru.orangesoftware.financisto.utils.Utils;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
+import static ru.orangesoftware.financisto.test.DateTime.NULL_DATE;
+import static ru.orangesoftware.financisto.test.DateTime.date;
 
 public class PlannerTest extends AbstractDbTest {
 
@@ -60,6 +69,7 @@ public class PlannerTest extends AbstractDbTest {
         CurrencyCache.initialize(db);
     }
 
+    @Test
     public void test_should_generate_monthly_view_for_account() {
         prepareData();
         //a1
@@ -105,6 +115,7 @@ public class PlannerTest extends AbstractDbTest {
         assertAmount(447, a1.currency, list.totals[0]);
     }
 
+    @Test
     public void test_should_generate_credit_card_statement() {
         prepareData();
         MonthlyViewPlanner planner = new MonthlyViewPlanner(db, a1, true, from, to, now);
@@ -140,6 +151,7 @@ public class PlannerTest extends AbstractDbTest {
         assertAmount(47, a1.currency, statement.totals[0]);
     }
 
+    @Test
     public void test_should_generate_monthly_preview_for_the_next_month_correctly() {
         prepareData();
         from = date(2011, 9, 1).atMidnight().asDate();
@@ -185,6 +197,7 @@ public class PlannerTest extends AbstractDbTest {
 
     }
 
+    @Test
     public void test_should_generate_monthly_preview_for_the_previous_month_correctly() {
         prepareData();
         from = date(2011, 7, 1).atMidnight().asDate();
@@ -199,6 +212,7 @@ public class PlannerTest extends AbstractDbTest {
 
     }
 
+    @Test
     public void test_should_generate_future_preview() {
         prepareData();
         TransactionList transactions = planTransactions(date(2011, 7, 1), date(2011, 7, 19));

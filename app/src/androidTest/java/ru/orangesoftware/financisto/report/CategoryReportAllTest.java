@@ -1,18 +1,26 @@
 package ru.orangesoftware.financisto.report;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.List;
+
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.graph.GraphUnit;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.TransactionBuilder;
 
-import java.util.List;
+import static androidx.test.InstrumentationRegistry.getContext;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Denis Solonenko
  * Date: 7/6/11 11:15 PM
  */
+@RunWith(AndroidJUnit4.class)
 public class CategoryReportAllTest extends AbstractReportTest {
 
+    @Test
     public void test_should_calculate_correct_report() {
         // A -3400
         //   +250

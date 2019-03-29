@@ -8,6 +8,8 @@
 
 package ru.orangesoftware.financisto.model.rates;
 
+import org.junit.Test;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.rates.ExchangeRate;
@@ -16,6 +18,7 @@ import ru.orangesoftware.financisto.test.CurrencyBuilder;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.RateBuilder;
 
+import static junit.framework.TestCase.assertTrue;
 import static ru.orangesoftware.financisto.model.rates.AssertExchangeRate.assertRate;
 
 /**
@@ -35,6 +38,7 @@ public class HistoryExchangeRatesTest extends AbstractDbTest {
         c2 = CurrencyBuilder.withDb(db).name("EUR").title("Euro").symbol("€").create();
     }
 
+    @Test
     public void test_should_get_rates_for_every_date() {
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 7)).rate(0.78592f).create();
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 18)).rate(0.78654f).create();
@@ -64,6 +68,7 @@ public class HistoryExchangeRatesTest extends AbstractDbTest {
         assertRate(DateTime.date(2012, 1, 20), 1.0f / 0.78712f, rate);
     }
 
+    @Test
     public void test_should_return_error_non_existing_dates() {
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 18)).rate(0.78654f).create();
         RateBuilder.withDb(db).from(c1).to(c2).at(DateTime.date(2012, 1, 19)).rate(0.78712f).create();

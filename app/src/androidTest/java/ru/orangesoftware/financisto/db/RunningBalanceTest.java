@@ -8,13 +8,21 @@
 
 package ru.orangesoftware.financisto.db;
 
-import ru.orangesoftware.financisto.model.Account;
-import ru.orangesoftware.financisto.model.Category;
-import ru.orangesoftware.financisto.model.Transaction;
-import ru.orangesoftware.financisto.test.*;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.test.AccountBuilder;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.DateTime;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+import ru.orangesoftware.financisto.test.TransferBuilder;
+
+import static org.junit.Assert.assertEquals;
 
 public class RunningBalanceTest extends AbstractDbTest {
 
@@ -32,6 +40,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         categoriesMap = CategoryBuilder.createDefaultHierarchy(db);
     }
 
+    @Test
     public void test_should_update_running_balance_for_single_account() {
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         Transaction t2 = TransactionBuilder.withDb(db).account(a1).amount(1234).create();
@@ -41,6 +50,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a1, 2234);
     }
 
+    @Test
     public void test_should_update_running_balance_for_single_account_with_transactions_having_exactly_the_same_datetime() {
         DateTime dt = DateTime.fromTimestamp(System.currentTimeMillis());
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).dateTime(dt).create();
@@ -63,6 +73,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertAccountBalanceForTransaction(t5, a1, 15000);
     }
 
+    @Test
     public void test_should_not_duplicate_running_balance_with_splits() {
         // add new transaction before split
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(2000).create();
@@ -88,6 +99,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a1, 1500);
     }
 
+    @Test
     public void test_should_update_running_balance_for_two_accounts() {
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         Transaction t2 = TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -101,6 +113,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a2, 2500);
     }
 
+    @Test
     public void test_should_update_running_balance_for_account_which_has_transfer_to_the_same_account() {
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         Transaction t2 = TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -113,6 +126,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a2, 2000);
     }
 
+    @Test
     public void test_should_update_running_balance_for_two_accounts_with_transfer_split() {
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         Transaction t2 = TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -134,6 +148,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a2, 2050);
     }
 
+    @Test
     public void test_should_update_running_balance_for_two_accounts_with_transfer_split_with_multiple_transfers() {
         TransactionBuilder.withDb(db).account(a1).amount(2000).create();
         TransactionBuilder.withDb(db).account(a2).amount(3000).create();
@@ -166,6 +181,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a3, 4000);
     }
 
+    @Test
     public void test_should_update_running_balance_for_two_accounts_when_updating_transfer_split() {
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         Transaction t2 = TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -195,6 +211,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a2, 2000);
     }
 
+    @Test
     public void test_should_update_running_balance_when_deleting_transfer_split() {
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         Transaction t2 = TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -215,6 +232,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertAccountBalanceForTransaction(t2, a2, 2000);
     }
 
+    @Test
     public void test_should_update_running_balance_when_inserting_new_transaction() {
         // *  | time  | amount | balance
         // t1 | 11:00 | +1000  | +1000
@@ -274,6 +292,7 @@ public class RunningBalanceTest extends AbstractDbTest {
     }
 
 
+    @Test
     public void test_should_update_running_balance_when_updating_amount_on_existing_transaction() {
         // *  | time  | amount | balance
         // t1 | 11:00 | +1000  | +1000
@@ -323,6 +342,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertLastTransactionDate(a1, DateTime.today().at(12,0,0,0));
     }
 
+    @Test
     public void test_should_update_running_balance_when_updating_datetime_on_existing_transaction() {
         // *  | time  | amount | balance
         // t1 | 11:00 | +1000  | +1000
@@ -361,6 +381,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertLastTransactionDate(a1, DateTime.today().at(12,5,0,0));
     }
 
+    @Test
     public void test_should_update_running_balance_when_updating_account_on_existing_transaction() {
         // A1  | time  | amount | balance
         // t11 | 11:00 | +1000  | +1000
@@ -395,6 +416,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertLastTransactionDate(a2, DateTime.today().at(11,0,0,0));
     }
 
+    @Test
     public void test_should_update_running_balance_when_deleting_existing_transaction() {
         // *  | time  | amount | balance
         // t1 | 11:00 | +1000  | +1000
@@ -441,6 +463,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertLastTransactionDate(a1, DateTime.today().at(12,0,0,0));
     }
 
+    @Test
     public void test_should_update_running_balance_when_inserting_new_transfer() {
         // A1  | time  | amount | balance
         // t11 | 11:00 | +1000  | +1000
@@ -500,6 +523,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a2, 920);
     }
 
+    @Test
     public void test_should_update_running_balance_when_updating_amount_on_existing_transfer() {
         // A1  | time  | amount | balance
         // t11 | 11:00 | +1000  | +1000
@@ -550,6 +574,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a2, 1050);
     }
 
+    @Test
     public void test_should_update_running_balance_when_updating_datetime_on_existing_transfer() {
         // A1  | time  | amount | balance
         // t11 | 11:00 | +1000  | +1000
@@ -599,6 +624,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a2, 900);
     }
 
+    @Test
     public void test_should_update_running_balance_when_updating_account_on_existing_transfer() {
         // A1  | time  | amount | balance
         // t11 | 11:00 | +1000  | +1000
@@ -643,6 +669,7 @@ public class RunningBalanceTest extends AbstractDbTest {
         assertFinalBalanceForAccount(a3, 200);
     }
 
+    @Test
     public void test_should_update_accounts_last_transaction_date() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).dateTime(DateTime.today().at(11,0,0,0)).create();
         TransactionBuilder.withDb(db).account(a1).amount(-500).dateTime(DateTime.today().at(11,5,0,0)).create();

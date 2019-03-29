@@ -1,12 +1,19 @@
 package ru.orangesoftware.financisto.db;
 
-import ru.orangesoftware.financisto.model.Account;
-import ru.orangesoftware.financisto.model.Category;
-import ru.orangesoftware.financisto.model.Transaction;
-import ru.orangesoftware.financisto.test.*;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.test.AccountBuilder;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+import ru.orangesoftware.financisto.test.TransferBuilder;
+
+import static org.junit.Assert.assertEquals;
 
 public class AccountTotalTest extends AbstractDbTest {
 
@@ -24,6 +31,7 @@ public class AccountTotalTest extends AbstractDbTest {
         categoriesMap = CategoryBuilder.createDefaultHierarchy(db);
     }
 
+    @Test
     public void test_should_update_account_total_when_credit_transaction_is_added() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -35,6 +43,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 2234);
     }
 
+    @Test
     public void test_should_update_account_total_when_debit_transaction_is_added() {
         TransactionBuilder.withDb(db).account(a1).amount(-1000).create();
         assertAccountTotal(a1, -1000);
@@ -46,6 +55,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, -2234);
     }
 
+    @Test
     public void test_should_update_account_total_when_credit_transaction_is_updated_with_bigger_amount() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -58,6 +68,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 1234);
     }
 
+    @Test
     public void test_should_update_account_total_when_credit_transaction_is_updated_with_lesser_amount() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -70,6 +81,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 900);
     }
 
+    @Test
     public void test_should_update_account_total_when_debit_transaction_is_updated_with_lesser_amount() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(-1000).create();
         assertAccountTotal(a1, -1000);
@@ -82,6 +94,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, -900);
     }
 
+    @Test
     public void test_should_update_account_total_when_debit_transaction_is_updated_with_bigger_amount() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(-1000).create();
         assertAccountTotal(a1, -1000);
@@ -94,6 +107,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, -1920);
     }
 
+    @Test
     public void test_should_update_account_total_when_credit_transaction_is_converted_to_debit_and_back() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -110,6 +124,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 226);
     }
 
+    @Test
     public void test_should_update_account_total_when_debit_transaction_is_converted_to_credit_and_back() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(-1000).create();
         assertAccountTotal(a1, -1000);
@@ -126,6 +141,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, -110);
     }
 
+    @Test
     public void test_should_update_account_total_after_mix_of_debit_and_credit_transactions() {
         Transaction t = TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -151,6 +167,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 800);
     }
 
+    @Test
     public void test_should_update_account_total_when_transaction_is_deleted() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -168,6 +185,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 766);
     }
 
+    @Test
     public void test_should_update_accounts_total_when_transfer_is_added_a() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -183,6 +201,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a2, 2400);
     }
 
+    @Test
     public void test_should_update_accounts_total_when_transfer_is_updated() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -204,6 +223,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a2, 2500);
     }
 
+    @Test
     public void test_should_update_accounts_total_when_transfer_is_deleted() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -223,6 +243,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a2, 2000);
     }
 
+    @Test
     public void test_should_update_account_total_when_regular_split_is_added() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -237,6 +258,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 500);
     }
 
+    @Test
     public void test_should_update_account_total_when_regular_split_is_updated() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -261,6 +283,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 1800);
     }
 
+    @Test
     public void test_should_update_account_total_when_regular_split_is_deleted() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         assertAccountTotal(a1, 1000);
@@ -278,6 +301,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a1, 1000);
     }
 
+    @Test
     public void test_should_update_account_total_when_transfer_split_is_added() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -295,6 +319,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a2, 2200);
     }
 
+    @Test
     public void test_should_update_account_total_when_transfer_split_is_updated() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -321,6 +346,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a2, 2100);
     }
 
+    @Test
     public void test_should_update_account_total_when_transfer_split_is_deleted() {
         TransactionBuilder.withDb(db).account(a1).amount(1000).create();
         TransactionBuilder.withDb(db).account(a2).amount(2000).create();
@@ -342,6 +368,7 @@ public class AccountTotalTest extends AbstractDbTest {
         assertAccountTotal(a2, 2000);
     }
 
+    @Test
     public void test_should_update_account_total_when_transfer_split_with_multiple_transfers_is_added() {
         TransactionBuilder.withDb(db).account(a1).amount(2000).create();
         TransactionBuilder.withDb(db).account(a2).amount(3000).create();

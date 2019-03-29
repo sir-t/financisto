@@ -1,12 +1,18 @@
 package ru.orangesoftware.financisto.db;
 
 import android.database.Cursor;
+
 import org.junit.Assert;
-import ru.orangesoftware.financisto.model.SmsTemplate;
-import ru.orangesoftware.financisto.test.SmsTemplateBuilder;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ru.orangesoftware.financisto.model.SmsTemplate;
+import ru.orangesoftware.financisto.test.SmsTemplateBuilder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class SmsTemplateTest extends AbstractDbTest {
 
@@ -20,6 +26,7 @@ public class SmsTemplateTest extends AbstractDbTest {
         template777 = SmsTemplateBuilder.withDb(db).title("777").accountId(7).categoryId(8).template(template).create();
     }
 
+    @Test
     public void test_duplication() throws Exception {
         long dupId = db.duplicate(SmsTemplate.class, template777.id);
         assertEquals(1, template777.getSortOrder());
@@ -56,6 +63,7 @@ public class SmsTemplateTest extends AbstractDbTest {
         
     }
 
+    @Test
     public void test_sorting() throws Exception {
         String template1 = "*{{a}}. Summa {{p}} RUB. {{*}}, MOSCOW. {{d}}. Dostupno {{b}}";
         String template2 = "*{{a}}. Summa {{p}} RUB. NOVYY PROEKT, MOSCOW. {{d}}. Dostupno {{b}}";
@@ -91,6 +99,7 @@ public class SmsTemplateTest extends AbstractDbTest {
         assertEquals("Number Query Sort Order mismatch: ", 3, res.get(2).accountId);
     }
 
+    @Test
     public void test_checking_order() throws Exception {
         SmsTemplate t2 = SmsTemplateBuilder.withDb(db).title("2").accountId(2).categoryId(8).template("first").create();
         SmsTemplate t3 = SmsTemplateBuilder.withDb(db).title("3").accountId(3).categoryId(8).template("second").create();
@@ -120,7 +129,8 @@ public class SmsTemplateTest extends AbstractDbTest {
         assertEquals(t8.id, db.getNextByOrder(SmsTemplate.class, t7.id));
         assertEquals(-1, db.getNextByOrder(SmsTemplate.class, t8.id));
     }
-    
+
+    @Test
     public void test_changing_sorting() throws Exception {
         SmsTemplate t2 = SmsTemplateBuilder.withDb(db).title("2").accountId(2).categoryId(8).template("first").create();
         SmsTemplate t3 = SmsTemplateBuilder.withDb(db).title("3").accountId(3).categoryId(8).template("second").create();

@@ -8,6 +8,8 @@
 
 package ru.orangesoftware.financisto.model.rates;
 
+import org.junit.Test;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.Total;
@@ -18,6 +20,9 @@ import ru.orangesoftware.financisto.test.CurrencyBuilder;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.RateBuilder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static ru.orangesoftware.financisto.model.rates.AssertExchangeRate.assertRate;
 
 /**
@@ -37,6 +42,7 @@ public class LatestExchangeRatesTest extends AbstractDbTest {
         c2 = CurrencyBuilder.withDb(db).name("EUR").title("Euro").symbol("€").create();
     }
 
+    @Test
     public void test_should_find_the_most_actual_rate_for_every_currency() {
         Currency c1 = CurrencyBuilder.withDb(db).name("USD").title("Dollar").symbol("$").create();
         Currency c2 = CurrencyBuilder.withDb(db).name("EUR").title("Euro").symbol("€").create();
@@ -68,12 +74,14 @@ public class LatestExchangeRatesTest extends AbstractDbTest {
         assertRate(DateTime.date(2012, 1, 16), 1.0f/0.222f, rate);
     }
 
+    @Test
     public void test_should_return_error_if_rate_is_not_found() {
         ExchangeRateProvider m = db.getLatestRates();
         ExchangeRate rate = m.getRate(c1, c2);
         assertTrue(ExchangeRate.NA == rate);
     }
 
+    @Test
     public void test_should_calculate_accounts_total_in_home_currency() {
         AccountBuilder.withDb(db).title("Cash").currency(c1).total(500).create();
         AccountBuilder.withDb(db).title("Bank").currency(c2).total(1200).create();
@@ -91,6 +99,7 @@ public class LatestExchangeRatesTest extends AbstractDbTest {
         assertTrue(db.getAccountsTotal(c3).isError());
     }
 
+    @Test
     public void test_should_calculate_accounts_total_in_every_currency() {
         AccountBuilder.withDb(db).title("Cash1").currency(c1).total(500).create();
 
@@ -121,6 +130,7 @@ public class LatestExchangeRatesTest extends AbstractDbTest {
         fail("Unable to find total for "+currency);
     }
 
+    @Test
     public void test_should_calculate_accounts_total_correctly_with_big_amounts() {
         AccountBuilder.withDb(db).title("Cash").currency(c1).total(36487931200L).create();
         assertEquals(36487931200L, db.getAccountsTotal(c1).balance);

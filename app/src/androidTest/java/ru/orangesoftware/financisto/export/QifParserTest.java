@@ -8,16 +8,31 @@
 
 package ru.orangesoftware.financisto.export;
 
-import android.test.AndroidTestCase;
-import ru.orangesoftware.financisto.export.qif.*;
-import ru.orangesoftware.financisto.test.DateTime;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
+import androidx.test.runner.AndroidJUnit4;
+import ru.orangesoftware.financisto.export.qif.QifAccount;
+import ru.orangesoftware.financisto.export.qif.QifBufferedReader;
+import ru.orangesoftware.financisto.export.qif.QifCategory;
+import ru.orangesoftware.financisto.export.qif.QifDateFormat;
+import ru.orangesoftware.financisto.export.qif.QifParser;
+import ru.orangesoftware.financisto.export.qif.QifTransaction;
+import ru.orangesoftware.financisto.test.DateTime;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static ru.orangesoftware.financisto.export.qif.QifDateFormat.EU_FORMAT;
 import static ru.orangesoftware.financisto.export.qif.QifDateFormat.US_FORMAT;
 
@@ -26,14 +41,17 @@ import static ru.orangesoftware.financisto.export.qif.QifDateFormat.US_FORMAT;
  * User: Denis Solonenko
  * Date: 9/25/11 9:53 PM
  */
-public class QifParserTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class QifParserTest {
 
     QifParser p;
 
+    @Test
     public void test_should_parse_empty_file() throws IOException {
         parseQif("");
     }
 
+    @Test
     public void test_should_parse_empty_account() throws IOException {
         parseQif(
                 "!Account\n" +
@@ -45,6 +63,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals("Cash", p.accounts.get(0).type);
     }
 
+    @Test
     public void test_should_parse_a_couple_of_empty_accounts() throws IOException {
         parseQif(
                 "!Account\n" +
@@ -62,6 +81,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals("Bank", p.accounts.get(1).type);
     }
 
+    @Test
     public void test_should_parse_account_with_a_couple_of_transactions() throws Exception {
         parseQif(
                 "!Type:Cat\n" +
@@ -120,6 +140,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals("Some note here...", t.memo);
     }
 
+    @Test
     public void test_should_parse_date_according_to_format() throws Exception {
         parseQif(
                 "!Type:Cat\n" +
@@ -160,6 +181,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals(DateTime.date(2011, 2, 7).atMidnight().asDate(), t.date);
     }
 
+    @Test
     public void test_should_parse_account_with_a_couple_of_transactions_without_category_list() throws Exception {
         parseQif(
                 "!Account\n" +
@@ -206,6 +228,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals("Some note here...", t.memo);
     }
 
+    @Test
     public void test_should_parse_multiple_accounts() throws Exception {
         parseQif(
                 "!Account\n" +
@@ -267,6 +290,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals(5400, t.amount);
     }
 
+    @Test
     public void test_should_parse_categories_directly_from_transactions() throws Exception {
         parseQif(
                 "!Account\n" +
@@ -307,6 +331,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals(5, categories.size());
     }
 
+    @Test
     public void test_should_parse_classes() throws Exception {
         parseQif(
                 "!Account\n" +
@@ -362,6 +387,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals(3, p.classes.size());
     }
 
+    @Test
     public void test_should_parse_transfers() throws Exception {
         parseQif(
                 "!Account\n" +
@@ -414,6 +440,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals("Vacation", p.classes.iterator().next());
     }
 
+    @Test
     public void test_should_parse_splits() throws Exception {
         parseQif(
             "!Type:Cat\nNA\nE\n^\nNA:A1\nE\n^\nNA:A1:AA1\nE\n^\nNA:A2\nE\n^\nNB\nE\n^\n"+ // this is not important
@@ -461,6 +488,7 @@ public class QifParserTest extends AndroidTestCase {
         assertEquals("Note on third split", s.memo);
     }
 
+    @Test
     public void test_should_parse_transfer_splits() throws Exception {
         parseQif(
             "!Type:Cat\nNA\nE\n^\nNA:A1\nE\n^\nNA:A1:AA1\nE\n^\nNA:A2\nE\n^\nNB\nE\n^\n"+ // this is not important

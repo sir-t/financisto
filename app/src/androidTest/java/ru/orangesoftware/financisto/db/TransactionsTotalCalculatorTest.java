@@ -8,11 +8,27 @@
 
 package ru.orangesoftware.financisto.db;
 
-import ru.orangesoftware.financisto.filter.WhereFilter;
-import ru.orangesoftware.financisto.model.*;
-import ru.orangesoftware.financisto.test.*;
+import org.junit.Test;
 
 import java.util.Map;
+
+import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.model.Total;
+import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.test.AccountBuilder;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+import ru.orangesoftware.financisto.test.CurrencyBuilder;
+import ru.orangesoftware.financisto.test.DateTime;
+import ru.orangesoftware.financisto.test.RateBuilder;
+import ru.orangesoftware.financisto.test.TransactionBuilder;
+import ru.orangesoftware.financisto.test.TransferBuilder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by IntelliJ IDEA.
@@ -85,7 +101,8 @@ public class TransactionsTotalCalculatorTest extends AbstractDbTest {
         a1t5_23rd_s1 = a1t5_23rd.splits.get(0);
         a1t5_23rd_s2 = a1t5_23rd.splits.get(1);
     }
-    
+
+    @Test
     public void test_should_return_error_if_exchange_rate_not_available() {
         TransactionBuilder.withDb(db).account(a1).dateTime(DateTime.date(2012, 1, 10)).amount(1).create();
 
@@ -99,6 +116,7 @@ public class TransactionsTotalCalculatorTest extends AbstractDbTest {
         assertTrue(total.isError());  // no rates at all
     }
 
+    @Test
     public void test_should_calculate_blotter_total_in_multiple_currencies() {
         Total[] totals = c.getTransactionsBalance();
         assertEquals(2, totals.length);
@@ -106,12 +124,14 @@ public class TransactionsTotalCalculatorTest extends AbstractDbTest {
         assertEquals(-230, totals[1].balance);
     }
 
+    @Test
     public void test_should_calculate_blotter_total_in_home_currency() {
         assertEquals((long)(-100f +100f -(1f/ r_c1c2_17th)*100f -(1f/ r_c1c2_18th)*250f -50f +50f -450f -50f -150f +150f), c.getBlotterBalance(c1).balance);
         assertEquals((long)(-20f +r_c1c2_17th *100f -100f -250f -20f +20f - r_c1c2_18th *450f - r_c1c2_18th *50f -100f +100f), c.getBlotterBalance(c2).balance);
         assertEquals(c.getBlotterBalance(c1).balance, c.getBlotterBalanceInHomeCurrency().balance);
     }
 
+    @Test
     public void test_should_calculate_account_total_in_home_currency() {
         //no conversion
         assertEquals(a1t1_09th.fromAmount + a1t2_17th.fromAmount + a1t3_20th.fromAmount + a1t4_22nd.fromAmount + a1t5_23rd.fromAmount, c.getAccountBalance(c1, a1.id).balance);
@@ -130,6 +150,7 @@ public class TransactionsTotalCalculatorTest extends AbstractDbTest {
         assertEquals((long) (r_c2c3_5th * (a2t1_17th.fromAmount + a2t2_18th.fromAmount + a1t3_20th.toAmount + a1t5_23rd_s2.toAmount)), c.getAccountBalance(c3, a2.id).balance);
     }
 
+    @Test
     public void test_should_calculate_account_total_in_home_currency_with_big_amounts() {
         TransactionBuilder.withDb(db).account(a1).dateTime(DateTime.date(2012, 1, 10)).amount(45000000000L).create();
         //no conversion

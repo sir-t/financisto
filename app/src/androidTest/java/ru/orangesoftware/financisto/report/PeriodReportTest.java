@@ -1,23 +1,32 @@
 package ru.orangesoftware.financisto.report;
 
 import android.preference.PreferenceManager;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.List;
+
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.graph.GraphUnit;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.RateBuilder;
 import ru.orangesoftware.financisto.test.TransactionBuilder;
 import ru.orangesoftware.financisto.test.TransferBuilder;
 
-import java.util.List;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Denis Solonenko
  * Date: 7/6/11 11:15 PM
  */
+@RunWith(AndroidJUnit4.class)
 public class PeriodReportTest extends AbstractReportTest {
 
     // important that report is re-created after include_transfers_into_reports preference is set
 
+    @Test
     public void test_should_calculate_correct_report_for_today_without_transfers() {
         //given
         givenTransfersAreExcludedFromReports();
@@ -32,6 +41,7 @@ public class PeriodReportTest extends AbstractReportTest {
         assertExpense(units.get(0), -3500);
     }
 
+    @Test
     public void test_should_calculate_correct_report_for_today_with_transfers() {
         //given
         givenTransfersAreIncludedIntoReports();
@@ -45,6 +55,7 @@ public class PeriodReportTest extends AbstractReportTest {
         assertExpense(units.get(0), -4700);
     }
 
+    @Test
     public void test_should_calculate_correct_report_for_today_with_splits_without_transfers() {
         //given
         givenTransfersAreExcludedFromReports();
@@ -60,6 +71,7 @@ public class PeriodReportTest extends AbstractReportTest {
         assertExpense(units.get(0), -8000);
     }
 
+    @Test
     public void test_should_calculate_correct_report_for_today_with_splits_with_transfers() {
         //given
         givenTransfersAreIncludedIntoReports();
@@ -75,6 +87,7 @@ public class PeriodReportTest extends AbstractReportTest {
         assertExpense(units.get(0), -10000);
     }
 
+    @Test
     public void test_should_calculate_report_in_home_currency_without_transfers() {
         //given
         givenTransfersAreExcludedFromReports();
@@ -91,6 +104,7 @@ public class PeriodReportTest extends AbstractReportTest {
         assertExpense(units.get(0), -3650);
     }
 
+    @Test
     public void test_should_calculate_report_in_home_currency_with_transfers() {
         //given
         givenTransfersAreIncludedIntoReports();
@@ -107,6 +121,7 @@ public class PeriodReportTest extends AbstractReportTest {
         assertExpense(units.get(0), -4850);
     }
 
+    @Test
     public void test_should_calculate_report_in_home_currency_with_transfers_with_selected_income_expense() {
         //given
         givenTransfersAreIncludedIntoReports();
@@ -142,16 +157,16 @@ public class PeriodReportTest extends AbstractReportTest {
     }
 
     private void givenTransfersAreExcludedFromReports() {
-        assertTrue(PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("include_transfers_into_reports", false).commit());
+        assertTrue(PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("include_transfers_into_reports", false).commit());
     }
 
     private void givenTransfersAreIncludedIntoReports() {
-        assertTrue(PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("include_transfers_into_reports", true).commit());
+        assertTrue(PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("include_transfers_into_reports", true).commit());
     }
 
     @Override
     protected Report createReport() {
-        return new PeriodReport(getContext(), c1);
+        return new PeriodReport(context, c1);
     }
 
 }

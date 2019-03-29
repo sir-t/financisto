@@ -1,7 +1,9 @@
 package ru.orangesoftware.financisto.recur;
 
-import android.test.AndroidTestCase;
 import android.util.Log;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,8 +12,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.test.DateTime;
 
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertEquals;
 import static ru.orangesoftware.financisto.test.DateTime.date;
 
 /**
@@ -19,10 +25,12 @@ import static ru.orangesoftware.financisto.test.DateTime.date;
  * User: Denis Solonenko
  * Date: 2/18/11 7:15 PM
  */
-public class RecurrenceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class RecurrenceTest {
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    @Test
     public void test_should_schedule_correctly_monthly_last_working_day() throws ParseException {
         assertDates(
                 "2010-06-30T15:20:00~MONTHLY:count@1#interval@1#monthly_pattern_params_0@LAST-WEEKDAY#monthly_pattern_0@SPECIFIC_DAY#~INDEFINETELY:null",
@@ -30,6 +38,7 @@ public class RecurrenceTest extends AndroidTestCase {
                 "2011-02-28 15:20:00,2011-03-31 15:20:00,2011-04-29 15:20:00,...");
     }
 
+    @Test
     public void test_should_schedule_correctly_on_the_same_day_if_the_schedule_time_is_after_the_current_time() throws Exception {
         assertDates(
                 "2011-02-27T19:30:00~DAILY:interval@1#~INDEFINETELY:null",
@@ -37,6 +46,7 @@ public class RecurrenceTest extends AndroidTestCase {
                 "2011-02-27 19:30:00,2011-02-28 19:30:00,...");
     }
 
+    @Test
     public void test_should_schedule_correctly_on_the_next_day_if_the_scheduled_time_is_before_the_current_time() throws Exception {
         assertDates(
                 "2011-02-27T19:30:00~DAILY:interval@1#~INDEFINETELY:null",
@@ -44,6 +54,7 @@ public class RecurrenceTest extends AndroidTestCase {
                 "2011-02-28 19:30:00,2011-03-01 19:30:00,...");
     }
 
+    @Test
     public void test_should_generate_scheduled_times_for_specific_period() throws Exception {
         assertDates(generateDates("2011-08-02T21:40:00~DAILY:interval@1#~INDEFINETELY:null", date(2011, 8, 1).atMidnight(), date(2011, 8, 5).atDayEnd()),
                 "2011-08-02 21:40:00,2011-08-03 21:40:00,2011-08-04 21:40:00,2011-08-05 21:40:00");

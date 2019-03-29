@@ -8,13 +8,18 @@
 
 package ru.orangesoftware.financisto.db;
 
+import org.junit.Test;
+
+import java.util.Collections;
+import java.util.Map;
+
 import ru.orangesoftware.financisto.model.Attribute;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.CategoryTree;
 import ru.orangesoftware.financisto.test.CategoryBuilder;
 
-import java.util.Collections;
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,6 +28,7 @@ import java.util.Map;
  */
 public class CategoriesTest extends AbstractDbTest {
 
+    @Test
     public void test_should_insert_new_category() {
         //given
         /**
@@ -103,6 +109,7 @@ public class CategoriesTest extends AbstractDbTest {
         assertEquals("D", tree.getAt(3).title);
     }
 
+    @Test
     public void test_should_update_existing_category() {
         //given
         /**

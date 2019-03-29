@@ -8,11 +8,17 @@
 
 package ru.orangesoftware.financisto.model;
 
-import ru.orangesoftware.financisto.db.AbstractDbTest;
-import ru.orangesoftware.financisto.test.CategoryBuilder;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+
+import ru.orangesoftware.financisto.db.AbstractDbTest;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 public class CategoryTreeNavigatorTest extends AbstractDbTest {
 
@@ -32,7 +38,8 @@ public class CategoryTreeNavigatorTest extends AbstractDbTest {
         categories = CategoryBuilder.createDefaultHierarchy(db);
         navigator = new CategoryTreeNavigator(db);
     }
-    
+
+    @Test
     public void test_should_add_expense_income_level() {
         navigator.separateIncomeAndExpense();
         assertSelected(Category.NO_CATEGORY_ID, "<NO_CATEGORY>", "<INCOME>", "<EXPENSE>");
@@ -50,13 +57,15 @@ public class CategoryTreeNavigatorTest extends AbstractDbTest {
         assertSelected(Category.NO_CATEGORY_ID, "<NO_CATEGORY>", "<INCOME>", "<EXPENSE>");
     }
 
+    @Test
     public void test_should_select_startup_category() {
         long selectedCategoryId = categories.get("AA1").id;
         navigator.selectCategory(selectedCategoryId);
         assertEquals(selectedCategoryId, navigator.selectedCategoryId);
         assertSelected(selectedCategoryId, "A1", "AA1");
     }
-    
+
+    @Test
     public void test_should_navigate_to_category() {
         long categoryId = categories.get("A").id;
         navigator.navigateTo(categoryId);
@@ -71,6 +80,7 @@ public class CategoryTreeNavigatorTest extends AbstractDbTest {
         assertSelected(categoryId, "A1", "AA1");
     }
 
+    @Test
     public void test_should_select_parent_category_when_navigating_back() {
         long categoryId = categories.get("AA1").id;
         navigator.selectCategory(categoryId);

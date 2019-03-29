@@ -1,12 +1,16 @@
 package ru.orangesoftware.financisto.model;
 
+import org.junit.Test;
+
+import java.util.Map;
+
 import ru.orangesoftware.financisto.db.AbstractDbTest;
 import ru.orangesoftware.financisto.test.AccountBuilder;
 import ru.orangesoftware.financisto.test.CategoryBuilder;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.TransactionBuilder;
 
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,6 +52,7 @@ public class BudgetTest extends AbstractDbTest {
         db.saveOrUpdate(budgetOne);
     }
 
+    @Test
     public void test_should_calculate_budget_correctly_with_regular_transactions() {
         // zero initially
         long spent = db.fetchBudgetBalance(categories, projects, budgetOne);
@@ -70,6 +75,7 @@ public class BudgetTest extends AbstractDbTest {
         assertEquals(-300, spent);
     }
 
+    @Test
     public void test_should_calculate_budget_correctly_with_splits() {
         // zero initially
         long spent = db.fetchBudgetBalance(categories, projects, budgetOne);
@@ -90,6 +96,7 @@ public class BudgetTest extends AbstractDbTest {
         assertEquals(0, spent);
     }
 
+    @Test
     public void test_should_calculate_budget_total() {
 
     }

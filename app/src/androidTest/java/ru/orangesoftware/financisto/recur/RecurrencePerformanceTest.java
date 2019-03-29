@@ -8,12 +8,16 @@
 
 package ru.orangesoftware.financisto.recur;
 
-import android.test.AndroidTestCase;
 import android.util.Log;
-import ru.orangesoftware.financisto.test.DateTime;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Date;
 import java.util.List;
+
+import androidx.test.runner.AndroidJUnit4;
+import ru.orangesoftware.financisto.test.DateTime;
 
 import static ru.orangesoftware.financisto.test.DateTime.date;
 
@@ -22,8 +26,10 @@ import static ru.orangesoftware.financisto.test.DateTime.date;
  * User: Denis Solonenko
  * Date: 2/18/11 7:15 PM
  */
-public class RecurrencePerformanceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class RecurrencePerformanceTest {
 
+    @Test
     public void test_should_generate_scheduled_times_for_specific_period() throws Exception {
         String dailyPattern = "2011-08-02T21:40:00~DAILY:interval@1#~INDEFINETELY:null";
         generateDates(dailyPattern, date(2011, 8, 1));

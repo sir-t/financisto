@@ -9,6 +9,12 @@
 package ru.orangesoftware.financisto.db;
 
 import android.database.Cursor;
+
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
@@ -18,8 +24,7 @@ import ru.orangesoftware.financisto.test.AccountBuilder;
 import ru.orangesoftware.financisto.test.DateTime;
 import ru.orangesoftware.financisto.test.TransactionBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,6 +43,7 @@ public class BlotterTest extends AbstractDbTest {
         a1 = AccountBuilder.createDefault(db);
     }
 
+    @Test
     public void test_should_sort_transactions_in_the_blotter_with_the_same_datetime_according_to_filter() {
         //given
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).dateTime(dt).create();
@@ -51,6 +57,7 @@ public class BlotterTest extends AbstractDbTest {
         assertBlotter(getBlotter(WhereFilter.empty()), t3, t2, t1);
     }
 
+    @Test
     public void test_should_filter_blotter_by_payee() {
         //given
         Transaction t1 = TransactionBuilder.withDb(db).account(a1).amount(1000).payee("P1").dateTime(dt).create();

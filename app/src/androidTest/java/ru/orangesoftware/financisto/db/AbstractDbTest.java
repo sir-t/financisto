@@ -1,38 +1,48 @@
 package ru.orangesoftware.financisto.db;
 
 import android.content.Context;
-import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.Transaction;
 import ru.orangesoftware.financisto.test.DateTime;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Denis Solonenko
  * Date: 2/7/11 7:22 PM
  */
-public abstract class AbstractDbTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public abstract class AbstractDbTest {
 
     private DatabaseHelper dbHelper;
     protected DatabaseAdapter db;
     protected Context context;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        context = new RenamingDelegatingContext(getContext(), "test-"+System.currentTimeMillis());
+        Context origContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+
+        context = new RenamingDelegatingContext(origContext, "test-" + System.currentTimeMillis());
         dbHelper = new DatabaseHelper(context);
         db = new TestDatabaseAdapter(context, dbHelper);
         db.open();
     }
 
-    @Override
+    @After
     public void tearDown() {
         dbHelper.close();
     }
@@ -69,6 +79,7 @@ public abstract class AbstractDbTest extends AndroidTestCase {
         assertEquals(isIncome, c.isIncome());
     }
 
+    @SafeVarargs
     public static <T> Set<T> asSet(T... values) {
         return new HashSet<T>(Arrays.asList(values));
     }

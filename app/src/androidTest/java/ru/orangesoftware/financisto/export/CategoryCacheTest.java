@@ -8,14 +8,19 @@
 
 package ru.orangesoftware.financisto.export;
 
-import ru.orangesoftware.financisto.model.Category;
-import ru.orangesoftware.financisto.model.CategoryTree;
-import ru.orangesoftware.financisto.test.CategoryBuilder;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.CategoryTree;
+import ru.orangesoftware.financisto.test.CategoryBuilder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static ru.orangesoftware.financisto.export.CategoryCache.extractCategoryName;
 
 /**
@@ -27,6 +32,7 @@ public class CategoryCacheTest extends AbstractImportExportTest {
 
     CategoryCache cache = new CategoryCache();
 
+    @Test
     public void test_should_split_category_name() {
         assertEquals("P1", extractCategoryName("P1"));
         assertEquals("P1:c1", extractCategoryName("P1:c1"));
@@ -34,6 +40,7 @@ public class CategoryCacheTest extends AbstractImportExportTest {
         assertEquals("P1:c1", extractCategoryName("P1:c1/C2"));
     }
 
+    @Test
     public void test_should_import_categories() throws Exception {
         //given
         //P1         1-10
@@ -71,13 +78,13 @@ public class CategoryCacheTest extends AbstractImportExportTest {
         assertEquals(2, categories.size());
 
         Category c = categories.getAt(0);
-        assertCategory("P1", true, c);
+        assertCategory("P1", false, c);
         assertEquals(2, c.children.size());
 
-        assertCategory("cc1", true, c.children.getAt(0));
+        assertCategory("cc1", false, c.children.getAt(0));
         assertEquals(2, c.children.getAt(0).children.size());
 
-        assertCategory("cc2", true, c.children.getAt(1));
+        assertCategory("cc2", false, c.children.getAt(1));
         assertFalse(c.children.getAt(1).hasChildren());
 
         c = categories.getAt(1);
@@ -87,6 +94,7 @@ public class CategoryCacheTest extends AbstractImportExportTest {
         assertCategory("x1", false, c.children.getAt(0));
     }
 
+    @Test
     public void test_should_load_existing_categories() throws Exception {
         //given existing
         /**
@@ -107,6 +115,7 @@ public class CategoryCacheTest extends AbstractImportExportTest {
         assertEquals(existingCategories.get("B").id, cache.findCategory("B").id);
     }
 
+    @Test
     public void test_should_merge_existing_and_new_categories() throws Exception {
         //given existing
         CategoryBuilder.createDefaultHierarchy(db);

@@ -3,6 +3,7 @@ package ru.orangesoftware.financisto.db;
 import android.database.Cursor;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,12 @@ import ru.orangesoftware.financisto.test.TransactionBuilder;
 import ru.orangesoftware.financisto.test.TransferBuilder;
 import ru.orangesoftware.orb.EntityManager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 public class DatabaseAdapterTest extends AbstractDbTest {
 
     Account a1;
@@ -39,6 +46,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         categoriesMap = CategoryBuilder.createDefaultHierarchy(db);
     }
 
+    @Test
     public void test_should_restore_split_transaction() {
         //given
         Transaction originalTransaction = TransactionBuilder.withDb(db).account(a1).amount(100)
@@ -60,6 +68,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         assertEquals(2, splits.size());
     }
 
+    @Test
     public void test_should_remember_last_used_transaction_for_the_payee() {
         //when
         TransactionBuilder.withDb(db).account(a1).amount(1000).payee("Payee1").category(categoriesMap.get("A1")).create();
@@ -68,6 +77,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         assertEquals(categoriesMap.get("A1").id, p.lastCategoryId);
     }
 
+    @Test
     public void test_should_search_payee_with_or_without_first_letter_capitalized() {
         // given
         db.findOrInsertPayee("Парковка");
@@ -84,6 +94,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         assertEquals("Парковка", fetchFirstPayee("пар"));
     }
 
+    @Test
     public void test_should_detect_multiple_account_currencies() {
         // one account only
         assertTrue(db.singleCurrencyOnly());
@@ -106,6 +117,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         assertFalse(db.singleCurrencyOnly());
     }
 
+    @Test
     public void test_should_not_return_split_category_as_parent_when_editing_a_category() {
         List<Category> list = db.getCategoriesWithoutSubtreeAsList(categoriesMap.get("A").id);
         for (Category category : list) {
@@ -113,6 +125,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         }
     }
 
+    @Test
     public void test_should_return_only_valid_parent_categories_when_editing_a_category() {
         List<Category> list = db.getCategoriesWithoutSubtreeAsList(categoriesMap.get("A").id);
         assertEquals(2, list.size());
@@ -120,6 +133,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         assertEquals(categoriesMap.get("B").id, list.get(1).id);
     }
 
+    @Test
     public void test_should_return_id_of_the_nearest_transaction_which_is_older_than_specified_date() {
         //given
         a2 = AccountBuilder.createDefault(db);
@@ -142,6 +156,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         assertEquals(t8.id, db.findNearestOlderTransactionId(a2, DateTime.date(2012, 5, 26).asLong()));
     }
 
+    @Test
     public void test_should_delete_old_transactions() {
         //given
         a2 = AccountBuilder.createDefault(db);
@@ -185,6 +200,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         assertTransactionsCount(a2, 0);
     }
 
+    @Test
     public void test_should_find_latest_transaction_date_for_an_account() {
         //given
         Account a2 = AccountBuilder.createDefault(db);
@@ -214,6 +230,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
             MyLocation.currentLocation()
     };
 
+    @Test
     public void test_should_restore_system_entities() {
         //given
         givenSystemEntitiesHaveBeenDeleted();
@@ -236,6 +253,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
         }
     }
 
+    @Test
     public void test_account_number_lookup() {
         Account account = AccountBuilder.withDb(db)
                 .currency(CurrencyBuilder.createDefault(db))
@@ -243,7 +261,7 @@ public class DatabaseAdapterTest extends AbstractDbTest {
 
         final List<Long> res = db.findAccountsByNumber("5431");
         Assert.assertTrue(res.size() == 1);
-        Assert.assertEquals((Long) account.id, res.get(0));
+        assertEquals((Long) account.id, res.get(0));
     }
 
     private String fetchFirstPayee(String s) {

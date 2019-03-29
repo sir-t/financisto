@@ -8,22 +8,38 @@
 
 package ru.orangesoftware.financisto.utils;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.test.AndroidTestCase;
+import android.test.RenamingDelegatingContext;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.TimeUnit;
 
-public class IntegrityCheckAutobackupTest extends AndroidTestCase {
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+
+import static org.junit.Assert.assertEquals;
+
+@RunWith(AndroidJUnit4.class)
+public class IntegrityCheckAutobackupTest {
 
     IntegrityCheckAutobackup integrity;
+    private Context context;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-        integrity = new IntegrityCheckAutobackup(getContext(), TimeUnit.MILLISECONDS.toMillis(100));
+        Context origContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+
+        context = new RenamingDelegatingContext(origContext, "test-" + System.currentTimeMillis());
+
+        integrity = new IntegrityCheckAutobackup(context, TimeUnit.MILLISECONDS.toMillis(100));
     }
 
+    @Test
     public void test_should_check_if_autobackup_has_been_disabled() {
         // when reminder is enabled
         givenAutobackupReminderEnabledIs(true);
@@ -51,6 +67,7 @@ public class IntegrityCheckAutobackupTest extends AndroidTestCase {
         assertEquals(IntegrityCheck.Level.OK, integrity.check().level);
     }
 
+    @Test
     public void test_should_check_if_the_last_autobackup_has_failed() {
         // when reminder is enabled
         givenAutobackupWarningEnabledIs(true);
@@ -76,30 +93,30 @@ public class IntegrityCheckAutobackupTest extends AndroidTestCase {
     }
 
     private void givenTheLastAutobackupHasSucceeded() {
-        MyPreferences.notifyAutobackupSucceeded(getContext());
+        MyPreferences.notifyAutobackupSucceeded(context);
     }
 
     private void givenTheLastAutobackupHasFailed() {
-        MyPreferences.notifyAutobackupFailed(getContext(), new Exception("Error!"));
+        MyPreferences.notifyAutobackupFailed(context, new Exception("Error!"));
     }
 
     private void givenAutobackupEnabledIs(boolean isEnabled) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().putBoolean("auto_backup_enabled", isEnabled).commit();
     }
 
     private void givenAutobackupReminderEnabledIs(boolean isEnabled) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().putBoolean("auto_backup_reminder_enabled", isEnabled).commit();
     }
 
     private void givenAutobackupWarningEnabledIs(boolean isEnabled) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().putBoolean("auto_backup_warning_enabled", isEnabled).commit();
     }
 
     private void givenFirstRunAfterRelease() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit()
                 .remove("last_autobackup_check")
                 .remove("auto_backup_failed_notify")
