@@ -82,7 +82,6 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         menuFragment = new MenuFragment();
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.inflateMenu(R.menu.main_views_menu);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
         MyPreferences.StartupScreen screen = MyPreferences.getStartupScreen(this);
@@ -133,6 +132,7 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         if (PinProtection.isUnlocked()) {
             WebViewDialog.checkVersionAndShowWhatsNewIfNeeded(this);
         }
+        refreshCurrentTab();
     }
 
     @Override
@@ -216,9 +216,14 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
 
     @Override
     public void onBackPressed() {
-        FrameLayout searchLayout = blotterFragment.getView().findViewById(R.id.search_text_frame);
-        if (searchLayout != null && searchLayout.getVisibility() == View.VISIBLE) {
-            searchLayout.setVisibility(View.GONE);
+        View view = blotterFragment.getView();
+        if (view != null) {
+            FrameLayout searchLayout = view.findViewById(R.id.search_text_frame);
+            if (searchLayout != null && searchLayout.getVisibility() == View.VISIBLE) {
+                searchLayout.setVisibility(View.GONE);
+            } else {
+                super.onBackPressed();
+            }
         } else {
             super.onBackPressed();
         }
