@@ -1,5 +1,6 @@
 package ru.orangesoftware.financisto.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.BlotterOperations;
 import ru.orangesoftware.financisto.activity.BlotterTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.FilterState;
+import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
 import ru.orangesoftware.financisto.activity.MonthlyViewActivity;
 import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.SelectTemplateActivity;
@@ -48,6 +50,7 @@ import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.utils.IntegrityCheckRunningBalance;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.view.NodeInflater;
@@ -57,6 +60,9 @@ import static android.app.Activity.RESULT_OK;
 import static ru.orangesoftware.financisto.utils.MyPreferences.isQuickMenuEnabledForTransaction;
 
 public class BlotterFragment extends AbstractListFragment {
+
+    public static final String SAVE_FILTER = "saveFilter";
+    public static final String EXTRA_FILTER_ACCOUNTS = "filterAccounts";
 
     private static final int NEW_TRANSACTION_REQUEST = 1;
     private static final int NEW_TRANSFER_REQUEST = 3;
@@ -90,11 +96,17 @@ public class BlotterFragment extends AbstractListFragment {
         super(R.layout.blotter);
     }
 
+    @SuppressLint("ValidFragment")
+    public BlotterFragment(int layout) {
+        super(layout);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.inflater = new NodeInflater(inflater);
+        View view = super.onCreateView(inflater, container, savedInstanceState);
         integrityCheck();
-        return super.onCreateView(inflater, container, savedInstanceState);
+        return view;
     }
 
     protected void calculateTotals() {
@@ -140,6 +152,7 @@ public class BlotterFragment extends AbstractListFragment {
         Intent intent = context.getIntent();
         if (intent != null) {
             blotterFilter = WhereFilter.fromIntent(intent);
+            saveFilter = intent.getBooleanExtra(SAVE_FILTER, true);
             isAccountBlotter = intent.getBooleanExtra(BlotterFilterActivity.IS_ACCOUNT_FILTER, false);
         }
         if (savedInstanceState != null) {
@@ -518,9 +531,9 @@ public class BlotterFragment extends AbstractListFragment {
     }
 
     private void createTransactionFromTemplate(Intent data) {
-        long templateId = data.getLongExtra(SelectTemplateActivity.TEMPATE_ID, -1);
-        int multiplier = data.getIntExtra(SelectTemplateActivity.MULTIPLIER, 1);
-        boolean edit = data.getBooleanExtra(SelectTemplateActivity.EDIT_AFTER_CREATION, false);
+        long templateId = data.getLongExtra(SelectTemplateFragment.TEMPATE_ID, -1);
+        int multiplier = data.getIntExtra(SelectTemplateFragment.MULTIPLIER, 1);
+        boolean edit = data.getBooleanExtra(SelectTemplateFragment.EDIT_AFTER_CREATION, false);
         if (templateId > 0) {
             long id = duplicateTransaction(templateId, multiplier);
             Transaction t = db.getTransaction(id);
@@ -580,7 +593,7 @@ public class BlotterFragment extends AbstractListFragment {
 
     @Override
     public void integrityCheck() {
-//        new IntegrityCheckTask(context).execute(new IntegrityCheckRunningBalance(context, db));
+        new IntegrityCheckTask(context).execute(new IntegrityCheckRunningBalance(context, db));
     }
 
 //    @Override

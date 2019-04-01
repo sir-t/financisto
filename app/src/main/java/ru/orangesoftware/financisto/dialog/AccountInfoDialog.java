@@ -15,13 +15,18 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.AccountActivity;
-import ru.orangesoftware.financisto.activity.AccountListActivity;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
-import ru.orangesoftware.financisto.db.MyEntityManager;
-import ru.orangesoftware.financisto.model.*;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.AccountType;
+import ru.orangesoftware.financisto.model.CardIssuer;
 import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.financisto.view.NodeInflater;
 

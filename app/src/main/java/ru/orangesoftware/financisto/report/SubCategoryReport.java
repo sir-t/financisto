@@ -12,23 +12,31 @@ package ru.orangesoftware.financisto.report;
 
 import android.content.Context;
 import android.database.Cursor;
-import ru.orangesoftware.financisto.activity.BlotterActivity;
-import ru.orangesoftware.financisto.activity.SplitsBlotterActivity;
-import ru.orangesoftware.financisto.blotter.BlotterFilter;
-import ru.orangesoftware.financisto.filter.WhereFilter;
-import ru.orangesoftware.financisto.filter.Criteria;
-import ru.orangesoftware.financisto.db.*;
-import ru.orangesoftware.financisto.graph.GraphStyle;
-import ru.orangesoftware.financisto.graph.GraphUnit;
-import ru.orangesoftware.financisto.model.*;
-import ru.orangesoftware.financisto.model.CategoryTree.NodeCreator;
-import ru.orangesoftware.financisto.rates.ExchangeRateProvider;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import androidx.fragment.app.FragmentActivity;
+import ru.orangesoftware.financisto.activity.SplitsBlotterActivity;
+import ru.orangesoftware.financisto.blotter.BlotterFilter;
+import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.db.DatabaseHelper;
+import ru.orangesoftware.financisto.db.TransactionsTotalCalculator;
+import ru.orangesoftware.financisto.db.UnableToCalculateRateException;
+import ru.orangesoftware.financisto.filter.Criteria;
+import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.graph.GraphStyle;
+import ru.orangesoftware.financisto.graph.GraphUnit;
+import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.CategoryEntity;
+import ru.orangesoftware.financisto.model.CategoryTree;
+import ru.orangesoftware.financisto.model.CategoryTree.NodeCreator;
+import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.model.Total;
+import ru.orangesoftware.financisto.rates.ExchangeRateProvider;
 
 import static ru.orangesoftware.financisto.db.DatabaseHelper.V_REPORT_SUB_CATEGORY;
 
@@ -138,7 +146,7 @@ public class SubCategoryReport extends Report {
 	}
 
     @Override
-    protected Class<? extends BlotterActivity> getBlotterActivityClass() {
+    protected Class<? extends FragmentActivity> getBlotterFragmentClass() {
         return SplitsBlotterActivity.class;
     }
 

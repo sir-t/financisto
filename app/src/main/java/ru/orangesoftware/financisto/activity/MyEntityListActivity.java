@@ -143,7 +143,7 @@ public abstract class MyEntityListActivity<T extends MyEntity> extends AbstractL
     @Override
     protected void viewItem(View v, int position, long id) {
         T e = db.load(clazz, id);
-        Intent intent = new Intent(this, BlotterActivity.class);
+        Intent intent = new Intent(this, GenericBlotterActivity.class);
         Criteria blotterFilter = createBlotterCriteria(e);
         blotterFilter.toIntent(e.title, intent);
         startActivity(intent);

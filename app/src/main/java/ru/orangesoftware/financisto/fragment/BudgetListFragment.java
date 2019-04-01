@@ -36,7 +36,10 @@ import ru.orangesoftware.financisto.model.Total;
 import ru.orangesoftware.financisto.utils.RecurUtils;
 import ru.orangesoftware.financisto.utils.Utils;
 
-public class BudgetListFragment extends AbstractListFragment{
+import static android.app.Activity.RESULT_FIRST_USER;
+import static android.app.Activity.RESULT_OK;
+
+public class BudgetListFragment extends AbstractListFragment {
 
 
     private static final int NEW_BUDGET_REQUEST = 1;
@@ -61,6 +64,8 @@ public class BudgetListFragment extends AbstractListFragment{
 
         budgets = db.getAllBudgets(filter);
         handler = new Handler();
+
+        recreateCursor();
 
         return view;
     }
@@ -106,26 +111,26 @@ public class BudgetListFragment extends AbstractListFragment{
         FilterState.updateFilterColor(context, filter, bFilter);
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == FILTER_BUDGET_REQUEST) {
-//            if (resultCode == RESULT_FIRST_USER) {
-//                filter.clear();
-//            } else if (resultCode == RESULT_OK) {
-//                String periodType = data.getStringExtra(DateFilterActivity.EXTRA_FILTER_PERIOD_TYPE);
-//                PeriodType p = PeriodType.valueOf(periodType);
-//                if (PeriodType.CUSTOM == p) {
-//                    long periodFrom = data.getLongExtra(DateFilterActivity.EXTRA_FILTER_PERIOD_FROM, 0);
-//                    long periodTo = data.getLongExtra(DateFilterActivity.EXTRA_FILTER_PERIOD_TO, 0);
-//                    filter.put(new DateTimeCriteria(periodFrom, periodTo));
-//                } else {
-//                    filter.put(new DateTimeCriteria(p));
-//                }
-//            }
-//            saveFilter();
-//        }
-//        recreateCursor();
-//    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FILTER_BUDGET_REQUEST) {
+            if (resultCode == RESULT_FIRST_USER) {
+                filter.clear();
+            } else if (resultCode == RESULT_OK) {
+                String periodType = data.getStringExtra(DateFilterActivity.EXTRA_FILTER_PERIOD_TYPE);
+                PeriodType p = PeriodType.valueOf(periodType);
+                if (PeriodType.CUSTOM == p) {
+                    long periodFrom = data.getLongExtra(DateFilterActivity.EXTRA_FILTER_PERIOD_FROM, 0);
+                    long periodTo = data.getLongExtra(DateFilterActivity.EXTRA_FILTER_PERIOD_TO, 0);
+                    filter.put(new DateTimeCriteria(periodFrom, periodTo));
+                } else {
+                    filter.put(new DateTimeCriteria(p));
+                }
+            }
+            saveFilter();
+        }
+        recreateCursor();
+    }
 
     @Override
     protected ListAdapter createAdapter(Cursor cursor) {

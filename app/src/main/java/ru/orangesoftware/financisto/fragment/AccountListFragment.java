@@ -23,8 +23,9 @@ import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.AbstractTransactionActivity;
 import ru.orangesoftware.financisto.activity.AccountActivity;
 import ru.orangesoftware.financisto.activity.AccountListTotalsDetailsActivity;
+import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
+import ru.orangesoftware.financisto.activity.GenericBlotterActivity;
 import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
-import ru.orangesoftware.financisto.activity.MainActivity;
 import ru.orangesoftware.financisto.activity.MenuListItem;
 import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.PurgeAccountActivity;
@@ -43,6 +44,8 @@ import ru.orangesoftware.financisto.model.Total;
 import ru.orangesoftware.financisto.utils.IntegrityCheckAutobackup;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.view.NodeInflater;
+
+import static ru.orangesoftware.financisto.fragment.BlotterFragment.SAVE_FILTER;
 
 public class AccountListFragment extends AbstractListFragment {
 
@@ -210,10 +213,12 @@ public class AccountListFragment extends AbstractListFragment {
     private void showAccountTransactions(long id) {
         Account account = db.getAccount(id);
         if (account != null) {
-            MainActivity mainActivity = (MainActivity) this.context;
+            Intent intent = new Intent(context, GenericBlotterActivity.class);
             Criteria.eq(BlotterFilter.FROM_ACCOUNT_ID, String.valueOf(id))
-                    .toIntent(account.title, mainActivity.getIntent());
-            mainActivity.switchToBlotterWithFilter();
+                    .toIntent(account.title, intent);
+            intent.putExtra(SAVE_FILTER, false);
+            intent.putExtra(BlotterFilterActivity.IS_ACCOUNT_FILTER, true);
+            startActivityForResult(intent, VIEW_ACCOUNT_REQUEST);
         }
     }
 

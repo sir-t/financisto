@@ -189,7 +189,7 @@
             android:launchMode="singleTop" />
 
         <activity
-            android:name=".activity.BlotterActivity"
+            android:name=".activity.GenericBlotterActivity"
             android:label="@string/blotter" />
 
         <activity
@@ -247,10 +247,6 @@
             android:name=".activity.ExchangeRateActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/exchange_rate" />
-
-        <activity
-            android:name=".activity.AccountListActivity"
-            android:label="@string/accounts" />
 
         <activity
             android:name=".activity.CategoryListActivity2"

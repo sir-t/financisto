@@ -109,12 +109,6 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         refreshTab();
     }
 
-    public void switchToBlotterWithFilter() {
-        fragment = blotterFragment;
-        bottomNavigationView.setSelectedItemId(R.id.blotter_tab);
-        refreshTab();
-    }
-
     private void refreshTab() {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.main_container, fragment).commit();

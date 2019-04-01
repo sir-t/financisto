@@ -55,13 +55,15 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+
         this.inflater = inflater;
 
-        db = new DatabaseAdapter(context);
-        db.open();
-        context = getActivity();
+        this.context = getActivity();
 
-        view = inflater.inflate(contentId, container, false);
+        this.db = new DatabaseAdapter(context);
+        db.open();
+
+        this.view = inflater.inflate(contentId, container, false);
 
         initUI(savedInstanceState);
 

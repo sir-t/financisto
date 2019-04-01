@@ -20,7 +20,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import ru.orangesoftware.financisto.activity.BlotterActivity;
+import androidx.fragment.app.FragmentActivity;
+import ru.orangesoftware.financisto.activity.GenericBlotterActivity;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper;
@@ -181,15 +182,15 @@ public abstract class Report {
             filter.put(c);
         }
         filter.eq("from_account_is_include_into_totals", "1");
-		Intent intent = new Intent(context, getBlotterActivityClass());
+		Intent intent = new Intent(context, getBlotterFragmentClass());
 		filter.toIntent(intent);
 		return intent;
 	}
 
     protected abstract Criteria getCriteriaForId(DatabaseAdapter db, long id);
 
-    protected Class<? extends BlotterActivity> getBlotterActivityClass() {
-        return BlotterActivity.class;
+    protected Class<? extends FragmentActivity> getBlotterFragmentClass() {
+        return GenericBlotterActivity.class;
     }
 
     protected void cleanupFilter(WhereFilter filter) {
