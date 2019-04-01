@@ -29,7 +29,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import androidx.core.app.NavUtils;
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
 import io.reactivex.disposables.CompositeDisposable;
@@ -56,6 +55,7 @@ import ru.orangesoftware.financisto.widget.RateLayoutView;
 
 import static ru.orangesoftware.financisto.activity.RequestPermission.isRequestingPermission;
 import static ru.orangesoftware.financisto.activity.UiUtils.applyTheme;
+import static ru.orangesoftware.financisto.fragment.BlotterFragment.RESULT_CREATE_ANOTHER_TRANSACTION;
 import static ru.orangesoftware.financisto.model.Category.NO_CATEGORY_ID;
 import static ru.orangesoftware.financisto.model.MyLocation.CURRENT_LOCATION_ID;
 import static ru.orangesoftware.financisto.model.Project.NO_PROJECT_ID;
@@ -276,10 +276,7 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
                 setResult(RESULT_CANCELED);
                 finish();
             } else {
-                if (saveAndFinish()) {
-                    intent.putExtra(DATETIME_EXTRA, transaction.dateTime);
-                    startActivityForResult(intent, -1);
-                }
+                saveAndNew();
             }
         });
 
@@ -346,12 +343,20 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     protected abstract void fetchCategories();
 
     private boolean saveAndFinish() {
+        return saveWithResult(RESULT_OK);
+    }
+
+    private boolean saveAndNew() {
+        return saveWithResult(RESULT_CREATE_ANOTHER_TRANSACTION);
+    }
+
+    private boolean saveWithResult(int resultCreateAnotherTransaction) {
         long id = save();
         if (id > 0) {
             Intent data = new Intent();
             data.putExtra(TransactionColumns._id.name(), id);
-            setResult(RESULT_OK, data);
-            backToMain();
+            setResult(resultCreateAnotherTransaction, data);
+            finish();
             return true;
         }
         return false;
@@ -686,17 +691,5 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
         if (locationSelector != null) locationSelector.onDestroy();
         if (categorySelector != null) categorySelector.onDestroy();
         super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-        backToMain();
-    }
-
-    private void backToMain() {
-        Intent intent = NavUtils.getParentActivityIntent(this);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
     }
 }
