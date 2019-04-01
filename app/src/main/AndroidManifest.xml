@@ -146,6 +146,7 @@
             android:name=".activity.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
+            android:launchMode="singleInstance"
             android:taskAffinity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -159,7 +160,11 @@
             android:icon="@drawable/icon_transaction"
             android:label="@string/transaction"
             android:taskAffinity=".TransactionActivity"
+            android:parentActivityName=".activity.MainActivity"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.MainActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name=".NEW_TRANSACTION" />
@@ -174,7 +179,11 @@
             android:icon="@drawable/icon_transfer"
             android:label="@string/transfer"
             android:taskAffinity=".TransferActivity"
+            android:parentActivityName=".activity.MainActivity"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.MainActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name=".NEW_TRANSFER" />
