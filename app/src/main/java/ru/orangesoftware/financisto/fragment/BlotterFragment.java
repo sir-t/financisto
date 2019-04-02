@@ -74,6 +74,7 @@ public class BlotterFragment extends AbstractListFragment {
     private static final int MENU_DUPLICATE = MENU_ADD + 1;
     private static final int MENU_SAVE_AS_TEMPLATE = MENU_ADD + 2;
     public static final int RESULT_CREATE_ANOTHER_TRANSACTION = 100 ;
+    public static final int RESULT_CREATE_ANOTHER_TRANSFER = 101 ;
 
     protected TextView totalText;
     protected ImageButton bFilter;
@@ -527,7 +528,10 @@ public class BlotterFragment extends AbstractListFragment {
             createTransactionFromTemplate(data);
         }
         if(requestCode == NEW_TRANSACTION_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSACTION){
-            addItem();
+            addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class);
+        }
+        if(requestCode == NEW_TRANSFER_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSFER){
+            addItem(NEW_TRANSFER_REQUEST, TransferActivity.class);
         }
         if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
             calculateTotals();

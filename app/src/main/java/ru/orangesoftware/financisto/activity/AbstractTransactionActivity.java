@@ -56,6 +56,7 @@ import ru.orangesoftware.financisto.widget.RateLayoutView;
 import static ru.orangesoftware.financisto.activity.RequestPermission.isRequestingPermission;
 import static ru.orangesoftware.financisto.activity.UiUtils.applyTheme;
 import static ru.orangesoftware.financisto.fragment.BlotterFragment.RESULT_CREATE_ANOTHER_TRANSACTION;
+import static ru.orangesoftware.financisto.fragment.BlotterFragment.RESULT_CREATE_ANOTHER_TRANSFER;
 import static ru.orangesoftware.financisto.model.Category.NO_CATEGORY_ID;
 import static ru.orangesoftware.financisto.model.MyLocation.CURRENT_LOCATION_ID;
 import static ru.orangesoftware.financisto.model.Project.NO_PROJECT_ID;
@@ -69,6 +70,7 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     public static final String TEMPLATE_EXTRA = "isTemplate";
     public static final String DATETIME_EXTRA = "dateTimeExtra";
     public static final String NEW_FROM_TEMPLATE_EXTRA = "newFromTemplateExtra";
+    public static final String DIRECT_TRANSACTION_EXTRA = "directTransactionExtra";
 
     private static final int RECURRENCE_REQUEST = 4003;
     private static final int NOTIFICATION_REQUEST = 4004;
@@ -347,15 +349,22 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     }
 
     private boolean saveAndNew() {
-        return saveWithResult(RESULT_CREATE_ANOTHER_TRANSACTION);
+        boolean result = saveWithResult(this instanceof TransferActivity? RESULT_CREATE_ANOTHER_TRANSFER : RESULT_CREATE_ANOTHER_TRANSACTION);
+
+        if(getIntent() != null && getIntent().getBooleanExtra(DIRECT_TRANSACTION_EXTRA, false)){
+            Intent intent = getIntent();
+            intent.putExtra(DATETIME_EXTRA, transaction.dateTime);
+            startActivityForResult(intent, -1);
+        }
+        return result;
     }
 
-    private boolean saveWithResult(int resultCreateAnotherTransaction) {
+    private boolean saveWithResult(int result) {
         long id = save();
         if (id > 0) {
             Intent data = new Intent();
             data.putExtra(TransactionColumns._id.name(), id);
-            setResult(resultCreateAnotherTransaction, data);
+            setResult(result, data);
             finish();
             return true;
         }

@@ -14,12 +14,20 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.appwidget.AppWidgetProviderInfo;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
@@ -31,11 +39,8 @@ import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.orb.EntityManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
+import static ru.orangesoftware.financisto.activity.AbstractTransactionActivity.DIRECT_TRANSACTION_EXTRA;
 import static ru.orangesoftware.financisto.utils.EnumUtils.selectEnum;
 
 public class AccountWidget extends AppWidgetProvider {
@@ -170,9 +175,12 @@ public class AccountWidget extends AppWidgetProvider {
 
     private static void addButtonsClick(Context context, RemoteViews updateViews) {
         Intent intent = new Intent(context, TransactionActivity.class);
+        intent.putExtra(DIRECT_TRANSACTION_EXTRA, true);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         updateViews.setOnClickPendingIntent(R.id.add_transaction, pendingIntent);
+
         intent = new Intent(context, TransferActivity.class);
+        intent.putExtra(DIRECT_TRANSACTION_EXTRA, true);
         pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         updateViews.setOnClickPendingIntent(R.id.add_transfer, pendingIntent);
     }
