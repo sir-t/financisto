@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -35,9 +34,15 @@ public class ScheduledListFragment extends BlotterFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
+    protected void updateAdapter() {
         ArrayList<TransactionInfo> transactions = scheduler.getSortedSchedules(System.currentTimeMillis());
-        return new ScheduledListAdapter(context, transactions);
+        if(adapter == null){
+            adapter = new ScheduledListAdapter(context, transactions);
+            setListAdapter(adapter);
+        } else {
+            ((ScheduledListAdapter)adapter).setTransactions(transactions);
+            ((ScheduledListAdapter)adapter).notifyDataSetChanged();
+        }
     }
 
     @Override

@@ -60,8 +60,6 @@ public class AccountListFragment extends AbstractListFragment {
 
     protected ListAdapter adapter;
 
-    protected Cursor cursor;
-
     private AccountTotalsCalculationTask totalCalculationTask;
 
     public AccountListFragment(){
@@ -311,8 +309,14 @@ public class AccountListFragment extends AbstractListFragment {
 
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        return new AccountListAdapter2(context, cursor);
+    protected void updateAdapter() {
+        if(adapter==null){
+            adapter = new AccountListAdapter2(context, cursor);
+            setListAdapter(adapter);
+        }else{
+            ((AccountListAdapter2) adapter).changeCursor(cursor);
+            ((AccountListAdapter2) adapter).notifyDataSetChanged();
+        }
     }
 
     @Override

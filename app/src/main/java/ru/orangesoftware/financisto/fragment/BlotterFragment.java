@@ -14,10 +14,10 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -479,11 +479,18 @@ public class BlotterFragment extends AbstractListFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        if (isAccountBlotter) {
-            return new TransactionsListAdapter(context, db, cursor);
-        } else {
-            return new BlotterListAdapter(context, db, cursor);
+    protected void updateAdapter() {
+        if(adapter==null){
+            if (isAccountBlotter) {
+                adapter = new TransactionsListAdapter(context, db, cursor);
+                setListAdapter(adapter);
+            } else {
+                adapter = new BlotterListAdapter(context, db, cursor);
+                setListAdapter(adapter);
+            }
+        }else{
+            ((CursorAdapter)adapter).changeCursor(cursor);
+            ((CursorAdapter)adapter).notifyDataSetChanged();
         }
     }
 

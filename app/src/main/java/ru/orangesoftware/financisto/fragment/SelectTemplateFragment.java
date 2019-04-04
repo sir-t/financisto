@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import ru.orangesoftware.financisto.R;
@@ -112,8 +111,14 @@ public class SelectTemplateFragment extends TemplatesListFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        return new TemplateListAdapter(context, db, cursor);
+    protected void updateAdapter() {
+        if(adapter ==null){
+            adapter = new TemplateListAdapter(context, db, cursor);
+            setListAdapter(adapter);
+        }else {
+            ((TemplateListAdapter)adapter).changeCursor(cursor);
+            ((TemplateListAdapter)adapter).notifyDataSetChanged();
+        }
     }
 
     @Override

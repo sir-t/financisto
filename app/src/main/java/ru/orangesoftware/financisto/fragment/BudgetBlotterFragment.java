@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ListAdapter;
 
 import java.util.Map;
 
@@ -36,8 +35,14 @@ public class BudgetBlotterFragment extends BlotterFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        return new TransactionsListAdapter(context, db, cursor);
+    protected void updateAdapter() {
+        if(adapter==null){
+            adapter = new TransactionsListAdapter(context, db, cursor);
+            setListAdapter(adapter);
+        }else{
+            ((TransactionsListAdapter) adapter).changeCursor(cursor);
+            ((TransactionsListAdapter) adapter).notifyDataSetChanged();
+        }
     }
 
     private Cursor getBlotterForBudget(long budgetId) {

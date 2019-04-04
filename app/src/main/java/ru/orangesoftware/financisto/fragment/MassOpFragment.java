@@ -2,12 +2,10 @@ package ru.orangesoftware.financisto.fragment;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -88,8 +86,14 @@ public class MassOpFragment extends BlotterFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        return new BlotterListAdapter(context, db, R.layout.blotter_mass_op_list_item, cursor, true);
+    protected void updateAdapter() {
+        if(adapter == null) {
+            adapter = new BlotterListAdapter(context, db, R.layout.blotter_mass_op_list_item, cursor, true);
+            setListAdapter(adapter);
+        }else{
+            ((BlotterListAdapter) adapter).changeCursor(cursor);
+            ((BlotterListAdapter) adapter).notifyDataSetChanged();
+        }
     }
 
     private enum MassOp implements LocalizableEnum {

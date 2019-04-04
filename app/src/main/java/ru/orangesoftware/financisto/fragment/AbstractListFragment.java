@@ -74,7 +74,7 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
 //            startManagingCursor(cursor);
 //        }
 
-        recreateAdapter();
+        updateAdapter();
 
 
         return view;
@@ -117,14 +117,9 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
         });
     }
 
-    protected void recreateAdapter() {
-        adapter = createAdapter(cursor);
-        setListAdapter(adapter);
-    }
-
     protected abstract Cursor createCursor();
 
-    protected abstract ListAdapter createAdapter(Cursor cursor);
+    protected abstract void updateAdapter();
 
     protected void initUI(Bundle savedInstanceState) {
         bAdd = view.findViewById(R.id.bAdd);
@@ -198,13 +193,11 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
         Parcelable state = getListView().onSaveInstanceState();
         try {
             if (cursor != null) {
-//               stopManagingCursor(cursor);
                 cursor.close();
             }
             cursor = createCursor();
             if (cursor != null) {
-//                startManagingCursor(cursor);
-                recreateAdapter();
+                updateAdapter();
             }
         } finally {
             getListView().onRestoreInstanceState(state);

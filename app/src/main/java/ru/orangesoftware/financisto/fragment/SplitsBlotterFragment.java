@@ -3,7 +3,6 @@ package ru.orangesoftware.financisto.fragment;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ListAdapter;
 
 import ru.orangesoftware.financisto.adapter.TransactionsListAdapter;
 import ru.orangesoftware.financisto.blotter.BlotterTotalCalculationTask;
@@ -22,8 +21,14 @@ public class SplitsBlotterFragment extends BlotterFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        return new TransactionsListAdapter(getContext(), db, cursor);
+    protected void updateAdapter() {
+        if(adapter == null){
+            adapter = new TransactionsListAdapter(getContext(), db, cursor);
+            setListAdapter(adapter);
+        }else{
+            ((TransactionsListAdapter) adapter).changeCursor(cursor);
+            ((TransactionsListAdapter) adapter).notifyDataSetChanged();
+        }
     }
 
     @Override

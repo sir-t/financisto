@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import ru.orangesoftware.financisto.R;
@@ -50,13 +49,19 @@ public class TemplatesListFragment extends BlotterFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        return new BlotterListAdapter(context, db, cursor) {
-            @Override
-            protected boolean isShowRunningBalance() {
-                return false;
-            }
-        };
+    protected void updateAdapter() {
+        if(adapter == null){
+            adapter = new BlotterListAdapter(context, db, cursor) {
+                @Override
+                protected boolean isShowRunningBalance() {
+                    return false;
+                }
+            };
+            setListAdapter(adapter);
+        }else{
+            ((BlotterListAdapter)adapter).changeCursor(cursor);
+            ((BlotterListAdapter)adapter).notifyDataSetChanged();
+        }
     }
 
     @Override

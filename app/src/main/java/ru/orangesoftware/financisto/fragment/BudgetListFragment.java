@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -133,8 +132,14 @@ public class BudgetListFragment extends AbstractListFragment {
     }
 
     @Override
-    protected ListAdapter createAdapter(Cursor cursor) {
-        return new BudgetListAdapter(context, budgets);
+    public void updateAdapter() {
+        if(adapter==null) {
+            adapter = new BudgetListAdapter(context, budgets);
+            setListAdapter(adapter);
+        }else{
+            ((BudgetListAdapter) adapter).setBudgets(budgets);
+            ((BudgetListAdapter) adapter).notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -147,10 +152,6 @@ public class BudgetListFragment extends AbstractListFragment {
         budgets = db.getAllBudgets(filter);
         updateAdapter();
         calculateTotals();
-    }
-
-    private void updateAdapter() {
-        ((BudgetListAdapter) adapter).setBudgets(budgets);
     }
 
     private BudgetTotalsCalculationTask totalCalculationTask;
