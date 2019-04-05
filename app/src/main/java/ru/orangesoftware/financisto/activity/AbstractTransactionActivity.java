@@ -364,6 +364,7 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
         if (id > 0) {
             Intent data = new Intent();
             data.putExtra(TransactionColumns._id.name(), id);
+            data.putExtra(DATETIME_EXTRA, transaction.dateTime);
             setResult(result, data);
             finish();
             return true;

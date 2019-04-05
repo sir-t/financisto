@@ -169,7 +169,7 @@ public class BlotterFragment extends AbstractListFragment {
         if (showAllBlotterButtons) {
             bTransfer = view.findViewById(R.id.bTransfer);
             bTransfer.setVisibility(View.VISIBLE);
-            bTransfer.setOnClickListener(arg0 -> addItem(NEW_TRANSFER_REQUEST, TransferActivity.class));
+            bTransfer.setOnClickListener(arg0 -> addItem(NEW_TRANSFER_REQUEST, TransferActivity.class, null));
 
             bTemplate = view.findViewById(R.id.bTemplate);
             bTemplate.setVisibility(View.VISIBLE);
@@ -376,10 +376,10 @@ public class BlotterFragment extends AbstractListFragment {
     private QuickActionWidget.OnQuickActionClickListener addButtonActionListener = (widget, position) -> {
         switch (position) {
             case 0:
-                addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class);
+                addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class, null);
                 break;
             case 1:
-                addItem(NEW_TRANSFER_REQUEST, TransferActivity.class);
+                addItem(NEW_TRANSFER_REQUEST, TransferActivity.class, null);
                 break;
             case 2:
                 createFromTemplate();
@@ -453,17 +453,20 @@ public class BlotterFragment extends AbstractListFragment {
     @Override
     protected void addItem() {
         if (showAllBlotterButtons) {
-            addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class);
+            addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class, null);
         } else {
             addButtonActionGrid.show(bAdd);
         }
     }
 
-    protected void addItem(int requestId, Class<? extends AbstractTransactionActivity> clazz) {
+    private void addItem(int requestId, Class<? extends AbstractTransactionActivity> clazz, Intent data) {
         Intent intent = new Intent(context, clazz);
         long accountId = blotterFilter.getAccountId();
         if (accountId != -1) {
             intent.putExtra(TransactionActivity.ACCOUNT_ID_EXTRA, accountId);
+        }
+        if(data != null){
+            intent.putExtras(data);
         }
         intent.putExtra(TransactionActivity.TEMPLATE_EXTRA, blotterFilter.getIsTemplate());
         startActivityForResult(intent, requestId);
@@ -535,10 +538,10 @@ public class BlotterFragment extends AbstractListFragment {
             createTransactionFromTemplate(data);
         }
         if(requestCode == NEW_TRANSACTION_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSACTION){
-            addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class);
+            addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class, data);
         }
         if(requestCode == NEW_TRANSFER_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSFER){
-            addItem(NEW_TRANSFER_REQUEST, TransferActivity.class);
+            addItem(NEW_TRANSFER_REQUEST, TransferActivity.class, data);
         }
         if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
             calculateTotals();
