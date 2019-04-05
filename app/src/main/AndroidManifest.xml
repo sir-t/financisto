@@ -458,11 +458,6 @@
         <activity android:name="org.achartengine.GraphicalActivity" />
 
         <activity
-            android:name=".activity.RequestPermissionActivity_"
-            android:label="@string/permissions"
-            android:theme="@style/Theme.AppCompat" />
-
-        <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
             android:launchMode="singleTask">

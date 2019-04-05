@@ -1,21 +1,20 @@
 package ru.orangesoftware.financisto.activity;
 
 import android.Manifest;
-import static android.Manifest.permission.RECEIVE_SMS;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import androidx.core.content.FileProvider;
 import android.widget.ListAdapter;
 import android.widget.Toast;
+
 import java.io.File;
+
+import androidx.core.content.FileProvider;
 import ru.orangesoftware.financisto.BuildConfig;
 import ru.orangesoftware.financisto.R;
-import static ru.orangesoftware.financisto.activity.RequestPermission.isRequestingPermission;
-import static ru.orangesoftware.financisto.activity.RequestPermission.isRequestingPermissions;
 import ru.orangesoftware.financisto.backup.Backup;
 import ru.orangesoftware.financisto.bus.GreenRobotBus_;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
@@ -32,10 +31,14 @@ import ru.orangesoftware.financisto.export.qif.QifImportOptions;
 import ru.orangesoftware.financisto.export.qif.QifImportTask;
 import ru.orangesoftware.financisto.utils.EntityEnum;
 import ru.orangesoftware.financisto.utils.EnumUtils;
-import static ru.orangesoftware.financisto.utils.EnumUtils.showPickOneDialog;
 import ru.orangesoftware.financisto.utils.ExecutableEntityEnum;
 import ru.orangesoftware.financisto.utils.IntegrityFix;
 import ru.orangesoftware.financisto.utils.SummaryEntityEnum;
+
+import static android.Manifest.permission.RECEIVE_SMS;
+import static ru.orangesoftware.financisto.activity.RequestPermission.isRequestingPermission;
+import static ru.orangesoftware.financisto.activity.RequestPermission.isRequestingPermissions;
+import static ru.orangesoftware.financisto.utils.EnumUtils.showPickOneDialog;
 
 public enum MenuListItem implements SummaryEntityEnum {
 
@@ -180,12 +183,6 @@ public enum MenuListItem implements SummaryEntityEnum {
         @Override
         public void call(Activity activity) {
             activity.startActivity(new Intent(activity, PlannerActivity.class));
-        }
-    },
-    MENU_PERMISSIONS(R.string.permissions, R.string.permissions_summary, R.drawable.ic_tab_about) {
-        @Override
-        public void call(Activity activity) {
-            RequestPermissionActivity_.intent(activity).start();
         }
     },
     MENU_INTEGRITY_FIX(R.string.integrity_fix, R.string.integrity_fix_summary, R.drawable.actionbar_flash) {
