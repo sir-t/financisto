@@ -2,7 +2,6 @@ package ru.orangesoftware.financisto.fragment;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -64,8 +63,6 @@ public class BudgetListFragment extends AbstractListFragment {
         budgets = db.getAllBudgets(filter);
         handler = new Handler();
 
-        recreateCursor();
-
         return view;
     }
 
@@ -83,12 +80,10 @@ public class BudgetListFragment extends AbstractListFragment {
         });
 
         if (filter.isEmpty()) {
-            filter = WhereFilter.fromSharedPreferences(context.getPreferences(0));
-        }
-        if (filter.isEmpty()) {
             filter.put(new DateTimeCriteria(PeriodType.THIS_MONTH));
         }
 
+        recreateCursor();
         applyFilter();
         calculateTotals();
     }
@@ -97,13 +92,6 @@ public class BudgetListFragment extends AbstractListFragment {
         Intent intent = new Intent(context, BudgetListTotalsDetailsActivity.class);
         filter.toIntent(intent);
         startActivityForResult(intent, -1);
-    }
-
-    private void saveFilter() {
-        SharedPreferences preferences = context.getPreferences(0);
-        filter.toSharedPreferences(preferences);
-        applyFilter();
-        recreateCursor();
     }
 
     private void applyFilter() {
@@ -126,7 +114,6 @@ public class BudgetListFragment extends AbstractListFragment {
                     filter.put(new DateTimeCriteria(p));
                 }
             }
-            saveFilter();
         }
         recreateCursor();
     }
