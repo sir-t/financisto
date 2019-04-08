@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
@@ -22,8 +21,6 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.OnActivityResult;
-import org.androidannotations.api.builder.ActivityIntentBuilder;
-import org.androidannotations.api.builder.PostActivityStarter;
 import org.androidannotations.api.view.HasViews;
 import org.androidannotations.api.view.OnViewChangedListener;
 import org.androidannotations.api.view.OnViewChangedNotifier;
@@ -32,12 +29,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.ListFragment;
 import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.activity.MenuListActivity;
-import ru.orangesoftware.financisto.activity.MenuListActivity_;
 import ru.orangesoftware.financisto.activity.MenuListItem;
 import ru.orangesoftware.financisto.adapter.SummaryEntityListAdapter;
 import ru.orangesoftware.financisto.bus.GreenRobotBus;
@@ -94,14 +87,6 @@ public class MenuFragment extends ListFragment implements HasViews, OnViewChange
         OnViewChangedNotifier.registerOnViewChangedListener(this);
     }
 
-    public static MenuListActivity_.IntentBuilder_ intent(Context context) {
-        return new MenuListActivity_.IntentBuilder_(context);
-    }
-
-    public static MenuListActivity_.IntentBuilder_ intent(Fragment supportFragment) {
-        return new MenuListActivity_.IntentBuilder_(supportFragment);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -138,34 +123,6 @@ public class MenuFragment extends ListFragment implements HasViews, OnViewChange
         init();
     }
 
-    public static class IntentBuilder_
-            extends ActivityIntentBuilder<MenuListActivity_.IntentBuilder_> {
-        private Fragment fragmentSupport_;
-
-        public IntentBuilder_(Context context) {
-            super(context, MenuListActivity_.class);
-        }
-
-        public IntentBuilder_(Fragment fragment) {
-            super(fragment.getActivity(), MenuListActivity_.class);
-            fragmentSupport_ = fragment;
-        }
-
-        @Override
-        public PostActivityStarter startForResult(int requestCode) {
-            if (fragmentSupport_ != null) {
-                fragmentSupport_.startActivityForResult(intent, requestCode);
-            } else {
-                if (context instanceof Activity) {
-                    Activity activity = ((Activity) context);
-                    ActivityCompat.startActivityForResult(activity, intent, requestCode, lastOptions);
-                } else {
-                    context.startActivity(intent);
-                }
-            }
-            return new PostActivityStarter(context);
-        }
-    }
 
 
     @Override
@@ -249,13 +206,13 @@ public class MenuFragment extends ListFragment implements HasViews, OnViewChange
     // google drive
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void doGoogleDriveBackup(MenuListActivity.StartDriveBackup e) {
+    public void doGoogleDriveBackup(MenuFragment.StartDriveBackup e) {
         progressDialog = ProgressDialog.show(context, null, getString(R.string.backup_database_gdocs_inprogress), true);
         bus.post(new DoDriveBackup());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void doGoogleDriveRestore(MenuListActivity.StartDriveRestore e) {
+    public void doGoogleDriveRestore(MenuFragment.StartDriveRestore e) {
         progressDialog = ProgressDialog.show(context, null, getString(R.string.google_drive_loading_files), true);
         bus.post(new DoDriveListFiles());
     }
@@ -372,13 +329,13 @@ public class MenuFragment extends ListFragment implements HasViews, OnViewChange
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void doDropboxBackup(MenuListActivity.StartDropboxBackup e) {
+    public void doDropboxBackup(MenuFragment.StartDropboxBackup e) {
         ProgressDialog d = ProgressDialog.show(context, null, this.getString(R.string.backup_database_dropbox_inprogress), true);
         new DropboxBackupTask(context, d).execute();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void doDropboxRestore(MenuListActivity.StartDropboxRestore e) {
+    public void doDropboxRestore(MenuFragment.StartDropboxRestore e) {
         ProgressDialog d = ProgressDialog.show(context, null, this.getString(R.string.dropbox_loading_files), true);
         new DropboxListFilesTask(context, d).execute();
     }

@@ -29,6 +29,7 @@ import ru.orangesoftware.financisto.export.qif.QifExportOptions;
 import ru.orangesoftware.financisto.export.qif.QifExportTask;
 import ru.orangesoftware.financisto.export.qif.QifImportOptions;
 import ru.orangesoftware.financisto.export.qif.QifImportTask;
+import ru.orangesoftware.financisto.fragment.MenuFragment;
 import ru.orangesoftware.financisto.utils.EntityEnum;
 import ru.orangesoftware.financisto.utils.EnumUtils;
 import ru.orangesoftware.financisto.utils.ExecutableEntityEnum;
@@ -107,7 +108,7 @@ public enum MenuListItem implements SummaryEntityEnum {
             if (isRequestingPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 return;
             }
-            GreenRobotBus_.getInstance_(activity).post(new MenuListActivity.StartDriveBackup());
+            GreenRobotBus_.getInstance_(activity).post(new MenuFragment.StartDriveBackup());
         }
     },
     GOOGLE_DRIVE_RESTORE(R.string.restore_database_online_google_drive, R.string.restore_database_online_google_drive_summary, R.drawable.actionbar_google_drive) {
@@ -116,7 +117,7 @@ public enum MenuListItem implements SummaryEntityEnum {
             if (isRequestingPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 return;
             }
-            GreenRobotBus_.getInstance_(activity).post(new MenuListActivity.StartDriveRestore());
+            GreenRobotBus_.getInstance_(activity).post(new MenuFragment.StartDriveRestore());
         }
     },
     DROPBOX_BACKUP(R.string.backup_database_online_dropbox, R.string.backup_database_online_dropbox_summary, R.drawable.actionbar_dropbox) {
@@ -125,7 +126,7 @@ public enum MenuListItem implements SummaryEntityEnum {
             if (isRequestingPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 return;
             }
-            GreenRobotBus_.getInstance_(activity).post(new MenuListActivity.StartDropboxBackup());
+            GreenRobotBus_.getInstance_(activity).post(new MenuFragment.StartDropboxBackup());
         }
     },
     DROPBOX_RESTORE(R.string.restore_database_online_dropbox, R.string.restore_database_online_dropbox_summary, R.drawable.actionbar_dropbox) {
@@ -134,7 +135,7 @@ public enum MenuListItem implements SummaryEntityEnum {
             if (isRequestingPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 return;
             }
-            GreenRobotBus_.getInstance_(activity).post(new MenuListActivity.StartDropboxRestore());
+            GreenRobotBus_.getInstance_(activity).post(new MenuFragment.StartDropboxRestore());
         }
     },
     MENU_BACKUP_TO(R.string.backup_database_to, R.string.backup_database_to_summary, R.drawable.actionbar_share) {

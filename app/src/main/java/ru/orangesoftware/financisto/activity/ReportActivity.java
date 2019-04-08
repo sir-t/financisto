@@ -42,6 +42,7 @@ import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper.ReportColumns;
 import ru.orangesoftware.financisto.filter.Criteria;
 import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.fragment.ReportsListFragment;
 import ru.orangesoftware.financisto.graph.GraphUnit;
 import ru.orangesoftware.financisto.model.Total;
 import ru.orangesoftware.financisto.report.IncomeExpense;
@@ -99,7 +100,7 @@ public class ReportActivity extends ListActivity implements RefreshSupportedActi
 
 		Intent intent = getIntent();
 		if (intent != null) {
-            currentReport = ReportsListActivity.createReport(this, db, intent.getExtras());
+            currentReport = ReportsListFragment.createReport(this, db, intent.getExtras());
             filter = WhereFilter.fromIntent(intent);
             if (intent.hasExtra(FILTER_INCOME_EXPENSE)) {
                 incomeExpenseState = IncomeExpense.valueOf(intent.getStringExtra(FILTER_INCOME_EXPENSE));
