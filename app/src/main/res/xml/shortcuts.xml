@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="addTransfer"
+        android:enabled="true"
+        android:icon="@drawable/ic_action_transfer"
+        android:shortcutShortLabel="@string/add_transfer">
+        <intent
+            android:action=".NEW_TRANSFER"
+            android:targetPackage="ru.orangesoftware.financisto"
+            android:targetClass="ru.orangesoftware.financisto.activity.TransferActivity">
+            <extra android:name="directTransactionExtra" android:value="true" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="addTransaction"
+        android:enabled="true"
+        android:icon="@drawable/ic_action_add"
+        android:shortcutShortLabel="@string/add_transaction">
+        <intent
+            android:action=".NEW_TRANSACTION"
+            android:targetPackage="ru.orangesoftware.financisto"
+            android:targetClass="ru.orangesoftware.financisto.activity.TransactionActivity">
+            <extra android:name="directTransactionExtra" android:value="true" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>
