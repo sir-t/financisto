@@ -73,8 +73,8 @@ public class BlotterFragment extends AbstractListFragment {
     protected static final int FILTER_REQUEST = 6;
     private static final int MENU_DUPLICATE = MENU_ADD + 1;
     private static final int MENU_SAVE_AS_TEMPLATE = MENU_ADD + 2;
-    public static final int RESULT_CREATE_ANOTHER_TRANSACTION = 100 ;
-    public static final int RESULT_CREATE_ANOTHER_TRANSFER = 101 ;
+    public static final int RESULT_CREATE_ANOTHER_TRANSACTION = 100;
+    public static final int RESULT_CREATE_ANOTHER_TRANSFER = 101;
 
     protected TextView totalText;
     protected ImageButton bFilter;
@@ -465,7 +465,7 @@ public class BlotterFragment extends AbstractListFragment {
         if (accountId != -1) {
             intent.putExtra(TransactionActivity.ACCOUNT_ID_EXTRA, accountId);
         }
-        if(data != null){
+        if (data != null) {
             intent.putExtras(data);
         }
         intent.putExtra(TransactionActivity.TEMPLATE_EXTRA, blotterFilter.getIsTemplate());
@@ -483,7 +483,7 @@ public class BlotterFragment extends AbstractListFragment {
 
     @Override
     protected void updateAdapter() {
-        if(adapter==null){
+        if (adapter == null) {
             if (isAccountBlotter) {
                 adapter = new TransactionsListAdapter(context, db, cursor);
                 setListAdapter(adapter);
@@ -491,9 +491,9 @@ public class BlotterFragment extends AbstractListFragment {
                 adapter = new BlotterListAdapter(context, db, cursor);
                 setListAdapter(adapter);
             }
-        }else{
-            ((CursorAdapter)adapter).changeCursor(cursor);
-            ((CursorAdapter)adapter).notifyDataSetChanged();
+        } else {
+            ((CursorAdapter) adapter).changeCursor(cursor);
+            ((CursorAdapter) adapter).notifyDataSetChanged();
         }
     }
 
@@ -537,10 +537,10 @@ public class BlotterFragment extends AbstractListFragment {
         } else if (resultCode == RESULT_OK && requestCode == NEW_TRANSACTION_FROM_TEMPLATE_REQUEST) {
             createTransactionFromTemplate(data);
         }
-        if(requestCode == NEW_TRANSACTION_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSACTION){
+        if (requestCode == NEW_TRANSACTION_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSACTION) {
             addItem(NEW_TRANSACTION_REQUEST, TransactionActivity.class, data);
         }
-        if(requestCode == NEW_TRANSFER_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSFER){
+        if (requestCode == NEW_TRANSFER_REQUEST && resultCode == RESULT_CREATE_ANOTHER_TRANSFER) {
             addItem(NEW_TRANSFER_REQUEST, TransferActivity.class, data);
         }
         if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
@@ -613,14 +613,4 @@ public class BlotterFragment extends AbstractListFragment {
     public void integrityCheck() {
         new IntegrityCheckTask(context).execute(new IntegrityCheckRunningBalance(context, db));
     }
-
-//    @Override
-//    public void onBackPressed() {
-//        FrameLayout searchLayout = view.findViewById(R.id.search_text_frame);
-//        if (searchLayout != null && searchLayout.getVisibility() == View.VISIBLE) {
-//            searchLayout.setVisibility(View.GONE);
-//        } else {
-//            super.onBackPressed();
-//        }
-//    }
 }
