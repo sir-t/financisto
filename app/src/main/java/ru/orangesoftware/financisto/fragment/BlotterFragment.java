@@ -1,7 +1,10 @@
 package ru.orangesoftware.financisto.fragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,19 +12,23 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.List;
 
 import greendroid.widget.QuickActionGrid;
@@ -45,12 +52,14 @@ import ru.orangesoftware.financisto.blotter.AccountTotalCalculationTask;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.blotter.BlotterTotalCalculationTask;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
+import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.dialog.TransactionInfoDialog;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.Transaction;
 import ru.orangesoftware.financisto.utils.IntegrityCheckRunningBalance;
+import ru.orangesoftware.financisto.utils.LocalizableEnum;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.view.NodeInflater;
@@ -94,6 +103,12 @@ public class BlotterFragment extends AbstractListFragment {
     protected boolean isAccountBlotter = false;
     protected boolean showAllBlotterButtons = true;
 
+    boolean selectionMode = false;
+
+    private View defaultBottomBar;
+    private View selectionBottomBar;
+    private int shortAnimationDuration;
+
     public BlotterFragment() {
         super(R.layout.blotter);
     }
@@ -109,6 +124,125 @@ public class BlotterFragment extends AbstractListFragment {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         integrityCheck();
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setOnItemLongClickListener((parent, v, position, id) -> {
+                    selectItem(v, id);
+                    return true;
+                }
+        );
+        defaultBottomBar = view.findViewById(R.id.defaultBottomBar);
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime
+        );
+        selectionBottomBar = view.findViewById(R.id.selectionBottomBar);
+
+        selectionBottomBar.findViewById(R.id.bCheckAll).setOnClickListener(arg0 -> ((BlotterListAdapter) adapter).checkAll());
+        selectionBottomBar.findViewById(R.id.bUncheckAll).setOnClickListener(arg0 -> deselectAll());
+        selectionBottomBar.findViewById(R.id.bSelectionAction).setOnClickListener(arg0 -> showSelectionActionDialog());
+
+        if(selectionMode){
+            defaultBottomBar.setVisibility(View.GONE);
+            selectionBottomBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void showSelectionActionDialog() {
+        Dialog dialog = new Dialog(context);
+        LinearLayout ll = new LinearLayout(context);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        Button deleteBtn = new Button(context);
+        deleteBtn.setText("Delete");
+        deleteBtn.setOnClickListener(arg0 -> {
+            applyMassOp(MassOp.DELETE);
+            dialog.cancel();
+        });
+        ll.addView(deleteBtn);
+        Button clearBtn = new Button(context);
+        clearBtn.setText("Clear");
+        clearBtn.setOnClickListener(arg0 -> {
+            applyMassOp(MassOp.CLEAR);
+            dialog.cancel();
+        });
+        ll.addView(clearBtn);
+        Button reconcileBtn = new Button(context);
+        reconcileBtn.setText("Reconcile");
+        reconcileBtn.setOnClickListener(arg0 -> {
+            applyMassOp(MassOp.RECONCILE);
+            dialog.cancel();
+        });
+        ll.addView(reconcileBtn);
+        Button cancelBtn = new Button(context);
+        cancelBtn.setText("Cancel");
+        cancelBtn.setOnClickListener(arg0 -> dialog.cancel());
+        ll.addView(cancelBtn);
+        dialog.addContentView(ll, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        dialog.show();
+    }
+
+    private void applyMassOp(final MassOp op) {
+        int count = ((BlotterListAdapter) getListAdapter()).getCheckedCount();
+        if (count > 0) {
+            new AlertDialog.Builder(context)
+                    .setMessage(getString(R.string.apply_mass_op, getString(op.getTitleId()), count))
+                    .setPositiveButton(R.string.yes, (arg0, arg1) -> {
+                        BlotterListAdapter adapter = ((BlotterListAdapter) getListAdapter());
+                        long[] ids = adapter.getAllCheckedIds();
+                        Log.d("Financisto", "Will apply " + op + " on " + Arrays.toString(ids));
+                        op.apply(db, ids);
+//                        adapter.uncheckAll();
+                        adapter.changeCursor(createCursor());
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show();
+        } else {
+            Toast.makeText(context, R.string.apply_mass_op_zero_count, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void deselectAll() {
+        ((BlotterListAdapter) adapter).uncheckAll();
+        updateSelectionMode(false);
+    }
+
+    private void selectItem(View v, long id) {
+        ((BlotterListAdapter) adapter).toggleSelection(id, v);
+        Transaction t = db.getTransaction(id);
+        updateSelectionMode(((BlotterListAdapter) adapter).getCheckedCount() > 0);
+    }
+
+    private void updateSelectionMode(boolean selectionModeOn) {
+        if (selectionModeOn != selectionMode) {
+            selectionMode = selectionModeOn;
+            if (selectionModeOn) {
+                crossfade(selectionBottomBar, defaultBottomBar);
+            } else {
+                crossfade(defaultBottomBar, selectionBottomBar);
+            }
+        }
+    }
+
+    private void crossfade(View in, View out) {
+        in.setAlpha(0f);
+        in.setVisibility(View.VISIBLE);
+
+        in.animate()
+                .alpha(1f)
+                .setDuration(shortAnimationDuration)
+                .setListener(null);
+
+        out.animate()
+                .alpha(0f)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        out.setVisibility(View.GONE);
+                    }
+                });
     }
 
     protected void calculateTotals() {
@@ -591,11 +725,15 @@ public class BlotterFragment extends AbstractListFragment {
 
     @Override
     protected void onItemClick(View v, int position, long id) {
-        if (isQuickMenuEnabledForTransaction(context)) {
-            selectedId = id;
-            transactionActionGrid.show(v);
+        if (selectionMode) {
+            selectItem(v, id);
         } else {
-            showTransactionInfo(id);
+            if (isQuickMenuEnabledForTransaction(context)) {
+                selectedId = id;
+                transactionActionGrid.show(v);
+            } else {
+                showTransactionInfo(id);
+            }
         }
     }
 
@@ -612,5 +750,40 @@ public class BlotterFragment extends AbstractListFragment {
     @Override
     public void integrityCheck() {
         new IntegrityCheckTask(context).execute(new IntegrityCheckRunningBalance(context, db));
+    }
+
+    public enum MassOp implements LocalizableEnum {
+        CLEAR(R.string.mass_operations_clear_all){
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.clearSelectedTransactions(ids);
+            }
+        },
+        RECONCILE(R.string.mass_operations_reconcile){
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.reconcileSelectedTransactions(ids);
+            }
+        },
+        DELETE(R.string.mass_operations_delete){
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.deleteSelectedTransactions(ids);
+                db.rebuildRunningBalances();
+            }
+        };
+
+        private final int titleId;
+
+        MassOp(int titleId) {
+            this.titleId = titleId;
+        }
+
+        public abstract void apply(DatabaseAdapter db, long[] ids);
+
+        @Override
+        public int getTitleId() {
+            return titleId;
+        }
     }
 }

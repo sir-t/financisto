@@ -17,29 +17,30 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.format.DateUtils;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
+
 import java.util.Date;
 import java.util.HashMap;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper.BlotterColumns;
-import static ru.orangesoftware.financisto.model.Category.isSplit;
 import ru.orangesoftware.financisto.model.CategoryEntity;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.TransactionStatus;
 import ru.orangesoftware.financisto.recur.Recurrence;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.MyPreferences;
-import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
-
 import ru.orangesoftware.financisto.utils.StringUtil;
 import ru.orangesoftware.financisto.utils.Utils;
+
+import static ru.orangesoftware.financisto.model.Category.isSplit;
+import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
 
 public class BlotterListAdapter extends ResourceCursorAdapter {
 
@@ -55,7 +56,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
 
     private final int colors[];
 
-    private boolean allChecked = true;
+    private boolean allChecked = false;
     private final HashMap<Long, Boolean> checkedItems = new HashMap<Long, Boolean>();
 
     private boolean showRunningBalance;
@@ -110,6 +111,13 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         final BlotterViewHolder v = (BlotterViewHolder) view.getTag();
+        final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
+        final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
+        if (getCheckedState(id)) {
+            v.layout.setBackgroundResource(R.color.material_blue_gray);
+        } else {
+            v.layout.setBackgroundResource(R.color.holo_gray_dark);
+        }
         bindView(v, context, cursor);
     }
 
@@ -206,17 +214,15 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
             }
         }
         removeRightViewIfNeeded(v);
-        if (v.checkBox != null) {
-            final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
-            final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
-            v.checkBox.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View arg0) {
-                    updateCheckedState(id, allChecked ^ v.checkBox.isChecked());
-                }
-            });
-            boolean isChecked = getCheckedState(id);
-            v.checkBox.setChecked(isChecked);
+    }
+
+    public void toggleSelection(long id, View layout) {
+        boolean checked = !getCheckedState(id);
+        updateCheckedState(id, checked);
+        if (checked) {
+            layout.setBackgroundResource(R.color.material_blue_gray);
+        } else {
+            layout.setBackgroundResource(R.color.holo_gray_dark);
         }
     }
 
@@ -299,6 +305,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         public final TextView rightView;
         public final ImageView iconView;
         public final CheckBox checkBox;
+        public boolean checked = false;
 
         public BlotterViewHolder(View view) {
             layout = (RelativeLayout) view.findViewById(R.id.layout);

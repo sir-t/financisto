@@ -207,10 +207,6 @@
             android:label="@string/planner" />
 
         <activity
-            android:name=".activity.MassOpActivity"
-            android:label="@string/mass_operations" />
-
-        <activity
             android:name=".activity.BudgetBlotterActivity"
             android:label="@string/budget" />
 

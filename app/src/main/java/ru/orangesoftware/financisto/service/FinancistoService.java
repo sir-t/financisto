@@ -13,18 +13,19 @@ package ru.orangesoftware.financisto.service;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+
+import java.util.Date;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
-import android.util.Log;
-import java.util.Date;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.AbstractTransactionActivity;
 import ru.orangesoftware.financisto.activity.AccountWidget;
-import ru.orangesoftware.financisto.activity.MassOpActivity;
+import ru.orangesoftware.financisto.activity.MainActivity;
 import ru.orangesoftware.financisto.backup.DatabaseExport;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
@@ -34,10 +35,12 @@ import ru.orangesoftware.financisto.model.Transaction;
 import ru.orangesoftware.financisto.model.TransactionInfo;
 import ru.orangesoftware.financisto.model.TransactionStatus;
 import ru.orangesoftware.financisto.recur.NotificationOptions;
+import ru.orangesoftware.financisto.utils.MyPreferences;
+
+import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static ru.orangesoftware.financisto.service.DailyAutoBackupScheduler.scheduleNextAutoBackup;
 import static ru.orangesoftware.financisto.service.SmsReceiver.SMS_TRANSACTION_BODY;
 import static ru.orangesoftware.financisto.service.SmsReceiver.SMS_TRANSACTION_NUMBER;
-import ru.orangesoftware.financisto.utils.MyPreferences;
 import static ru.orangesoftware.financisto.utils.MyPreferences.getSmsTransactionStatus;
 import static ru.orangesoftware.financisto.utils.MyPreferences.shouldSaveSmsToTransactionNote;
 
@@ -190,7 +193,7 @@ public class FinancistoService extends JobIntentService {
         String text = getString(R.string.scheduled_transactions_have_been_restored, count);
         String contentTitle = getString(R.string.scheduled_transactions_restored);
 
-        Intent notificationIntent = new Intent(this, MassOpActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         WhereFilter filter = new WhereFilter("");
         filter.eq(BlotterFilter.STATUS, TransactionStatus.RS.name());
         filter.toIntent(notificationIntent);
