@@ -1,6 +1,5 @@
 package ru.orangesoftware.financisto.fragment;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -17,6 +16,7 @@ import android.widget.ListView;
 import java.util.LinkedList;
 import java.util.List;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.ListFragment;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.RefreshSupportedActivity;
@@ -44,7 +44,7 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
 
     protected boolean enablePin = true;
 
-    Activity context;
+    FragmentActivity context;
     View view;
 
     protected AbstractListFragment(int contentId) {

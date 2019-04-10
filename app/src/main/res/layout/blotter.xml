@@ -119,20 +119,32 @@
             <ImageButton
                 android:id="@+id/bCheckAll"
                 style="@style/BottomBarButton"
-                android:src="@drawable/btn_check_all" />
-
-            <ImageButton
-                android:id="@+id/bUncheckAll"
-                style="@style/BottomBarButton"
-                android:src="@drawable/btn_uncheck_all" />
+                android:src="@drawable/ic_select_all" />
 
             <ImageButton
                 android:id="@+id/bSelectionAction"
                 style="@style/BottomBarButton"
-                android:src="@drawable/btn_next" />
+                android:src="@drawable/ic_edit" />
 
+            <TextView android:id="@+id/selectionCount"
+                android:layout_height="fill_parent"
+                android:layout_width="wrap_content"
+                android:padding="10dp"
+                android:gravity="right|center"
+                android:textStyle="bold"
+                android:layout_margin="4dp"/>
 
-            <include layout="@layout/total_text" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right">
+
+                <ImageButton
+                    android:id="@+id/bUncheckAll"
+                    style="@style/BottomBarButton"
+                    android:src="@drawable/ic_clear" />
+            </LinearLayout>
+
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

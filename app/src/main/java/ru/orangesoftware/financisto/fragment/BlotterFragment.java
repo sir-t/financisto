@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,12 +17,10 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +50,7 @@ import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.blotter.BlotterTotalCalculationTask;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.dialog.MultiSelectActionsDialog;
 import ru.orangesoftware.financisto.dialog.TransactionInfoDialog;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
@@ -84,6 +82,10 @@ public class BlotterFragment extends AbstractListFragment {
     private static final int MENU_SAVE_AS_TEMPLATE = MENU_ADD + 2;
     public static final int RESULT_CREATE_ANOTHER_TRANSACTION = 100;
     public static final int RESULT_CREATE_ANOTHER_TRANSFER = 101;
+    public static final int MASS_OPERATION = 1001;
+    public static final int MASS_OPERATION_CLEAR = 1002;
+    public static final int MASS_OPERATION_DELETE = 1003;
+    public static final int MASS_OPERATION_RECONCILE = 1004;
 
     protected TextView totalText;
     protected ImageButton bFilter;
@@ -107,6 +109,7 @@ public class BlotterFragment extends AbstractListFragment {
 
     private View defaultBottomBar;
     private View selectionBottomBar;
+    private TextView selectionCountText;
     private int shortAnimationDuration;
 
     public BlotterFragment() {
@@ -140,78 +143,47 @@ public class BlotterFragment extends AbstractListFragment {
         );
         selectionBottomBar = view.findViewById(R.id.selectionBottomBar);
 
-        selectionBottomBar.findViewById(R.id.bCheckAll).setOnClickListener(arg0 -> ((BlotterListAdapter) adapter).checkAll());
+        selectionBottomBar.findViewById(R.id.bCheckAll).setOnClickListener(arg0 -> selectAll());
         selectionBottomBar.findViewById(R.id.bUncheckAll).setOnClickListener(arg0 -> deselectAll());
         selectionBottomBar.findViewById(R.id.bSelectionAction).setOnClickListener(arg0 -> showSelectionActionDialog());
 
-        if(selectionMode){
+        selectionCountText = selectionBottomBar.findViewById(R.id.selectionCount);
+
+        if (selectionMode) {
             defaultBottomBar.setVisibility(View.GONE);
             selectionBottomBar.setVisibility(View.VISIBLE);
         }
     }
 
-    private void showSelectionActionDialog() {
-        Dialog dialog = new Dialog(context);
-        LinearLayout ll = new LinearLayout(context);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        Button deleteBtn = new Button(context);
-        deleteBtn.setText("Delete");
-        deleteBtn.setOnClickListener(arg0 -> {
-            applyMassOp(MassOp.DELETE);
-            dialog.cancel();
-        });
-        ll.addView(deleteBtn);
-        Button clearBtn = new Button(context);
-        clearBtn.setText("Clear");
-        clearBtn.setOnClickListener(arg0 -> {
-            applyMassOp(MassOp.CLEAR);
-            dialog.cancel();
-        });
-        ll.addView(clearBtn);
-        Button reconcileBtn = new Button(context);
-        reconcileBtn.setText("Reconcile");
-        reconcileBtn.setOnClickListener(arg0 -> {
-            applyMassOp(MassOp.RECONCILE);
-            dialog.cancel();
-        });
-        ll.addView(reconcileBtn);
-        Button cancelBtn = new Button(context);
-        cancelBtn.setText("Cancel");
-        cancelBtn.setOnClickListener(arg0 -> dialog.cancel());
-        ll.addView(cancelBtn);
-        dialog.addContentView(ll, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        dialog.show();
+    private void selectAll() {
+        ((BlotterListAdapter) adapter).checkAll();
+        updateCount();
     }
 
-    private void applyMassOp(final MassOp op) {
-        int count = ((BlotterListAdapter) getListAdapter()).getCheckedCount();
-        if (count > 0) {
-            new AlertDialog.Builder(context)
-                    .setMessage(getString(R.string.apply_mass_op, getString(op.getTitleId()), count))
-                    .setPositiveButton(R.string.yes, (arg0, arg1) -> {
-                        BlotterListAdapter adapter = ((BlotterListAdapter) getListAdapter());
-                        long[] ids = adapter.getAllCheckedIds();
-                        Log.d("Financisto", "Will apply " + op + " on " + Arrays.toString(ids));
-                        op.apply(db, ids);
-//                        adapter.uncheckAll();
-                        adapter.changeCursor(createCursor());
-                    })
-                    .setNegativeButton(R.string.no, null)
-                    .show();
-        } else {
-            Toast.makeText(context, R.string.apply_mass_op_zero_count, Toast.LENGTH_SHORT).show();
-        }
+    private void showSelectionActionDialog() {
+        MultiSelectActionsDialog multiSelectActionsDialog = new MultiSelectActionsDialog();
+        multiSelectActionsDialog.setTargetFragment(this, 1001);
+        multiSelectActionsDialog.show(context.getSupportFragmentManager(), "MultiSelectActionsDialog");
     }
 
     private void deselectAll() {
         ((BlotterListAdapter) adapter).uncheckAll();
         updateSelectionMode(false);
+        updateCount();
+    }
+
+    private void updateCount() {
+        int count = ((BlotterListAdapter) adapter).getCheckedCount();
+        selectionCountText.setText(String.valueOf(count));
+        if (count == 0) {
+            updateSelectionMode(false);
+        }
     }
 
     private void selectItem(View v, long id) {
         ((BlotterListAdapter) adapter).toggleSelection(id, v);
-        Transaction t = db.getTransaction(id);
         updateSelectionMode(((BlotterListAdapter) adapter).getCheckedCount() > 0);
+        updateCount();
     }
 
     private void updateSelectionMode(boolean selectionModeOn) {
@@ -680,6 +652,42 @@ public class BlotterFragment extends AbstractListFragment {
         if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
             calculateTotals();
         }
+        if (requestCode == MASS_OPERATION) {
+            switch (resultCode) {
+                case MASS_OPERATION_CLEAR:
+                    applyMassOp(BlotterFragment.MassOp.CLEAR);
+                    break;
+                case MASS_OPERATION_DELETE:
+                    applyMassOp(BlotterFragment.MassOp.DELETE);
+                    break;
+                case MASS_OPERATION_RECONCILE:
+                    applyMassOp(BlotterFragment.MassOp.RECONCILE);
+                    break;
+            }
+        }
+    }
+
+    private void applyMassOp(final MassOp op) {
+        int count = ((BlotterListAdapter) getListAdapter()).getCheckedCount();
+        if (count > 0) {
+            new AlertDialog.Builder(context)
+                    .setMessage(getString(R.string.apply_mass_op, getString(op.getTitleId()), count))
+                    .setPositiveButton(R.string.yes, (arg0, arg1) -> {
+                        BlotterListAdapter adapter = ((BlotterListAdapter) getListAdapter());
+                        long[] ids = adapter.getAllCheckedIds();
+                        Log.d("Financisto", "Will apply " + op + " on " + Arrays.toString(ids));
+                        op.apply(db, ids);
+                        if (op == MassOp.DELETE) {
+                            deselectAll();
+                        }
+                        adapter.changeCursor(createCursor());
+                        updateCount();
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show();
+        } else {
+            Toast.makeText(context, R.string.apply_mass_op_zero_count, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void createTransactionFromTemplate(Intent data) {
@@ -753,19 +761,19 @@ public class BlotterFragment extends AbstractListFragment {
     }
 
     public enum MassOp implements LocalizableEnum {
-        CLEAR(R.string.mass_operations_clear_all){
+        CLEAR(R.string.mass_operations_clear_all) {
             @Override
             public void apply(DatabaseAdapter db, long[] ids) {
                 db.clearSelectedTransactions(ids);
             }
         },
-        RECONCILE(R.string.mass_operations_reconcile){
+        RECONCILE(R.string.mass_operations_reconcile) {
             @Override
             public void apply(DatabaseAdapter db, long[] ids) {
                 db.reconcileSelectedTransactions(ids);
             }
         },
-        DELETE(R.string.mass_operations_delete){
+        DELETE(R.string.mass_operations_delete) {
             @Override
             public void apply(DatabaseAdapter db, long[] ids) {
                 db.deleteSelectedTransactions(ids);
