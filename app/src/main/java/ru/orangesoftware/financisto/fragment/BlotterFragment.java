@@ -86,6 +86,7 @@ public class BlotterFragment extends AbstractListFragment {
     public static final int MASS_OPERATION_CLEAR = 1002;
     public static final int MASS_OPERATION_DELETE = 1003;
     public static final int MASS_OPERATION_RECONCILE = 1004;
+    public static final int MASS_OPERATION_PENDING = 1005;
 
     protected TextView totalText;
     protected ImageButton bFilter;
@@ -660,6 +661,9 @@ public class BlotterFragment extends AbstractListFragment {
                 case MASS_OPERATION_DELETE:
                     applyMassOp(BlotterFragment.MassOp.DELETE);
                     break;
+                case MASS_OPERATION_PENDING:
+                    applyMassOp(BlotterFragment.MassOp.PENDING);
+                    break;
                 case MASS_OPERATION_RECONCILE:
                     applyMassOp(BlotterFragment.MassOp.RECONCILE);
                     break;
@@ -668,19 +672,17 @@ public class BlotterFragment extends AbstractListFragment {
     }
 
     private void applyMassOp(final MassOp op) {
-        int count = ((BlotterListAdapter) getListAdapter()).getCheckedCount();
+        BlotterListAdapter blotterAdapter = (BlotterListAdapter) adapter;
+        int count = blotterAdapter.getCheckedCount();
         if (count > 0) {
             new AlertDialog.Builder(context)
                     .setMessage(getString(R.string.apply_mass_op, getString(op.getTitleId()), count))
                     .setPositiveButton(R.string.yes, (arg0, arg1) -> {
-                        BlotterListAdapter adapter = ((BlotterListAdapter) getListAdapter());
-                        long[] ids = adapter.getAllCheckedIds();
+                        long[] ids = blotterAdapter.getAllCheckedIds();
                         Log.d("Financisto", "Will apply " + op + " on " + Arrays.toString(ids));
                         op.apply(db, ids);
-                        if (op == MassOp.DELETE) {
                             deselectAll();
-                        }
-                        adapter.changeCursor(createCursor());
+                        blotterAdapter.changeCursor(createCursor());
                         updateCount();
                     })
                     .setNegativeButton(R.string.no, null)
@@ -771,6 +773,12 @@ public class BlotterFragment extends AbstractListFragment {
             @Override
             public void apply(DatabaseAdapter db, long[] ids) {
                 db.reconcileSelectedTransactions(ids);
+            }
+        },
+        PENDING(R.string.transaction_status_pending) {
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.setPendingSelectedTransactions(ids);
             }
         },
         DELETE(R.string.mass_operations_delete) {

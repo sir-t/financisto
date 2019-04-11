@@ -37,6 +37,10 @@ public class MultiSelectActionsDialog extends BottomSheetDialogFragment {
         clearBtn.setText(R.string.clear);
         clearBtn.setOnClickListener(arg0 -> dismissWithReply(BlotterFragment.MASS_OPERATION_CLEAR));
         ll.addView(clearBtn);
+        Button pendingBtn = new Button(context);
+        pendingBtn.setText(R.string.transaction_status_pending);
+        pendingBtn.setOnClickListener(arg0 -> dismissWithReply(BlotterFragment.MASS_OPERATION_PENDING));
+        ll.addView(pendingBtn);
         Button reconcileBtn = new Button(context);
         reconcileBtn.setText(R.string.reconcile);
         reconcileBtn.setOnClickListener(arg0 -> dismissWithReply(BlotterFragment.MASS_OPERATION_RECONCILE));
