@@ -50,7 +50,8 @@ import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.blotter.BlotterTotalCalculationTask;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
-import ru.orangesoftware.financisto.dialog.MultiSelectActionsDialog;
+import ru.orangesoftware.financisto.dialog.AbstractDialogFragment;
+import ru.orangesoftware.financisto.dialog.MassOperationsDialog;
 import ru.orangesoftware.financisto.dialog.TransactionInfoDialog;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
@@ -162,9 +163,9 @@ public class BlotterFragment extends AbstractListFragment {
     }
 
     private void showSelectionActionDialog() {
-        MultiSelectActionsDialog multiSelectActionsDialog = new MultiSelectActionsDialog();
-        multiSelectActionsDialog.setTargetFragment(this, 1001);
-        multiSelectActionsDialog.show(context.getSupportFragmentManager(), "MultiSelectActionsDialog");
+        AbstractDialogFragment massOperationsDialog = new MassOperationsDialog();
+        massOperationsDialog.setTargetFragment(this, 1001);
+        massOperationsDialog.show(context.getSupportFragmentManager(), "MultiSelectActionsDialog");
     }
 
     private void deselectAll() {
