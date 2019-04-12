@@ -182,14 +182,14 @@ public abstract class Report {
             filter.put(c);
         }
         filter.eq("from_account_is_include_into_totals", "1");
-		Intent intent = new Intent(context, getBlotterFragmentClass());
+		Intent intent = new Intent(context, getGenericBlotterClass());
 		filter.toIntent(intent);
 		return intent;
 	}
 
     protected abstract Criteria getCriteriaForId(DatabaseAdapter db, long id);
 
-    protected Class<? extends FragmentActivity> getBlotterFragmentClass() {
+    protected Class<? extends FragmentActivity> getGenericBlotterClass() {
         return GenericBlotterActivity.class;
     }
 

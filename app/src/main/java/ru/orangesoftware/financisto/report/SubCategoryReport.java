@@ -146,7 +146,7 @@ public class SubCategoryReport extends Report {
 	}
 
     @Override
-    protected Class<? extends FragmentActivity> getBlotterFragmentClass() {
+    protected Class<? extends FragmentActivity> getGenericBlotterClass() {
         return SplitsBlotterActivity.class;
     }
 

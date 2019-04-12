@@ -14,8 +14,8 @@ import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.fragment.BlotterFragment;
 
 public abstract class AbstractDialogFragment extends BottomSheetDialogFragment {
 
@@ -45,7 +45,7 @@ public abstract class AbstractDialogFragment extends BottomSheetDialogFragment {
     }
 
     private void dismissWithReply(int massOperationDelete) {
-        BlotterFragment targetFragment = (BlotterFragment) getTargetFragment();
+        Fragment targetFragment = getTargetFragment();
         if (targetFragment != null) {
             targetFragment.onActivityResult(getTargetRequestCode(), massOperationDelete, null);
         }
