@@ -140,7 +140,7 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         bTypeSwitcher.setText(type.getTitleId());
         currentReport = createReport(type);
         filter = new WhereFilter("Empty");
-        loadPrefsFilter();
+        FilterState.updateFilterColor(context, filter, bFilter);
         selectReport();
     }
 
@@ -153,7 +153,7 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         int nextIndex = incomeExpenseState.ordinal() + 1;
         incomeExpenseState = nextIndex < values.length ? values[nextIndex] : values[0];
         applyIncomeExpense();
-        saveFilter();
+        FilterState.updateFilterColor(context, filter, bFilter);
         selectReport();
     }
 
@@ -180,25 +180,6 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         if (!currentReport.shouldDisplayTotal()) {
             view.findViewById(R.id.total).setVisibility(View.GONE);
         }
-    }
-
-    private void applyAnimationToListView() {
-//        AnimationSet set = new AnimationSet(true);
-//
-//        Animation animation = new AlphaAnimation(0.0f, 1.0f);
-//        animation.setDuration(50);
-//        set.addAnimation(animation);
-//
-//        animation = new TranslateAnimation(
-//                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-//                Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
-//        );
-//        animation.setDuration(100);
-//        set.addAnimation(animation);
-//
-//        LayoutAnimationController controller = new LayoutAnimationController(set, 0.5f);
-//        ListView listView = getListView();
-//        listView.setLayoutAnimation(controller);
     }
 
     @Override
@@ -243,11 +224,11 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         if (requestCode == FILTER_REQUEST) {
             if (resultCode == RESULT_FIRST_USER) {
                 filter.clear();
-                saveFilter();
+                FilterState.updateFilterColor(context, filter, bFilter);
                 selectReport();
             } else if (resultCode == RESULT_OK) {
                 filter = WhereFilter.fromIntent(data);
-                saveFilter();
+                FilterState.updateFilterColor(context, filter, bFilter);
                 selectReport();
             }
         }
@@ -267,24 +248,6 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
                     break;
             }
         }
-    }
-
-    private void saveFilter() {
-        if (saveFilter) {
-            SharedPreferences preferences = getPreferencesForReport();
-            filter.toSharedPreferences(preferences);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(FILTER_INCOME_EXPENSE, incomeExpenseState.name());
-            editor.apply();
-        }
-        FilterState.updateFilterColor(context, filter, bFilter);
-    }
-
-    private void loadPrefsFilter() {
-        SharedPreferences preferences = getPreferencesForReport();
-        filter = WhereFilter.fromSharedPreferences(preferences);
-        incomeExpenseState = IncomeExpense.valueOf(preferences.getString(FILTER_INCOME_EXPENSE, IncomeExpense.BOTH.name()));
-        saveFilter = true;
     }
 
     private void displayTotal(Total total) {
@@ -324,7 +287,6 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
             ((TextView) view.findViewById(android.R.id.empty)).setText(R.string.empty_report);
             ReportAdapter adapter = new ReportAdapter(context, data.units);
             setListAdapter(adapter);
-            applyAnimationToListView();
         }
 
     }
