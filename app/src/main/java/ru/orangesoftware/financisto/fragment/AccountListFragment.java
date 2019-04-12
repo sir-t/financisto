@@ -34,8 +34,6 @@ import ru.orangesoftware.financisto.activity.TransferActivity;
 import ru.orangesoftware.financisto.adapter.AccountListAdapter2;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
-import ru.orangesoftware.financisto.bus.GreenRobotBus_;
-import ru.orangesoftware.financisto.bus.SwitchToMenuTabEvent;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.dialog.AccountInfoDialog;
 import ru.orangesoftware.financisto.filter.Criteria;
@@ -129,9 +127,6 @@ public class AccountListFragment extends AbstractListFragment {
         switch (id) {
             case R.id.backup:
                 MenuListItem.MENU_BACKUP.call(context);
-                break;
-            case R.id.go_to_menu:
-                GreenRobotBus_.getInstance_(context).post(new SwitchToMenuTabEvent());
                 break;
         }
     }
