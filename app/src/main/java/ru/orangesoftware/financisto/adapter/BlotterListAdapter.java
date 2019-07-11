@@ -24,8 +24,9 @@ import android.widget.RelativeLayout;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
@@ -57,7 +58,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     private final int colors[];
 
     private boolean allChecked = false;
-    private final HashMap<Long, Boolean> checkedItems = new HashMap<>();
+    private final List<Long> checkedItems = new ArrayList<>();
 
     private boolean showRunningBalance;
 
@@ -221,6 +222,19 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         updateCheckedState(id, checked);
         if (checked) {
             layout.setBackgroundResource(R.color.material_blue_gray);
+        } else if (allChecked) {
+            allChecked = false;
+            List<Long> allItems = new ArrayList<>();
+            Cursor cursor = getCursor();
+            boolean notempty = cursor.moveToFirst();
+            if (notempty) {
+                do {
+                    allItems.add(cursor.getLong(0));
+                } while (cursor.moveToNext());
+            }
+            allItems.remove(id);
+            checkedItems.addAll(allItems);
+            layout.setBackgroundResource(R.color.holo_gray_dark);
         } else {
             layout.setBackgroundResource(R.color.holo_gray_dark);
         }
@@ -267,12 +281,12 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     }
 
     private boolean getCheckedState(long id) {
-        return checkedItems.get(id) == null == allChecked;
+        return !checkedItems.contains(id) == allChecked;
     }
 
     private void updateCheckedState(long id, boolean checked) {
         if (checked) {
-            checkedItems.put(id, true);
+            checkedItems.add(id);
         } else {
             checkedItems.remove(id);
         }
@@ -335,7 +349,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
                 }
             }
         } else {
-            for (Long id : checkedItems.keySet()) {
+            for (Long id : checkedItems) {
                 ids[k++] = id;
             }
         }
