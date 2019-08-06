@@ -337,6 +337,27 @@ public class SmsTransactionProcessorTest extends AbstractDbTest {
     }
 
     @Test
+    public void testNegativeSums() throws Exception {
+        String smsTpl = "Karta {{*}}.{{a}} {{*}} Cash {{p}} BYN {{*}}";
+        String sms = "Karta 5.3471 08.07.2019 18:46:28 Cash -497.00 BYN EO 27-1 MINSK BLR OK. Dostupno 1169.42 BYN";
+
+        String[] matches = SmsTransactionProcessor.findTemplateMatches(smsTpl, sms);
+        Assert.assertArrayEquals(new String[]{null, "3471", null, null, "-497.00", null}, matches);
+
+        AccountBuilder.withDb(db).currency(CurrencyBuilder.createDefault(db)).title("BLR")
+            .number("1111-2222-3333-3471")
+            .create();
+
+        SmsTemplateBuilder.withDb(db).title("900").accountId(17).categoryId(18).template(smsTpl).income(false).create();
+        Transaction transaction = smsProcessor.createTransactionBySmsAndCorrect("900", sms, status, true, 0).first;
+
+        assertEquals(1, transaction.fromAccountId);
+        assertEquals(18, transaction.categoryId);
+        assertEquals(-49700, transaction.fromAmount);
+        assertEquals(sms, transaction.note);
+    }
+
+    @Test
     public void testFindingPlaceholderIndexes() throws Exception {
         int[] indexes = SmsTransactionProcessor.findPlaceholderIndexes("Pokupka. Karta *<:A:>. Summa <:P:> RUB. NOVYY PROEKT, MOSCOW. <:D:>. Dostupno <:B:> RUB. Tinkoff.ru");
         Assert.assertTrue(indexes[Placeholder.ACCOUNT.ordinal()] == 0);

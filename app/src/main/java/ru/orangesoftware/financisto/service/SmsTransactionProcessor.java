@@ -141,9 +141,8 @@ public class SmsTransactionProcessor {
             SmsTemplate smsTemplate,
             String note,
             TransactionStatus status) {
-            Transaction res = null;
-
-        if (price.compareTo(ZERO) > 0 && accountId > 0) {
+        Transaction res = null;
+        if (price.compareTo(ZERO) != 0 && accountId > 0) {
             res = new Transaction();
             res.isTemplate = 0;
             res.fromAccountId = accountId;
