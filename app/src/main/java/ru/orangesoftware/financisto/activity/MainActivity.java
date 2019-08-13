@@ -116,6 +116,7 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSwitchToMenuTab(SwitchToMenuTabEvent event) {
         fragment = menuFragment;
+        bottomNavigationView.setSelectedItemId(R.id.menu_tab);
         refreshTab();
     }
 
