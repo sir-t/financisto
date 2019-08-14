@@ -45,8 +45,12 @@ public class Dropbox {
     }
 
     public void startAuth() {
-        startedAuth = true;
-        Auth.startOAuth2Authentication(context, APP_KEY);
+        if (!APP_KEY.startsWith("INSERT_APP_KEY")) {
+            startedAuth = true;
+            Auth.startOAuth2Authentication(context, APP_KEY);
+        } else {
+            Log.e("Financisto", "Dropbox APP_KEY not configured");
+        }
     }
 
     public void completeAuth() {
