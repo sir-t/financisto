@@ -21,6 +21,8 @@ SELECT
 	pp._id as payee_id,
 	pp.title as payee,
 	t.note as note,
+	t.e_receipt_qr_code as e_receipt_qr_code,
+	t.e_receipt_data as e_receipt_data,
 	t.from_amount as from_amount,
 	t.to_amount as to_amount,
 	t.datetime as datetime,

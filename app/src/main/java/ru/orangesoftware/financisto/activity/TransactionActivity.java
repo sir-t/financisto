@@ -18,9 +18,14 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.barcode.BarcodeInput;
+import ru.orangesoftware.financisto.barcode.BarcodeInput_;
+import ru.orangesoftware.financisto.barcode.QRCodeListener;
+import ru.orangesoftware.financisto.barcode.RequestReceiptTask;
 import ru.orangesoftware.financisto.model.*;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.utils.*;
@@ -31,7 +36,7 @@ import java.util.*;
 import static ru.orangesoftware.financisto.activity.CategorySelector.SelectorType.TRANSACTION;
 import static ru.orangesoftware.financisto.utils.Utils.isNotEmpty;
 
-public class TransactionActivity extends AbstractTransactionActivity {
+public class TransactionActivity extends AbstractTransactionActivity implements QRCodeListener {
 
     public static final String CURRENT_BALANCE_EXTRA = "accountCurrentBalance";
     public static final String AMOUNT_EXTRA = "accountAmount";
@@ -52,6 +57,8 @@ public class TransactionActivity extends AbstractTransactionActivity {
     private LinearLayout splitsLayout;
     private TextView unsplitAmountText;
     private TextView currencyText;
+
+    private TextView eReceiptText;
 
     private QuickActionWidget unsplitActionGrid;
     private long selectedOriginCurrencyId = -1;
@@ -201,6 +208,9 @@ public class TransactionActivity extends AbstractTransactionActivity {
             createSplitsLayout(layout);
             rateView.setAmountFromChangeListener((oldAmount, newAmount) -> updateUnsplitAmount());
         }
+        // electronic receipt
+        if (MyPreferences.isShowElectronicReceipt(this))
+            eReceiptText = x.addListNodePlusWithoutFilter(layout, R.id.e_receipt_info, R.id.e_receipt_get, R.string.e_receipt_title, R.string.no_e_receipt);
     }
 
     private void selectLastCategoryForPayee(long id) {
@@ -295,6 +305,7 @@ public class TransactionActivity extends AbstractTransactionActivity {
         selectCurrency(transaction);
         fetchSplits();
         selectPayee(transaction.payeeId);
+        selectElectronicReceipt(transaction);
     }
 
     private void selectCurrency(Transaction transaction) {
@@ -318,6 +329,31 @@ public class TransactionActivity extends AbstractTransactionActivity {
             }
             addOrEditSplit(split);
         }
+    }
+
+    private void selectElectronicReceipt(Transaction transaction) {
+        String[] statuses = {
+                "QRCode: NO",
+                "QRCode: OK",
+                "QRCode: OK, ReceiptData: NO",
+                "QRCode: OK, ReceiptData: ERR",
+                "QRCode: OK, ReceiptData: OK",
+        };
+        String status = "";
+        if (transaction.eReceiptQRCode != null && !transaction.eReceiptQRCode.isEmpty()) {
+            if (transaction.eReceiptData != null && !transaction.eReceiptData.isEmpty()) {
+                if (transaction.eReceiptData.startsWith("{")) {
+                    status = statuses[4];
+                } else {
+                    status = statuses[3] + " " + transaction.eReceiptData;
+                }
+            } else {
+                status = statuses[MyPreferences.isElectronicReceiptEnabled(this) ? 2 : 1];
+            }
+        } else {
+            status = statuses[0];
+        }
+        eReceiptText.setText(status);
     }
 
     private void updateTransactionFromUI() {
@@ -392,6 +428,14 @@ public class TransactionActivity extends AbstractTransactionActivity {
                 ListAdapter adapter = TransactionUtils.createCurrencyAdapter(this, currencies);
                 int selectedPos = MyEntity.indexOf(currencies, selectedOriginCurrencyId);
                 x.selectItemId(this, R.id.currency, R.string.currency, adapter, selectedPos);
+                break;
+            case R.id.e_receipt_info:
+                eReceiptText.setText("Not implemented yet");
+                break;
+            case R.id.e_receipt_get:
+                BarcodeInput input = BarcodeInput_.builder().qrcode(transaction.eReceiptQRCode).build();
+                input.setListener(this);
+                input.show(this.getFragmentManager(), "barcode_input");
                 break;
         }
         Transaction split = viewToSplitMap.get(v);
@@ -616,6 +660,34 @@ public class TransactionActivity extends AbstractTransactionActivity {
             return selectedAccount.currency;
         }
         return Currency.EMPTY;
+    }
+
+    @Override
+    public void onQRCodeChanged(String qrcode, long amount) {
+        rateView.setFromAmount(amount);
+
+        boolean taskStart = false;
+        if (!qrcode.equals(transaction.eReceiptQRCode)) {
+            transaction.eReceiptQRCode = qrcode;
+            selectElectronicReceipt(transaction);
+            taskStart = true;
+        } else if (transaction.eReceiptData == null || transaction.eReceiptData.isEmpty() || !transaction.eReceiptData.startsWith("{")) {
+            taskStart = true;
+        }
+
+        if (taskStart) {
+            if (MyPreferences.isElectronicReceiptEnabled(this)) {
+                RequestReceiptTask task = new RequestReceiptTask(this, qrcode);
+                task.setListener(this);
+                task.execute();
+            }
+        }
+    }
+
+    @Override
+    public void onElectronicReceiptChanged(String data) {
+        transaction.eReceiptData = data;
+        selectElectronicReceipt(transaction);
     }
 
     private static class ActivityState implements Serializable {

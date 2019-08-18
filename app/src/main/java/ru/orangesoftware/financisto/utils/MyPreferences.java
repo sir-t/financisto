@@ -197,6 +197,26 @@ public class MyPreferences {
         return sharedPreferences.getBoolean("remember_last_project", false);
     }
 
+    public static boolean isShowElectronicReceipt(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("ntsl_show_e_receipt", true);
+    }
+
+    public static boolean isElectronicReceiptEnabled(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean("e_receipt_enabled", false);
+    }
+
+    public static String getElectronicNalogLogin(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("e_receipt_nalog_login", "");
+    }
+
+    public static String getElectronicNalogPass(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("e_receipt_nalog_pass", "");
+    }
+
     public static boolean isShowTakePicture(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return isCameraSupported(context) && sharedPreferences.getBoolean("ntsl_show_picture", true);

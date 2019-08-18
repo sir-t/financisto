@@ -181,6 +181,11 @@
                     android:title="@string/show_project_order" />
                 <CheckBoxPreference
                     android:defaultValue="true"
+                    android:key="ntsl_show_e_receipt"
+                    android:summary="@string/show_e_receipt_summary"
+                    android:title="@string/show_e_receipt" />
+                <CheckBoxPreference
+                    android:defaultValue="true"
                     android:key="ntsl_show_picture"
                     android:summary="@string/show_picture_summary"
                     android:title="@string/show_picture" />
@@ -358,6 +363,25 @@
             android:key="google_drive_upload_autobackup"
             android:summary="@string/google_drive_upload_autobackup_summary"
             android:title="@string/google_drive_upload_autobackup" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/e_receipt_title">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="e_receipt_enabled"
+            android:summary="@string/e_receipt_enabled_summary"
+            android:title="@string/e_receipt_enabled" />
+        <EditTextPreference
+            android:dependency="e_receipt_enabled"
+            android:defaultValue="+7"
+            android:key="e_receipt_nalog_login"
+            android:summary="@string/e_receipt_nalog_login_summary"
+            android:title="@string/e_receipt_nalog_login" />
+        <EditTextPreference
+            android:dependency="e_receipt_enabled"
+            android:key="e_receipt_nalog_pass"
+            android:summary="@string/e_receipt_nalog_pass_summary"
+            android:title="@string/e_receipt_nalog_pass" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/exchange_rates">

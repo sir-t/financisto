@@ -447,6 +447,10 @@
         <activity android:name="org.achartengine.GraphicalActivity" />
 
         <activity
+            android:name=".barcode.BarcodeCaptureActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+
+        <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
             android:launchMode="singleTask">

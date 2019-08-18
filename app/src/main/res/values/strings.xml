@@ -1008,4 +1008,19 @@
         <item>List with filter button</item>
     </string-array>
 
+    <string name="show_e_receipt">Show \'Electronic receipt\'</string>
+    <string name="show_e_receipt_summary">Show \'Electronic receipt\' box</string>
+    <string name="no_e_receipt">No electronic receipt</string>
+    <string name="e_receipt_title">Electronic receipt</string>
+    <string name="e_receipt_enabled">Enable get electronic receipt</string>
+    <string name="e_receipt_enabled_summary">Allow Financisto get electronic receipt from nalog.ru</string>
+    <string name="e_receipt_nalog_login">Login for nalog.ru</string>
+    <string name="e_receipt_nalog_login_summary">Choose your account of nalog.ru</string>
+    <string name="e_receipt_nalog_pass">Password for nalog.ru</string>
+    <string name="e_receipt_nalog_pass_summary">Choose your password of nalog.ru</string>
+
+    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="no_camera_permission">This application cannot run because it does not have the camera permission. The application will now exit.</string>
+    <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+
 </resources>

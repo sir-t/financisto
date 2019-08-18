@@ -164,6 +164,12 @@ public class ActivityLayout {
 		return (TextView)v.findViewById(R.id.data);
 	}
 
+	public TextView addListNodePlusWithoutFilter(LinearLayout layout, int id, int plusId, int labelId, int defaultValueResId) {
+		ListBuilder b = inflater.new ListBuilder(layout, R.layout.select_entry_plus_no_filter);
+		View v = b.withButtonId(plusId, listener).withId(id, listener).withLabel(labelId).withData(defaultValueResId).create();
+		return (TextView)v.findViewById(R.id.data);
+	}
+
 	public TextView addListNodePlusWithoutLabel(LinearLayout layout, int id, int plusId, int defaultValueResId) {
 		ListBuilder b = inflater.new ListBuilder(layout, R.layout.select_entry_plus_no_label);
 		View v = b.withButtonId(plusId, listener).withId(id, listener).withData(defaultValueResId).create();

@@ -938,4 +938,15 @@
         <item>Список с кнопкой фильтра</item>
     </string-array>
 
+    <string name="show_e_receipt">Показать \'Электронный кассовый чек\'</string>
+    <string name="show_e_receipt_summary">Показывать поле \'Электронный кассовый чек\'</string>
+    <string name="no_e_receipt">Добавьте электронный чек</string>
+    <string name="e_receipt_title">Электронный кассовый чек</string>
+    <string name="e_receipt_enabled">Включить получение электронного чека</string>
+    <string name="e_receipt_enabled_summary">Включить возможность делать запрос в налоговую для получения электронного чека</string>
+    <string name="e_receipt_nalog_login">Логин кабинета proverkacheka.nalog.ru</string>
+    <string name="e_receipt_nalog_login_summary">Ввести логин от кабинета proverkacheka.nalog.ru. В международном формате</string>
+    <string name="e_receipt_nalog_pass">Пароль от кабинета proverkacheka.nalog.ru</string>
+    <string name="e_receipt_nalog_pass_summary">Ввести пароль от кабинета proverkacheka.nalog.ru. Приходит в смс-сообщении при регистрации</string>
+
 </resources>

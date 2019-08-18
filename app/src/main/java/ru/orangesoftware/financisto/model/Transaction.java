@@ -55,6 +55,12 @@ public class Transaction extends TransactionBase {
     @Column(name = "original_currency_id")
     public long originalCurrencyId;
 
+    @Column(name = "e_receipt_qr_code")
+    public String eReceiptQRCode;
+
+    @Column(name = "e_receipt_data")
+    public String eReceiptData;
+
     @Transient
     public EnumMap<SystemAttribute, String> systemAttributes;
 
@@ -95,6 +101,8 @@ public class Transaction extends TransactionBase {
         values.put(TransactionColumns.is_ccard_payment.name(), isCCardPayment);
         values.put(TransactionColumns.last_recurrence.name(), lastRecurrence);
         values.put(TransactionColumns.blob_key.name(), blobKey);
+        values.put(TransactionColumns.e_receipt_qr_code.name(), eReceiptQRCode);
+        values.put(TransactionColumns.e_receipt_data.name(), eReceiptData);
         return values;
     }
 
@@ -135,6 +143,8 @@ public class Transaction extends TransactionBase {
         t.attachedPicture = c.getString(BlotterColumns.attached_picture.ordinal());
         t.isCCardPayment = c.getInt(BlotterColumns.is_ccard_payment.ordinal());
         t.lastRecurrence = c.getLong(BlotterColumns.last_recurrence.ordinal());
+        t.eReceiptQRCode = c.getString(BlotterColumns.e_receipt_qr_code.ordinal());
+        t.eReceiptData = c.getString(BlotterColumns.e_receipt_data.ordinal());
         return t;
     }
 

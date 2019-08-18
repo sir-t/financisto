@@ -89,7 +89,9 @@ public class DatabaseHelper extends DatabaseSchemaEvolution {
         attached_picture,
         is_ccard_payment,
         last_recurrence,
-        blob_key;
+        blob_key,
+        e_receipt_qr_code,
+        e_receipt_data;
 
         public static String[] NORMAL_PROJECTION = asStringArray(TransactionColumns.values());
 
@@ -131,7 +133,9 @@ public class DatabaseHelper extends DatabaseSchemaEvolution {
         last_recurrence,
         from_account_balance,
         to_account_balance,
-        is_transfer;
+        is_transfer,
+        e_receipt_qr_code,
+        e_receipt_data;
 
         public static final String[] NORMAL_PROJECTION = asStringArray(BlotterColumns.values());
 

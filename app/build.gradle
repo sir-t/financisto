@@ -83,6 +83,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-base:11.0.2"
     implementation "com.google.android.gms:play-services-drive:11.0.2"
     implementation "com.google.android.gms:play-services-plus:11.0.2"
+    implementation "com.google.android.gms:play-services-vision:11.0.2"
 
     annotationProcessor "org.androidannotations:androidannotations:$AAVersion"
     implementation "org.androidannotations:androidannotations-api:$AAVersion"
