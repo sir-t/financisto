@@ -138,7 +138,7 @@ public class BarcodeInput extends DialogFragment {
 
     private long parseDateTime(String val) {
         try {
-            return new SimpleDateFormat("yyyyMMdd'T'HHmm").parse(val).getTime();
+            return new SimpleDateFormat("yyyyMMdd'T'HHmm").parse(val.substring(0,13)).getTime();
         } catch (ParseException ex) {
             return 0;
         }
