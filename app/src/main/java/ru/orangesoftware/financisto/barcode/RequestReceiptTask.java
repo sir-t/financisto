@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.util.Base64;
 import java.util.Map;
 
@@ -68,7 +70,16 @@ public class RequestReceiptTask extends AsyncTask<String, String, String> {
                     }
 
                     if (response_get.code() == 200) {
-                        result = response_get.body().string();
+                        JSONObject jsonObject;
+                        try {
+                            jsonObject = new JSONObject(response_get.body().string());
+                            jsonObject = jsonObject.getJSONObject("document").getJSONObject("receipt");
+                            jsonObject.remove("rawData");
+                            result = jsonObject.toString();
+                        } catch (Exception ex) {
+                            Log.e("CheckRequest", "Unexpected error", ex);
+                            result = response_get.body().string();
+                        }
                     }
 
                     response_get.close();
