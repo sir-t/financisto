@@ -23,7 +23,7 @@
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:singleLine="true"
-                android:text="DateTime"
+                android:text="@string/barcode_datetime"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <EditText
@@ -58,7 +58,7 @@
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:singleLine="true"
-                android:text="Sum"
+                android:text="@string/amount"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <EditText
@@ -98,7 +98,7 @@
                     android:ellipsize="marquee"
                     android:fadingEdge="horizontal"
                     android:singleLine="true"
-                    android:text="TypeOperation"
+                    android:text="@string/barcode_type_operation"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -133,7 +133,7 @@
                     android:ellipsize="marquee"
                     android:fadingEdge="horizontal"
                     android:singleLine="true"
-                    android:text="Number FD"
+                    android:text="@string/barcode_fd"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -144,7 +144,8 @@
                     android:layout_alignLeft="@id/lFD"
                     android:layout_weight="1"
                     android:ems="9"
-                    android:inputType="number" />
+                    android:inputType="number"
+                    android:maxLength="10" />
 
             </RelativeLayout>
 
@@ -170,7 +171,7 @@
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:singleLine="true"
-                android:text="Number FN"
+                android:text="@string/barcode_fn"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <EditText
@@ -181,7 +182,8 @@
                 android:layout_alignLeft="@id/lFN"
                 android:layout_weight="1"
                 android:ems="15"
-                android:inputType="number"/>
+                android:inputType="number"
+                android:maxLength="16" />
 
         </RelativeLayout>
 
@@ -205,18 +207,19 @@
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:singleLine="true"
-                android:text="Number FPD"
+                android:text="@string/barcode_fpd"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <EditText
                 android:id="@+id/etFPD"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/lFPD"
                 android:layout_below="@id/lFPD"
+                android:layout_alignLeft="@id/lFPD"
                 android:layout_weight="1"
                 android:ems="15"
-                android:inputType="number" />
+                android:inputType="number"
+                android:maxLength="10" />
 
         </RelativeLayout>
 

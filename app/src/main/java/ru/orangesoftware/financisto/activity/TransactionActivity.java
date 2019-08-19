@@ -663,8 +663,10 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
     }
 
     @Override
-    public void onQRCodeChanged(String qrcode, long amount) {
+    public void onQRCodeChanged(String qrcode, long amount, long date) {
         rateView.setFromAmount(amount);
+        if (date > 0)
+            this.setDateTime(date);
 
         boolean taskStart = false;
         if (!qrcode.equals(transaction.eReceiptQRCode)) {

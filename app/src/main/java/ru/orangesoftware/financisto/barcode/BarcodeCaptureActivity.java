@@ -52,7 +52,7 @@ import ru.orangesoftware.financisto.camera.CameraSourcePreview;
 public final class BarcodeCaptureActivity extends AppCompatActivity
         implements BarcodeTracker.BarcodeGraphicTrackerCallback {
 
-    private static final String TAG = "Barcode-reader";
+    private static final String TAG = "QRCode-reader";
 
     // Intent request code to handle updating play services if needed.
     private static final int RC_HANDLE_GMS = 9001;

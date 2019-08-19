@@ -949,4 +949,18 @@
     <string name="e_receipt_nalog_pass">Пароль от кабинета proverkacheka.nalog.ru</string>
     <string name="e_receipt_nalog_pass_summary">Ввести пароль от кабинета proverkacheka.nalog.ru. Приходит в смс-сообщении при регистрации</string>
 
+    <string name="barcode_datetime">Время операции</string>
+    <string name="barcode_datetime_err">Формат времени введен неверно</string>
+    <string name="barcode_amount_err">Сумма введена неверно</string>
+    <string name="barcode_type_operation">Тип операции</string>
+    <string name="barcode_type_operation_err">Тип операции введен неверно</string>
+    <string name="barcode_fd">Номер ФД</string>
+    <string name="barcode_fn">Номер ФН</string>
+    <string name="barcode_fpd">Номер ФПД (ФП)</string>
+    <string name="barcode_fd_fn_fpd_err">Неправильно введен номер ФД, ФН или ФПД</string>
+
+    <string name="permission_camera_rationale">Необходим доступ к камере, чтобы отсканировать QRCode</string>
+    <string name="no_camera_permission">У этого приложения нет доступа к камере, чтобы продолжить работать</string>
+    <string name="low_storage_error">Библиотека обработки изображения не может быть загружена из-за нехватки памяти</string>
+
 </resources>

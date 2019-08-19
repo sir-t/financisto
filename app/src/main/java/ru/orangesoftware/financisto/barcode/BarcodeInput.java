@@ -25,6 +25,8 @@ import org.androidannotations.annotations.FragmentArg;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import ru.orangesoftware.financisto.R;
@@ -59,6 +61,7 @@ public class BarcodeInput extends DialogFragment {
     @FragmentArg
     protected String qrcode;
     private long amount = 0;
+    private long date = 0;
 
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -104,7 +107,7 @@ public class BarcodeInput extends DialogFragment {
             return;
         }
         if (qrcode != null)
-            listener.onQRCodeChanged(qrcode, amount);
+            listener.onQRCodeChanged(qrcode, amount, date);
         else
             Toast.makeText(getActivity(), "QRCode not new or null", Toast.LENGTH_LONG).show();
         dismiss();
@@ -133,21 +136,37 @@ public class BarcodeInput extends DialogFragment {
         }
     }
 
+    private long parseDateTime(String val) {
+        try {
+            return new SimpleDateFormat("yyyyMMdd'T'HHmm").parse(val).getTime();
+        } catch (ParseException ex) {
+            return 0;
+        }
+    }
+
     private boolean checkQRCode(Map<String, String> mQRCode) {
         if (mQRCode.get("t").length() == 0) {
-            Toast.makeText(getActivity(), "Error \'t\'", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.barcode_datetime_err, Toast.LENGTH_LONG).show();
             return false;
         }
         if (mQRCode.get("s").length() == 0) {
-            Toast.makeText(getActivity(), "Error \'s\'", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.barcode_amount_err, Toast.LENGTH_LONG).show();
             return false;
         }
-        if (mQRCode.get("n").length() != 1) {
-            Toast.makeText(getActivity(), "Error \'n\' length", Toast.LENGTH_LONG).show();
+        if (mQRCode.get("n").length() != 1 ||
+                !(mQRCode.get("n").equals("1")) ||
+                mQRCode.get("n").equals("2"))
+        {
+            Toast.makeText(getActivity(), R.string.barcode_type_operation_err, Toast.LENGTH_LONG).show();
             return false;
         }
-        if (mQRCode.get("fn").length() != 16 || mQRCode.get("i").length() > 10 || mQRCode.get("fp").length() > 10) {
-            Toast.makeText(getActivity(), "Error with \'fn\' or \'i\' or \'fp\'", Toast.LENGTH_LONG).show();
+        if (mQRCode.get("fn").length() != 16 ||
+                mQRCode.get("i").length() == 0 ||
+                mQRCode.get("i").length() > 10 ||
+                mQRCode.get("fp").length() == 0 ||
+                mQRCode.get("fp").length() > 10)
+        {
+            Toast.makeText(getActivity(), R.string.barcode_fd_fn_fpd_err, Toast.LENGTH_LONG).show();
             return false;
         }
         return true;
@@ -167,11 +186,10 @@ public class BarcodeInput extends DialogFragment {
             Map<String, String> mQRCode = splitQuery(qrcode);
             if (checkQRCode(mQRCode)) {
                 Log.i("Financisto", "genQRCode checked true -> this.qrcode = " + this.qrcode);
-                long amount = (Integer.parseInt(mQRCode.get("n")) == 1 ? -1 : 1) * Long.parseLong(mQRCode.get("s").replaceAll("\\.", ""));
-                Log.i("Financisto", "genQRCode amount = " + amount);
 
                 this.qrcode = qrcode;
-                this.amount = amount;
+                this.amount = (Integer.parseInt(mQRCode.get("n")) == 1 ? -1 : 1) * Long.parseLong(mQRCode.get("s").replaceAll("\\.", ""));
+                this.date = parseDateTime(etDateTime.getText().toString());
 
                 return true;
             }
@@ -186,6 +204,7 @@ public class BarcodeInput extends DialogFragment {
             return;
 
         try {
+            long date = 0;
             long amount = 0;
             String n = "";
 
@@ -195,6 +214,7 @@ public class BarcodeInput extends DialogFragment {
                 switch (key) {
                     case "t":
                         etDateTime.setText(val);
+                        date = parseDateTime(val);
                         break;
                     case "s":
                         etSum.setText(val);
@@ -221,6 +241,7 @@ public class BarcodeInput extends DialogFragment {
             }
             this.qrcode = qrcode;
             this.amount = amount;
+            this.date = date;
         } catch (Exception ex) {
             Log.e("Financisto", "Unknown error", ex);
         }

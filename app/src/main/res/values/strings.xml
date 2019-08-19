@@ -901,7 +901,7 @@
     <string name="request_permissions_storage_title">Storage</string>
     <string name="request_permissions_storage_description">Required to read and write backup files from/to the external storage.</string>
     <string name="request_permissions_camera_title">Camera</string>
-    <string name="request_permissions_camera_description">Required to take pictures and attach them to transactions.</string>
+    <string name="request_permissions_camera_description">Required to scan qrcodes, take pictures and attach them to transactions.</string>
     <string name="request_permissions_get_accounts_title">Contacts</string>
     <string name="request_permissions_get_accounts_description">Required to allow backup to your personal Google Drive.</string>
     <string name="request_permissions_granted">Permission granted</string>
@@ -1019,8 +1019,18 @@
     <string name="e_receipt_nalog_pass">Password for nalog.ru</string>
     <string name="e_receipt_nalog_pass_summary">Choose your password of nalog.ru</string>
 
+    <string name="barcode_datetime">DateTime</string>
+    <string name="barcode_datetime_err">DateTime format incorrect</string>
+    <string name="barcode_amount_err">Amount is incorrect</string>
+    <string name="barcode_type_operation">TypeOperation</string>
+    <string name="barcode_type_operation_err">TypeOperation is incorrect</string>
+    <string name="barcode_fd">Number FD</string>
+    <string name="barcode_fn">Number FN</string>
+    <string name="barcode_fpd">Number FPD</string>
+    <string name="barcode_fd_fn_fpd_err">Incorrect length of FD, FN or FPD</string>
+
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
-    <string name="no_camera_permission">This application cannot run because it does not have the camera permission. The application will now exit.</string>
+    <string name="no_camera_permission">This application cannot run because it does not have the camera permission</string>
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
 
 </resources>
