@@ -188,6 +188,7 @@ public class CategorySelectorActivity extends AbstractListActivity {
             } else {
                 v.layout.setBackgroundResource(0);
             }
+            v.eReceiptView.setVisibility(View.GONE);
             return convertView;
         }
 

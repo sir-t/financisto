@@ -203,6 +203,7 @@ public class ScheduledListAdapter extends BaseAdapter {
 
         private static void removeRightView(View view, Holder v) {
             view.findViewById(R.id.right).setVisibility(View.GONE);
+            view.findViewById(R.id.e_receipt).setVisibility(View.GONE);
         }
 
     }

@@ -139,6 +139,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
             }
             v.iconView.setImageDrawable(icBlotterTransfer);
             v.iconView.setColorFilter(u.transferColor);
+            v.eReceiptView.setVisibility(View.GONE);
         } else {
             String fromAccountTitle = cursor.getString(BlotterColumns.from_account_title.ordinal());
             v.topView.setText(fromAccountTitle);
@@ -181,6 +182,18 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
                 long balance = cursor.getLong(BlotterColumns.from_account_balance.ordinal());
                 v.rightView.setText(Utils.amountToString(fromCurrency, balance, false));
             }
+            if (cursor.getString(BlotterColumns.e_receipt_qr_code.ordinal()) != null) {
+                String eReceiptData = cursor.getString(BlotterColumns.e_receipt_data.ordinal());
+                if (eReceiptData != null && eReceiptData.startsWith("{"))
+                    v.eReceiptView.setText("qr ok");
+                else if (eReceiptData != null) {
+                    v.eReceiptView.setText("qr err " + eReceiptData);
+                } else {
+                    v.eReceiptView.setText("qr");
+                }
+                v.eReceiptView.setVisibility(View.VISIBLE);
+            } else
+                v.eReceiptView.setVisibility(View.GONE);
         }
         setIndicatorColor(v, cursor);
         if (isTemplate == 1) {
@@ -299,6 +312,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         public final TextView rightView;
         public final ImageView iconView;
         public final CheckBox checkBox;
+        public final TextView eReceiptView;
 
         public BlotterViewHolder(View view) {
             layout = (RelativeLayout) view.findViewById(R.id.layout);
@@ -310,6 +324,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
             rightView = (TextView) view.findViewById(R.id.right);
             iconView = (ImageView) view.findViewById(R.id.right_top);
             checkBox = (CheckBox) view.findViewById(R.id.cb);
+            eReceiptView = (TextView) view.findViewById(R.id.e_receipt);
         }
 
     }
