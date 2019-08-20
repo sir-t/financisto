@@ -34,6 +34,8 @@ import java.io.*;
 import java.util.*;
 
 import static ru.orangesoftware.financisto.activity.CategorySelector.SelectorType.TRANSACTION;
+import static ru.orangesoftware.financisto.activity.ReceiptActivity.CURRENCY_ID;
+import static ru.orangesoftware.financisto.activity.ReceiptActivity.RECEIPT_DATA;
 import static ru.orangesoftware.financisto.utils.Utils.isNotEmpty;
 
 public class TransactionActivity extends AbstractTransactionActivity implements QRCodeListener {
@@ -43,6 +45,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
     public static final String ACTIVITY_STATE = "ACTIVITY_STATE";
 
     private static final int SPLIT_REQUEST = 5001;
+    private static final int VIEW_RECEIPT = 5002;
 
     private final Currency currencyAsAccount = new Currency();
 
@@ -430,7 +433,12 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
                 x.selectItemId(this, R.id.currency, R.string.currency, adapter, selectedPos);
                 break;
             case R.id.e_receipt_info:
-                eReceiptText.setText("Not implemented yet");
+                if (transaction.eReceiptData != null && transaction.eReceiptData.startsWith("{")) {
+                    Intent intent = new Intent(TransactionActivity.this, ReceiptActivity.class);
+                    intent.putExtra(CURRENCY_ID, isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
+                    intent.putExtra(RECEIPT_DATA, transaction.eReceiptData);
+                    startActivityForResult(intent, VIEW_RECEIPT);
+                }
                 break;
             case R.id.e_receipt_get:
                 BarcodeInput input = BarcodeInput_.builder().qrcode(transaction.eReceiptQRCode).build();

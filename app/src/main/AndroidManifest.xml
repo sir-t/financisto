@@ -421,6 +421,9 @@
         <activity
             android:name=".activity.CategorySelectorActivity"
             android:label="@string/select_category" />
+        <activity
+            android:name=".activity.ReceiptActivity"
+            android:label="@string/e_receipt_title" />
 
         <activity
             android:name=".activity.AccountListTotalsDetailsActivity"
