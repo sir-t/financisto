@@ -14,6 +14,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.text.format.DateUtils;
+import android.view.View;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper.BlotterColumns;
@@ -49,10 +51,23 @@ public class TransactionsListAdapter extends BlotterListAdapter {
             } else {
                 note = "\u00AB "+toAccount;
             }
+            v.eReceiptView.setVisibility(View.GONE);
         } else {
             String title = cursor.getString(BlotterColumns.from_account_title.ordinal());
             v.topView.setText(title);
             v.centerView.setTextColor(Color.WHITE);
+            if (cursor.getString(BlotterColumns.e_receipt_qr_code.ordinal()) != null) {
+                String eReceiptData = cursor.getString(BlotterColumns.e_receipt_data.ordinal());
+                if (eReceiptData != null && eReceiptData.startsWith("{"))
+                    v.eReceiptView.setText("qr ok");
+                else if (eReceiptData != null) {
+                    v.eReceiptView.setText("qr err " + eReceiptData);
+                } else {
+                    v.eReceiptView.setText("qr");
+                }
+                v.eReceiptView.setVisibility(View.VISIBLE);
+            } else
+                v.eReceiptView.setVisibility(View.GONE);
         }
 
         long categoryId = cursor.getLong(BlotterColumns.category_id.ordinal());
