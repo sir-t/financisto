@@ -12,7 +12,9 @@ package ru.orangesoftware.financisto.backup;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.dropbox.core.util.IOUtil;
@@ -28,6 +30,7 @@ import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
@@ -107,7 +110,9 @@ public class DatabaseImport extends FullDatabaseImport {
         String tableName = null;
         long rowNum = 0;
         while ((line = br.readLine()) != null) {
-            if (line.startsWith("$")) {
+            if (line.startsWith("#PREFERENCE")) {
+                importPreference(line);
+            } else if (line.startsWith("$")) {
                 if ("$$".equals(line)) {
                     if (tableName != null && values.size() > 0) {
                         if (shouldRestoreTable(tableName)) {
@@ -143,6 +148,24 @@ public class DatabaseImport extends FullDatabaseImport {
                 }
             }
         }
+    }
+
+    private void importPreference(String line) {
+        List<String> arr = Arrays.asList(line.split(":"));
+        Log.i("Financisto", "" + arr.get(1) + " -> " + arr.get(2) + " -> " + arr.get(3));
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        switch (arr.get(1)) {
+            case "boolean":
+                editor.putBoolean(arr.get(2), arr.get(3).equals("true"));
+                break;
+            case "int":
+                editor.putInt(arr.get(2), Integer.parseInt(arr.get(3)));
+                break;
+            case "string":
+                editor.putString(arr.get(2), arr.get(3));
+                break;
+        }
+        editor.apply();
     }
 
     private void runRestoreAlterscripts() throws IOException {

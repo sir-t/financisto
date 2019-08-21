@@ -373,7 +373,6 @@
             android:title="@string/e_receipt_enabled" />
         <EditTextPreference
             android:dependency="e_receipt_enabled"
-            android:defaultValue="+7"
             android:key="e_receipt_nalog_login"
             android:summary="@string/e_receipt_nalog_login_summary"
             android:title="@string/e_receipt_nalog_login" />

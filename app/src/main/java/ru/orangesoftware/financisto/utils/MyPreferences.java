@@ -21,10 +21,10 @@ import ru.orangesoftware.financisto.rates.ExchangeRateProviderFactory;
 
 public class MyPreferences {
 
-    private static final String DROPBOX_AUTH_TOKEN = "dropbox_auth_token";
-    private static final String DROPBOX_AUTHORIZE = "dropbox_authorize";
-    private static final String ENTITY_SELECTOR_LIST = "list";
-    private static final String ENTITY_SELECTOR_FILTER = "filter";
+    public static final String DROPBOX_AUTH_TOKEN = "dropbox_auth_token";
+    public static final String DROPBOX_AUTHORIZE = "dropbox_authorize";
+    public static final String ENTITY_SELECTOR_LIST = "list";
+    public static final String ENTITY_SELECTOR_FILTER = "filter";
 
     public enum AccountSortOrder {
         SORT_ORDER_ASC("sortOrder", true),
