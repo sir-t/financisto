@@ -10,7 +10,6 @@
  ******************************************************************************/
 package ru.orangesoftware.financisto.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,6 +25,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+
+import androidx.fragment.app.FragmentActivity;
 
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
@@ -50,7 +51,7 @@ import ru.orangesoftware.financisto.utils.Utils;
 
 import static ru.orangesoftware.financisto.activity.UiUtils.applyTheme;
 
-public class RecurActivity extends Activity {
+public class RecurActivity extends FragmentActivity {
 
     public static final String EXTRA_RECUR = "recur";
 
@@ -104,7 +105,7 @@ public class RecurActivity extends Activity {
                     c.get(Calendar.DAY_OF_MONTH)
             );
             applyTheme(this, dialog);
-            dialog.show(getFragmentManager(), "DatePickerDialog");
+            dialog.show(getSupportFragmentManager(), "DatePickerDialog");
         });
 
         addSpinnerItems(sInterval, new RecurInterval[]{RecurInterval.NO_RECUR, RecurInterval.WEEKLY, RecurInterval.MONTHLY});
@@ -258,7 +259,7 @@ public class RecurActivity extends Activity {
                                 c.get(Calendar.DAY_OF_MONTH)
                         );
                         applyTheme(RecurActivity.this, dialog);
-                        dialog.show(getFragmentManager(), "DatePickerDialog");
+                        dialog.show(getSupportFragmentManager(), "DatePickerDialog");
                     });
                 }
                 layout.addView(v, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
