@@ -40,6 +40,7 @@ import ru.orangesoftware.financisto.model.SmsTemplate;
 
 import static android.Manifest.permission.RECEIVE_SMS;
 import static ru.orangesoftware.financisto.activity.CategorySelector.SelectorType.PARENT;
+import static ru.orangesoftware.financisto.activity.CategorySelectorActivity.CATEGORY_PICK;
 import static ru.orangesoftware.financisto.activity.RequestPermission.isRequestingPermission;
 import static ru.orangesoftware.financisto.utils.Utils.checkEditText;
 import static ru.orangesoftware.financisto.utils.Utils.text;
@@ -397,7 +398,7 @@ public class CategoryActivity extends AbstractActivity implements CategorySelect
                     }
                 }
                 break;
-                case R.id.category_pick: {
+                case CATEGORY_PICK: {
                     parentCatSelector.onActivityResult(requestCode, resultCode, data);
                 }
                 break;

@@ -28,6 +28,9 @@ public class CategorySelectorActivity extends AbstractListActivity {
     public static final String EXCLUDED_SUB_TREE_ID = "EXCLUDED_SUB_TREE_ID";
     public static final String INCLUDE_SPLIT_CATEGORY = "INCLUDE_SPLIT_CATEGORY";
 
+    protected static final int CATEGORY_ADD = 300;
+    protected static final int CATEGORY_PICK = 301;
+
     private int incomeColor;
     private int expenseColor;
 
@@ -125,7 +128,7 @@ public class CategorySelectorActivity extends AbstractListActivity {
             intent.putExtra(CategorySelectorActivity.SELECTED_CATEGORY_ID, selectedId);
             intent.putExtra(CategorySelectorActivity.EXCLUDED_SUB_TREE_ID, excludingTreeId);
             intent.putExtra(CategorySelectorActivity.INCLUDE_SPLIT_CATEGORY, includeSplit);
-            activity.startActivityForResult(intent, R.id.category_pick);
+            activity.startActivityForResult(intent, CATEGORY_PICK);
             return true;
         }
         return false;

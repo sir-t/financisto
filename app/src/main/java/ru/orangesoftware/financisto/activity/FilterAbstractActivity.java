@@ -28,6 +28,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static ru.orangesoftware.financisto.activity.CategorySelector.SelectorType.FILTER;
+import static ru.orangesoftware.financisto.activity.CategorySelectorActivity.CATEGORY_ADD;
+import static ru.orangesoftware.financisto.activity.CategorySelectorActivity.CATEGORY_PICK;
 import static ru.orangesoftware.financisto.blotter.BlotterFilter.*;
 import static ru.orangesoftware.financisto.filter.WhereFilter.Operation.BTW;
 import static ru.orangesoftware.financisto.filter.WhereFilter.Operation.IN;
@@ -261,8 +263,8 @@ public abstract class FilterAbstractActivity extends AbstractActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case R.id.category_pick:
-            case R.id.category_add:
+            case CATEGORY_PICK:
+            case CATEGORY_ADD:
                 categorySelector.onActivityResult(requestCode, resultCode, data);
                 break;
         }
