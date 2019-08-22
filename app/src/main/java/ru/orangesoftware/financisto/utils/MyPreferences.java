@@ -23,6 +23,8 @@ public class MyPreferences {
 
     public static final String DROPBOX_AUTH_TOKEN = "dropbox_auth_token";
     public static final String DROPBOX_AUTHORIZE = "dropbox_authorize";
+    public static final String NALOG_LOGIN = "nalog_login";
+    public static final String NALOG_PASSWORD = "nalog_password";
     public static final String ENTITY_SELECTOR_LIST = "list";
     public static final String ENTITY_SELECTOR_FILTER = "filter";
 
@@ -202,19 +204,40 @@ public class MyPreferences {
         return sharedPreferences.getBoolean("ntsl_show_e_receipt", true);
     }
 
-    public static boolean isElectronicReceiptEnabled(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean("e_receipt_enabled", false);
+    public static boolean isNalogAuthorized(Context context) {
+        return !getNalogLogin(context).equals("") || !getNalogPassword(context).equals("");
     }
 
-    public static String getElectronicNalogLogin(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString("e_receipt_nalog_login", "");
+    public static String getNalogLogin(Context context) {
+        return getString(context, NALOG_LOGIN, "");
     }
 
-    public static String getElectronicNalogPass(Context context) {
+    public static String getNalogPassword(Context context) {
+        return getString(context, NALOG_PASSWORD, "");
+    }
+
+    public static void storeNalogAuth(Context context, String login, String password) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString("e_receipt_nalog_pass", "");
+        SharedPreferences.Editor e = sharedPreferences.edit();
+        e.putString(NALOG_LOGIN, login);
+        if (password != null)
+            e.putString(NALOG_PASSWORD, password);
+        e.apply();
+    }
+
+    public static void removeNalogAuth(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor e = sharedPreferences.edit();
+        e.remove(NALOG_LOGIN);
+        e.remove(NALOG_PASSWORD);
+        e.apply();
+    }
+
+    public static void removeNalogPassword(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor e = sharedPreferences.edit();
+        e.remove(NALOG_PASSWORD);
+        e.apply();
     }
 
     public static boolean isShowTakePicture(Context context) {
@@ -663,6 +686,11 @@ public class MyPreferences {
     public static boolean isOpenExchangeRatesProviderSelected(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return getExchangeRateProviderFactory(sharedPreferences) == ExchangeRateProviderFactory.openexchangerates;
+    }
+
+    private static String getString(Context context, String name, String defaultValue) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(name, defaultValue);
     }
 
     private static boolean getBoolean(Context context, String name, boolean defaultValue) {

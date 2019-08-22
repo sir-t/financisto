@@ -351,7 +351,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
                     status = statuses[3] + " " + transaction.eReceiptData;
                 }
             } else {
-                status = statuses[MyPreferences.isElectronicReceiptEnabled(this) ? 2 : 1];
+                status = statuses[MyPreferences.isNalogAuthorized(this) ? 2 : 1];
             }
         } else {
             status = statuses[0];
@@ -686,7 +686,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
         }
 
         if (taskStart) {
-            if (MyPreferences.isElectronicReceiptEnabled(this)) {
+            if (MyPreferences.isNalogAuthorized(this)) {
                 RequestReceiptTask task = new RequestReceiptTask(this, qrcode);
                 task.setListener(this);
                 task.execute();

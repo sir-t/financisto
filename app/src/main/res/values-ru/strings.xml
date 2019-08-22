@@ -944,12 +944,22 @@
     <string name="show_e_receipt_summary">Показывать поле \'Электронный кассовый чек\'</string>
     <string name="no_e_receipt">Добавьте электронный чек</string>
     <string name="e_receipt_title">Электронный кассовый чек</string>
-    <string name="e_receipt_enabled">Включить получение электронного чека</string>
-    <string name="e_receipt_enabled_summary">Включить возможность делать запрос в налоговую для получения электронного чека</string>
-    <string name="e_receipt_nalog_login">Логин кабинета proverkacheka.nalog.ru</string>
-    <string name="e_receipt_nalog_login_summary">Ввести логин от кабинета proverkacheka.nalog.ru. В международном формате</string>
-    <string name="e_receipt_nalog_pass">Пароль от кабинета proverkacheka.nalog.ru</string>
-    <string name="e_receipt_nalog_pass_summary">Ввести пароль от кабинета proverkacheka.nalog.ru. Приходит в смс-сообщении при регистрации</string>
+    <string name="e_receipt_authorize">Авторизация на nalog.ru</string>
+    <string name="e_receipt_authorize_summary">Включить возможность делать запрос в налоговую для получения электронного чека</string>
+    <string name="e_receipt_unlink">Отключить</string>
+    <string name="e_receipt_unlink_summary">Запретить отправлять запрос получать электронный чек</string>
+    <string name="e_receipt_nalog_sign_up">Регистрация на proverkacheka.nalog.ru</string>
+    <string name="e_receipt_nalog_sign_up_summary">Отправить запрос на регистрацию в кабинете proverkacheka.nalog.ru</string>
+    <string name="e_receipt_nalog_pass_recovery">Восстановить пароль от кабинета</string>
+    <string name="e_receipt_nalog_pass_recovery_summary">Отправить запрос на восстановление пароля от кабинета proverkacheka.nalog.ru</string>
+
+    <string name="sign_in_success">Успешная авторизация</string>
+    <string name="sign_up_success">Запрос на регистрацию отправлен</string>
+    <string name="recovery_pass_success">Запрос восстановление пароля отправлен</string>
+    <string name="user_exists">Такой пользователь уже существует</string>
+    <string name="user_not_found">Пользователь не найден</string>
+    <string name="incorrect_email_format">Неправильно задана электронная почта</string>
+    <string name="incorrect_phone">Неправильно задан номер телефона</string>
 
     <string name="barcode_datetime">Время операции</string>
     <string name="barcode_datetime_err">Формат времени введен неверно</string>
@@ -964,5 +974,9 @@
     <string name="permission_camera_rationale">Необходим доступ к камере, чтобы отсканировать QRCode</string>
     <string name="no_camera_permission">У этого приложения нет доступа к камере, чтобы продолжить работать</string>
     <string name="low_storage_error">Библиотека обработки изображения не может быть загружена из-за нехватки памяти</string>
+
+    <string name="user_email">Электронная почта</string>
+    <string name="user_name">Имя</string>
+    <string name="user_phone">Телефон</string>
 
 </resources>

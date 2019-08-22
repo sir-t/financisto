@@ -30,6 +30,8 @@ import com.google.android.gms.common.AccountPicker;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.dialog.FolderBrowser;
+import ru.orangesoftware.financisto.dialog.ProverkaChekaAuth;
+import ru.orangesoftware.financisto.dialog.ProverkaChekaAuth_;
 import ru.orangesoftware.financisto.export.Export;
 import ru.orangesoftware.financisto.export.dropbox.Dropbox;
 import ru.orangesoftware.financisto.rates.ExchangeRateProviderFactory;
@@ -117,7 +119,31 @@ public class PreferencesActivity extends PreferenceActivity {
             useFingerprint.setSummary(getString(R.string.fingerprint_unavailable, reasonWhyFingerprintUnavailable(this)));
             useFingerprint.setEnabled(false);
         }
+        Preference pReceiptAutorize = preferenceScreen.findPreference("e_receipt_nalog_autorize");
+        pReceiptAutorize.setOnPreferenceClickListener(arg0 -> {
+            ProverkaChekaAuth input = ProverkaChekaAuth_.builder().type(1).build();
+            input.show(this.getFragmentManager(), "nalog_auth");
+            return true;
+        });
+        Preference pReceiptUnlink = preferenceScreen.findPreference("e_receipt_nalog_unlink");
+        pReceiptUnlink.setOnPreferenceClickListener(arg0 -> {
+            MyPreferences.removeNalogAuth(this);
+            return true;
+        });
+        Preference pReceiptSignUp = preferenceScreen.findPreference("e_receipt_nalog_sign_up");
+        pReceiptSignUp.setOnPreferenceClickListener(arg0 -> {
+            ProverkaChekaAuth input = ProverkaChekaAuth_.builder().type(2).build();
+            input.show(this.getFragmentManager(), "nalog_auth");
+            return true;
+        });
+        Preference pReceiptRecoveryPass = preferenceScreen.findPreference("e_receipt_nalog_pass_recovery");
+        pReceiptRecoveryPass.setOnPreferenceClickListener(arg0 -> {
+            ProverkaChekaAuth input = ProverkaChekaAuth_.builder().type(3).build();
+            input.show(this.getFragmentManager(), "nalog_auth");
+            return true;
+        });
         linkToDropbox();
+        linkToNalog();
         setCurrentDatabaseBackupFolder();
         enableOpenExchangeApp();
         selectAccount();
@@ -157,6 +183,12 @@ public class PreferencesActivity extends PreferenceActivity {
         preferenceScreen.findPreference("dropbox_unlink").setEnabled(dropboxAuthorized);
         preferenceScreen.findPreference("dropbox_upload_backup").setEnabled(dropboxAuthorized);
         preferenceScreen.findPreference("dropbox_upload_autobackup").setEnabled(dropboxAuthorized);
+    }
+
+    private void linkToNalog() {
+        boolean nalogAutorized = MyPreferences.isNalogAuthorized(this);
+        PreferenceScreen preferenceScreen = getPreferenceScreen();
+        preferenceScreen.findPreference("e_receipt_nalog_unlink").setEnabled(nalogAutorized);
     }
 
     private void selectDatabaseBackupFolder() {
@@ -254,6 +286,7 @@ public class PreferencesActivity extends PreferenceActivity {
         PinProtection.unlock(this);
         dropbox.completeAuth();
         linkToDropbox();
+        linkToNalog();
     }
 
 }

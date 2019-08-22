@@ -45,8 +45,8 @@ public class RequestReceiptTask extends AsyncTask<String, String, String> {
             String url_2 = "https://proverkacheka.nalog.ru:9999/v1/inns/*/kkts/*/fss/" + mQRCode.get("fn") + "/tickets/" + mQRCode.get("i") + "?fiscalSign=" + mQRCode.get("fp") + "&sendToEmail=no";
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                String login = MyPreferences.getElectronicNalogLogin(context);
-                String pass = MyPreferences.getElectronicNalogPass(context);
+                String login = MyPreferences.getNalogLogin(context);
+                String pass = MyPreferences.getNalogPassword(context);
 
                 OkHttpClient client = new OkHttpClient();
                 Request.Builder builder = new Request.Builder()

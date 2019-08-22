@@ -32,6 +32,8 @@ import static ru.orangesoftware.financisto.db.DatabaseHelper.ACCOUNT_TABLE;
 import static ru.orangesoftware.financisto.utils.MyPreferences.DROPBOX_AUTHORIZE;
 import static ru.orangesoftware.financisto.utils.MyPreferences.DROPBOX_AUTH_TOKEN;
 import static ru.orangesoftware.financisto.utils.MyPreferences.ENTITY_SELECTOR_FILTER;
+import static ru.orangesoftware.financisto.utils.MyPreferences.NALOG_LOGIN;
+import static ru.orangesoftware.financisto.utils.MyPreferences.NALOG_PASSWORD;
 import static ru.orangesoftware.orb.EntityManager.DEF_SORT_COL;
 
 public class DatabaseExport extends Export {
@@ -164,9 +166,8 @@ public class DatabaseExport extends Export {
         exportPreference(bw, "boolean", "google_drive_upload_backup", false);
         exportPreference(bw, "boolean", "google_drive_upload_autobackup", false);
         // Electronic receipt
-        exportPreference(bw, "boolean", "e_receipt_enabled", false);
-        exportPreference(bw, "string", "e_receipt_nalog_login", "");
-        exportPreference(bw, "string", "e_receipt_nalog_pass", "");
+        exportPreference(bw, "string", NALOG_LOGIN, null);
+        exportPreference(bw, "string", NALOG_PASSWORD, null);
         // Exchange rates
         exportPreference(bw, "string", "exchange_rate_provider", ExchangeRateProviderFactory.freeCurrency.name());
         exportPreference(bw, "boolean", "openexchangerates_app_id", false);

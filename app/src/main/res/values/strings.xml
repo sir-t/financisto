@@ -1016,12 +1016,22 @@
     <string name="show_e_receipt_summary">Show \'Electronic receipt\' box</string>
     <string name="no_e_receipt">No electronic receipt</string>
     <string name="e_receipt_title">Electronic receipt</string>
-    <string name="e_receipt_enabled">Enable get electronic receipt</string>
-    <string name="e_receipt_enabled_summary">Allow Financisto get electronic receipt from nalog.ru</string>
-    <string name="e_receipt_nalog_login">Login for nalog.ru</string>
-    <string name="e_receipt_nalog_login_summary">Choose your account of nalog.ru</string>
-    <string name="e_receipt_nalog_pass">Password for nalog.ru</string>
-    <string name="e_receipt_nalog_pass_summary">Choose your password of nalog.ru</string>
+    <string name="e_receipt_authorize">Autorize to nalog.ru</string>
+    <string name="e_receipt_authorize_summary">Allow Financisto get electronic receipt from nalog.ru</string>
+    <string name="e_receipt_unlink">Unlink from nalog.ru</string>
+    <string name="e_receipt_unlink_summary">Prevent Financisto getting electronic receipt from nalog.ru</string>
+    <string name="e_receipt_nalog_sign_up">Sign-up on nalog.ru</string>
+    <string name="e_receipt_nalog_sign_up_summary">Send request for sign-up of nalog.ru</string>
+    <string name="e_receipt_nalog_pass_recovery">Recovery password on nalog.ru</string>
+    <string name="e_receipt_nalog_pass_recovery_summary">Send request for recovery password of nalog.ru</string>
+
+    <string name="sign_in_success">Authorize success</string>
+    <string name="sign_up_success">Sign up success</string>
+    <string name="recovery_pass_success">Recovery password success</string>
+    <string name="user_exists">User exists</string>
+    <string name="user_not_found">User not found</string>
+    <string name="incorrect_email_format">Incorrect email format</string>
+    <string name="incorrect_phone">Incorrect phone number</string>
 
     <string name="barcode_datetime">DateTime</string>
     <string name="barcode_datetime_err">DateTime format incorrect</string>
@@ -1036,5 +1046,9 @@
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission</string>
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+
+    <string name="user_email">E-mail</string>
+    <string name="user_name">Name</string>
+    <string name="user_phone">Phone</string>
 
 </resources>

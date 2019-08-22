@@ -366,21 +366,22 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/e_receipt_title">
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="e_receipt_enabled"
-            android:summary="@string/e_receipt_enabled_summary"
-            android:title="@string/e_receipt_enabled" />
-        <EditTextPreference
-            android:dependency="e_receipt_enabled"
-            android:key="e_receipt_nalog_login"
-            android:summary="@string/e_receipt_nalog_login_summary"
-            android:title="@string/e_receipt_nalog_login" />
-        <EditTextPreference
-            android:dependency="e_receipt_enabled"
-            android:key="e_receipt_nalog_pass"
-            android:summary="@string/e_receipt_nalog_pass_summary"
-            android:title="@string/e_receipt_nalog_pass" />
+        <Preference
+            android:key="e_receipt_nalog_autorize"
+            android:summary="@string/e_receipt_authorize_summary"
+            android:title="@string/e_receipt_authorize" />
+        <Preference
+            android:key="e_receipt_nalog_unlink"
+            android:summary="@string/e_receipt_unlink_summary"
+            android:title="@string/e_receipt_unlink" />
+        <Preference
+            android:key="e_receipt_nalog_sign_up"
+            android:summary="@string/e_receipt_nalog_sign_up_summary"
+            android:title="@string/e_receipt_nalog_sign_up" />
+        <Preference
+            android:key="e_receipt_nalog_pass_recovery"
+            android:summary="@string/e_receipt_nalog_pass_recovery_summary"
+            android:title="@string/e_receipt_nalog_pass_recovery" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/exchange_rates">
