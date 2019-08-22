@@ -2,7 +2,6 @@ package ru.orangesoftware.financisto.barcode;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -12,6 +11,8 @@ import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -35,7 +36,7 @@ import static ru.orangesoftware.financisto.activity.RequestPermission.isRequesti
 import static ru.orangesoftware.financisto.barcode.BarcodeHelper.splitQuery;
 
 @EFragment(R.layout.barcode_input)
-public class BarcodeInput extends DialogFragment {
+public class BarcodeInput extends AppCompatDialogFragment {
 
     @ViewById(R.id.etDateTime)
     protected EditText etDateTime;
@@ -76,13 +77,14 @@ public class BarcodeInput extends DialogFragment {
     }
 
     @AfterViews
-    public void initUi() {
+    protected void initUi() {
         int bgColorResource = R.color.mdtp_date_picker_view_animator_dark_theme;
         int bgColor = ContextCompat.getColor(getActivity(), bgColorResource);
         getView().setBackgroundColor(bgColor);
         setQRCode(qrcode);
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);

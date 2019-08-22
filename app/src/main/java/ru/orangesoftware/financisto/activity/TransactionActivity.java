@@ -443,7 +443,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
             case R.id.e_receipt_get:
                 BarcodeInput input = BarcodeInput_.builder().qrcode(transaction.eReceiptQRCode).build();
                 input.setListener(this);
-                input.show(this.getFragmentManager(), "barcode_input");
+                input.show(getSupportFragmentManager(), "barcode_input");
                 break;
         }
         Transaction split = viewToSplitMap.get(v);
