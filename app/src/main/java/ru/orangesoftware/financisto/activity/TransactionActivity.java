@@ -19,6 +19,8 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.DialogFragment;
+
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
 import ru.orangesoftware.financisto.R;
@@ -442,6 +444,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
                 break;
             case R.id.e_receipt_get:
                 BarcodeInput input = BarcodeInput_.builder().qrcode(transaction.eReceiptQRCode).build();
+                input.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
                 input.setListener(this);
                 input.show(getSupportFragmentManager(), "barcode_input");
                 break;
