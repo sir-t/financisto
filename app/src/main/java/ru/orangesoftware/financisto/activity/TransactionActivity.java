@@ -437,7 +437,8 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
             case R.id.e_receipt_info:
                 if (transaction.eReceiptData != null && transaction.eReceiptData.startsWith("{")) {
                     Intent intent = new Intent(TransactionActivity.this, ReceiptActivity.class);
-                    intent.putExtra(CURRENCY_ID, isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
+                    if (isDifferentCurrency() || selectedAccount != null)
+                        intent.putExtra(CURRENCY_ID, isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
                     intent.putExtra(RECEIPT_DATA, transaction.eReceiptData);
                     startActivityForResult(intent, VIEW_RECEIPT);
                 }
