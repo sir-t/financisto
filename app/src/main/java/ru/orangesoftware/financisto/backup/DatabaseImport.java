@@ -44,12 +44,15 @@ import static ru.orangesoftware.financisto.backup.Backup.RESTORE_SCRIPTS;
 import static ru.orangesoftware.financisto.backup.Backup.tableHasOrder;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.ATTRIBUTES_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.LOCATIONS_TABLE;
+import static ru.orangesoftware.financisto.service.DailyAutoBackupScheduler.scheduleNextAutoBackup;
 import static ru.orangesoftware.orb.EntityManager.DEF_SORT_COL;
 
 public class DatabaseImport extends FullDatabaseImport {
 
     private final DatabaseSchemaEvolution schemaEvolution;
     private final InputStream backupStream;
+
+    private boolean start_backup_service = false;
 
     public static DatabaseImport createFromFileBackup(Context context, DatabaseAdapter dbAdapter, String backupFile) throws FileNotFoundException {
         File backupPath = Export.getBackupFolder(context);
@@ -85,6 +88,7 @@ public class DatabaseImport extends FullDatabaseImport {
         BufferedReader br = new BufferedReader(isr, 65535);
         try {
             recoverDatabase(br);
+            runActionsAfterRecover();
             runRestoreAlterscripts();
         } finally {
             IOUtil.closeInput(br);
@@ -166,6 +170,13 @@ public class DatabaseImport extends FullDatabaseImport {
                 break;
         }
         editor.apply();
+        if (arr.get(2).equals("auto_backup_enabled"))
+            start_backup_service = true;
+    }
+
+    private void runActionsAfterRecover() {
+        if (start_backup_service)
+            scheduleNextAutoBackup(context);
     }
 
     private void runRestoreAlterscripts() throws IOException {
