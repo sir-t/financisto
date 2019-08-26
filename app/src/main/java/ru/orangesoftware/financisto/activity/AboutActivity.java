@@ -8,24 +8,21 @@
 
 package ru.orangesoftware.financisto.activity;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v13.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.fragment.WebViewFragment;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Denis Solonenko
- * Date: 3/24/11 10:20 PM
- */
 public class AboutActivity extends AppCompatActivity {
-    private static final int ABOUT_TAB_COUNT = 3;
+    private static final int ABOUT_TAB_COUNT = 4;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -38,10 +35,11 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(R.layout.view_pager_activity);
         String[] tabTitles = new String[ABOUT_TAB_COUNT];
         tabTitles[0] = getString(R.string.about);
-        tabTitles[1] = getString(R.string.whats_new);
-        tabTitles[2] = getString(R.string.license);
+        tabTitles[1] = getString(R.string.privacy_policy);
+        tabTitles[2] = getString(R.string.whats_new);
+        tabTitles[3] = getString(R.string.license);
         ViewPager viewPager = findViewById(R.id.view_pager);
-        MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getFragmentManager(), tabTitles);
+        MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getSupportFragmentManager(), tabTitles);
         viewPager.setAdapter(adapter);
     }
 
@@ -61,9 +59,12 @@ public class AboutActivity extends AppCompatActivity {
                     fileName += "about";
                     break;
                 case 1:
-                    fileName += "whatsnew";
+                    fileName += "privacy";
                     break;
                 case 2:
+                    fileName += "whatsnew";
+                    break;
+                case 3:
                     fileName += "gpl-2.0-standalone";
                     break;
                 default:
