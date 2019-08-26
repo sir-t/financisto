@@ -98,7 +98,13 @@ public class DatabaseBackupTest extends AbstractImportExportTest {
             assertEquals("VERSION_CODE:" + pi.versionCode, br.readLine());
             assertEquals("VERSION_NAME:" + pi.versionName, br.readLine());
             assertEquals("DATABASE_VERSION:" + db.db().getVersion(), br.readLine());
-            assertEquals("#START", br.readLine());
+            while (true) {
+                String line = br.readLine();
+                if (line.startsWith("#PREFERENCE"))
+                    continue;
+                assertEquals("#START", line);
+                break;
+            }
         }
 
     }
