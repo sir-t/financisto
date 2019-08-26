@@ -10,13 +10,15 @@
  ******************************************************************************/
 package ru.orangesoftware.financisto.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import androidx.fragment.app.FragmentActivity;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.filter.DateTimeCriteria;
@@ -29,7 +31,9 @@ import ru.orangesoftware.financisto.datetime.PeriodType;
 import java.text.DateFormat;
 import java.util.Date;
 
-public abstract class AbstractExportActivity extends Activity {
+public abstract class AbstractExportActivity extends FragmentActivity {
+
+	private static final int PERIOD_REQUEST = 1;
 
     private final int layoutId;
 	private final WhereFilter filter = WhereFilter.empty();
@@ -55,36 +59,27 @@ public abstract class AbstractExportActivity extends Activity {
 		
 		filter.put(new DateTimeCriteria(PeriodType.THIS_MONTH));
 		
-		bPeriod = (Button)findViewById(R.id.bPeriod);
-		bPeriod.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View arg0) {
-				Intent intent = new Intent(AbstractExportActivity.this, DateFilterActivity.class);
-				filter.toIntent(intent);
-				startActivityForResult(intent, 1);
-			}
+		bPeriod = findViewById(R.id.bPeriod);
+		bPeriod.setOnClickListener(view -> {
+			Intent intent = new Intent(AbstractExportActivity.this, DateFilterActivity.class);
+			filter.toIntent(intent);
+			startActivityForResult(intent, PERIOD_REQUEST);
 		});
 
-		Button bOk = (Button)findViewById(R.id.bOK);
-		bOk.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                savePreferences();
-                Intent data = new Intent();
-                filter.toIntent(data);
-                updateResultIntentFromUi(data);
-                setResult(RESULT_OK, data);
-                finish();
-            }
+		Button bOk = findViewById(R.id.bOK);
+		bOk.setOnClickListener(view -> {
+			savePreferences();
+			Intent data = new Intent();
+			filter.toIntent(data);
+			updateResultIntentFromUi(data);
+			setResult(RESULT_OK, data);
+			finish();
         });
 
-		Button bCancel = (Button)findViewById(R.id.bCancel);
-		bCancel.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setResult(RESULT_CANCELED);
-                finish();
-            }
+		Button bCancel = findViewById(R.id.bCancel);
+		bCancel.setOnClickListener(view -> {
+			setResult(RESULT_CANCELED);
+			finish();
         });
 
         internalOnCreate();
@@ -122,7 +117,7 @@ public abstract class AbstractExportActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == 1) {
+		if (requestCode == PERIOD_REQUEST) {
 			if (resultCode == RESULT_FIRST_USER) {
 				filter.clearDateTime();
 			} else if (resultCode == RESULT_OK) {
@@ -134,9 +129,11 @@ public abstract class AbstractExportActivity extends Activity {
 					filter.put(new DateTimeCriteria(periodFrom, periodTo));
 				} else {
 					filter.put(new DateTimeCriteria(p));
-				}			
+				}
 			}
 			updatePeriod();
+		} else {
+			super.onActivityResult(requestCode, resultCode, data);
 		}
 	}
 	

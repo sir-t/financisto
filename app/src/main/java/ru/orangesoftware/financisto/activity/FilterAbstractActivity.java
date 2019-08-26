@@ -267,6 +267,9 @@ public abstract class FilterAbstractActivity extends AbstractActivity implements
             case CATEGORY_ADD:
                 categorySelector.onActivityResult(requestCode, resultCode, data);
                 break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
         }
     }
 

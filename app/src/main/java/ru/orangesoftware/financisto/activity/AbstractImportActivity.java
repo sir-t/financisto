@@ -7,7 +7,6 @@
  */
 package ru.orangesoftware.financisto.activity;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -17,15 +16,17 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.fragment.app.FragmentActivity;
+
 import java.io.File;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.PinProtection;
 
-public abstract class AbstractImportActivity extends Activity {
+public abstract class AbstractImportActivity extends FragmentActivity {
 
-    public static final int IMPORT_FILENAME_REQUESTCODE = 0xff;
+    public static final int IMPORT_FILENAME_REQUEST = 0xff;
 
     private final int layoutId;
     protected ImageButton bBrowse;
@@ -63,7 +64,7 @@ public abstract class AbstractImportActivity extends Activity {
         intent.setType("*/*");
 
         try {
-            startActivityForResult(intent, IMPORT_FILENAME_REQUESTCODE);
+            startActivityForResult(intent, IMPORT_FILENAME_REQUEST);
         } catch (ActivityNotFoundException e) {
             // No compatible file manager was found.
             Toast.makeText(this, R.string.no_filemanager_installed, Toast.LENGTH_SHORT).show();
@@ -77,7 +78,7 @@ public abstract class AbstractImportActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == IMPORT_FILENAME_REQUESTCODE) {
+        if (requestCode == IMPORT_FILENAME_REQUEST) {
             if (resultCode == RESULT_OK && data != null) {
                 Uri fileUri = data.getData();
                 if (fileUri != null) {
@@ -88,8 +89,9 @@ public abstract class AbstractImportActivity extends Activity {
                     }
                 }
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
-
     }
 
     @Override

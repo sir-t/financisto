@@ -17,12 +17,10 @@ import ru.orangesoftware.financisto.model.Attribute;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.PinProtection;
 import ru.orangesoftware.financisto.utils.Utils;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -30,9 +28,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-public class AttributeActivity extends Activity implements OnItemSelectedListener {
-	
-	public static final String CATEGORY_ID = "category_id";
+import androidx.fragment.app.FragmentActivity;
+
+public class AttributeActivity extends FragmentActivity implements OnItemSelectedListener {
 
 	private DatabaseAdapter db;
 	
@@ -58,37 +56,30 @@ public class AttributeActivity extends Activity implements OnItemSelectedListene
 		db = new DatabaseAdapter(this);
 		db.open();
 		
-		typeSpinner = (Spinner)findViewById(R.id.type);
+		typeSpinner = findViewById(R.id.type);
 		typeSpinner.setOnItemSelectedListener(this);
 
-		nameTextView = (EditText)findViewById(R.id.name);
-		valuesTextView = (EditText)findViewById(R.id.values);
-		defaultValueTextView = (EditText)findViewById(R.id.default_value_text);
-		defaultValueCheckBox = (CheckBox)findViewById(R.id.default_value_check);
+		nameTextView = findViewById(R.id.name);
+		valuesTextView = findViewById(R.id.values);
+		defaultValueTextView = findViewById(R.id.default_value_text);
+		defaultValueCheckBox = findViewById(R.id.default_value_check);
 
-		Button bOK = (Button)findViewById(R.id.bOK);
-		bOK.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View arg0) {
-				updateAttributeFromUI();
-				if (Utils.checkEditText(nameTextView, "name", true, 256)) {
-					long id = db.insertOrUpdate(attribute);
-					Intent intent = new Intent();				
-					intent.putExtra(AttributeColumns.ID, id);
-					setResult(RESULT_OK, intent);
-					finish();
-				}
+		Button bOK = findViewById(R.id.bOK);
+		bOK.setOnClickListener(view -> {
+			updateAttributeFromUI();
+			if (Utils.checkEditText(nameTextView, "name", true, 256)) {
+				long id = db.insertOrUpdate(attribute);
+				Intent intent = new Intent();
+				intent.putExtra(AttributeColumns.ID, id);
+				setResult(RESULT_OK, intent);
+				finish();
 			}
-
 		});
 
-		Button bCancel = (Button)findViewById(R.id.bCancel);
-		bCancel.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View arg0) {
-				setResult(RESULT_CANCELED);
-				finish();
-			}			
+		Button bCancel = findViewById(R.id.bCancel);
+		bCancel.setOnClickListener(view -> {
+			setResult(RESULT_CANCELED);
+			finish();
 		});
 
 		Intent intent = getIntent();

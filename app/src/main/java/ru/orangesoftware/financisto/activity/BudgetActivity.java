@@ -300,7 +300,6 @@ public class BudgetActivity extends AbstractActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 // todo.mb: not much sense for adding new category & project in budget, remove then >>
@@ -317,6 +316,7 @@ public class BudgetActivity extends AbstractActivity {
                     }
                     break;
                 default:
+                    super.onActivityResult(requestCode, resultCode, data);
                     break;
             }
         }
