@@ -404,9 +404,6 @@
         <activity
             android:name=".activity.AboutActivity"
             android:label="@string/about" />
-        <activity
-            android:name=".activity.WebViewActivity"
-            android:label="@string/about" />
 
         <activity
             android:name=".activity.SplitTransactionActivity"
