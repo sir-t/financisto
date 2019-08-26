@@ -50,8 +50,7 @@ import static ru.orangesoftware.financisto.fragment.BlotterFragment.SAVE_FILTER;
 public class AccountListFragment extends AbstractListFragment {
 
     private static final int NEW_ACCOUNT_REQUEST = 1;
-
-    public static final int EDIT_ACCOUNT_REQUEST = 2;
+    private static final int EDIT_ACCOUNT_REQUEST = 2;
     private static final int VIEW_ACCOUNT_REQUEST = 3;
     private static final int PURGE_ACCOUNT_REQUEST = 4;
 

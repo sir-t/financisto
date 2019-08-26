@@ -32,6 +32,8 @@ import androidx.fragment.app.FragmentActivity;
 
 public class AttributeActivity extends FragmentActivity implements OnItemSelectedListener {
 
+	public static final String ATTRIBUTE_ID_EXTRA = "attributeId";
+
 	private DatabaseAdapter db;
 	
 	private Spinner typeSpinner;
@@ -84,7 +86,7 @@ public class AttributeActivity extends FragmentActivity implements OnItemSelecte
 
 		Intent intent = getIntent();
 		if (intent != null) {
-			long id = intent.getLongExtra(AttributeColumns.ID, -1);
+			long id = intent.getLongExtra(ATTRIBUTE_ID_EXTRA, -1);
 			if (id != -1) {
 				attribute = db.getAttribute(id);
 				editAttribute();
