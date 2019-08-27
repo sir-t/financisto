@@ -37,12 +37,6 @@ public class AttributeListFragment extends AbstractListFragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		context = getActivity();
-		return super.onCreateView(inflater, container, savedInstanceState);
-	}
-
-	@Override
 	protected Cursor createCursor() {
 		return db.getAllAttributes();
 	}
