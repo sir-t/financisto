@@ -34,6 +34,8 @@ import static ru.orangesoftware.financisto.activity.AbstractActivity.setVisibili
  */
 public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractActivity> {
 
+    private static final int ACTION_BUTTON_REQUEST = 201;
+
     protected final A activity;
     protected final MyEntityManager em;
     private final ActivityLayout x;
@@ -143,7 +145,7 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
             }
         } else if (id == actBtnId) {
             Intent intent = new Intent(activity, getEditActivityClass());
-            activity.startActivityForResult(intent, actBtnId);
+            activity.startActivityForResult(intent, ACTION_BUTTON_REQUEST);
         } else if (id == filterToggleId) {
             initFilterAdapter();
         } else if (id == clearBtnId) {
@@ -281,7 +283,7 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK && requestCode == actBtnId) {
+        if (resultCode == Activity.RESULT_OK && requestCode == ACTION_BUTTON_REQUEST) {
             onNewEntity(data);
         }
     }
