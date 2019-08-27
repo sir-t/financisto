@@ -68,8 +68,6 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
 
         initUI(savedInstanceState);
 
-        cursor = createCursor();
-
 //        getLoaderManager().initLoader(LOADER_ID, null, this);
 //        if (cursor != null) {
 //            startManagingCursor(cursor);
@@ -81,6 +79,7 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        cursor = createCursor();
         updateAdapter();
     }
 
