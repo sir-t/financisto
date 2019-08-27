@@ -36,8 +36,6 @@ import java.io.*;
 import java.util.*;
 
 import static ru.orangesoftware.financisto.activity.CategorySelector.SelectorType.TRANSACTION;
-import static ru.orangesoftware.financisto.activity.ReceiptActivity.CURRENCY_ID;
-import static ru.orangesoftware.financisto.activity.ReceiptActivity.RECEIPT_DATA;
 import static ru.orangesoftware.financisto.utils.Utils.isNotEmpty;
 
 public class TransactionActivity extends AbstractTransactionActivity implements QRCodeListener {
@@ -436,11 +434,10 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
                 break;
             case R.id.e_receipt_info:
                 if (transaction.eReceiptData != null && transaction.eReceiptData.startsWith("{")) {
-                    Intent intent = new Intent(TransactionActivity.this, ReceiptActivity.class);
+                    ReceiptActivity.Builder builder = new ReceiptActivity.Builder(this, transaction.eReceiptData);
                     if (isDifferentCurrency() || selectedAccount != null)
-                        intent.putExtra(CURRENCY_ID, isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
-                    intent.putExtra(RECEIPT_DATA, transaction.eReceiptData);
-                    startActivityForResult(intent, VIEW_RECEIPT);
+                        builder.setCurrencyId(isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
+                    startActivityForResult(builder.build(), VIEW_RECEIPT);
                 }
                 break;
             case R.id.e_receipt_get:
