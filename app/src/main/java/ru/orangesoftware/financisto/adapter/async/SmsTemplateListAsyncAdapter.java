@@ -29,8 +29,8 @@ import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.SmsTemplate;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 
-import static android.view.Gravity.END;
-import static android.view.Gravity.START;
+import static androidx.recyclerview.widget.ItemTouchHelper.END;
+import static androidx.recyclerview.widget.ItemTouchHelper.START;
 import static ru.orangesoftware.financisto.activity.SmsDragListActivity.EDIT_REQUEST_CODE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.SmsTemplateColumns._id;
 
