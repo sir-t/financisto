@@ -18,6 +18,7 @@ import android.widget.PopupMenu;
 import java.util.LinkedList;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.ListFragment;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.RefreshSupportedActivity;
@@ -74,12 +75,16 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
 //            startManagingCursor(cursor);
 //        }
 
-        updateAdapter();
-
-
         return view;
     }
-//
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        updateAdapter();
+    }
+
+    //
 //    @Override
 //    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 //        createCursor();
@@ -123,7 +128,8 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
 
     protected void initUI(Bundle savedInstanceState) {
         bAdd = view.findViewById(R.id.bAdd);
-        bAdd.setOnClickListener(arg0 -> addItem());
+        if (bAdd != null)
+            bAdd.setOnClickListener(arg0 -> addItem());
     }
 
     @Override

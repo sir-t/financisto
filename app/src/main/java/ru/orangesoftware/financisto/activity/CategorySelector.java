@@ -20,6 +20,7 @@ import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper;
 import ru.orangesoftware.financisto.model.*;
 import ru.orangesoftware.financisto.utils.ArrUtils;
+import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.TransactionUtils;
 import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.financisto.view.AttributeView;
@@ -30,6 +31,7 @@ import java.util.*;
 import static java.util.Objects.requireNonNull;
 import static ru.orangesoftware.financisto.activity.CategorySelectorActivity.CATEGORY_ADD;
 import static ru.orangesoftware.financisto.activity.CategorySelectorActivity.CATEGORY_PICK;
+import static ru.orangesoftware.financisto.activity.CategorySelectorActivity.EXTRA_SELECTED_CATEGORY_ID;
 import static ru.orangesoftware.financisto.model.Category.NO_CATEGORY_ID;
 
 public class CategorySelector<A extends AbstractActivity> {
@@ -201,10 +203,12 @@ public class CategorySelector<A extends AbstractActivity> {
             case R.id.category: {
                 if (useMultiChoicePlainSelector) {
                     x.selectMultiChoice(activity, R.id.category, R.string.categories, categories);
-                } else if (!CategorySelectorActivity.pickCategory(activity, multiSelect, selectedCategoryId, excludingSubTreeId, showSplitCategory)) {
+                } else if (multiSelect || MyPreferences.isUseHierarchicalCategorySelector(activity)) {
+                    Intent intent = CategorySelectorActivity.pickCategory(activity, selectedCategoryId, excludingSubTreeId, showSplitCategory);
+                    activity.startActivityForResult(intent, CATEGORY_PICK);
+                } else {
                     x.select(activity, R.id.category, R.string.category, categoryCursor, categoryAdapter,
-                        DatabaseHelper.CategoryViewColumns._id.name(), selectedCategoryId);
-                    
+                            DatabaseHelper.CategoryViewColumns._id.name(), selectedCategoryId);
                 }
                 break;
             }
@@ -359,7 +363,7 @@ public class CategorySelector<A extends AbstractActivity> {
                     break;
                 }
                 case CATEGORY_PICK: {
-                    long categoryId = data.getLongExtra(CategorySelectorActivity.SELECTED_CATEGORY_ID, 0);
+                    long categoryId = data.getLongExtra(EXTRA_SELECTED_CATEGORY_ID, 0);
                     selectCategory(categoryId);
                     break;
                 }
