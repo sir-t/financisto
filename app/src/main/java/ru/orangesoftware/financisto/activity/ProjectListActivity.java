@@ -11,31 +11,44 @@
 package ru.orangesoftware.financisto.activity;
 
 import android.view.View;
+
+import androidx.fragment.app.Fragment;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.filter.Criteria;
+import ru.orangesoftware.financisto.fragment.MyEntityListFragment;
 import ru.orangesoftware.financisto.model.Project;
 
-public class ProjectListActivity extends MyEntityListActivity<Project> {
-
-    public ProjectListActivity() {
-        super(Project.class, R.string.no_projects);
-    }
+public class ProjectListActivity extends SingleFragmentActivity {
 
     @Override
-    protected Class<ProjectActivity> getEditActivityClass() {
-        return ProjectActivity.class;
+    protected Fragment createFragment() {
+        return new ProjectListFragment();
     }
 
-    @Override
-    protected Criteria createBlotterCriteria(Project p) {
-        return Criteria.eq(BlotterFilter.PROJECT_ID, String.valueOf(p.id));
-    }
+    public static class ProjectListFragment extends MyEntityListFragment<Project> {
 
-    @Override
-    protected void deleteItem(View v, int position, long id) {
-        db.deleteProject(id);
-        recreateCursor();
+        public ProjectListFragment() {
+            super(Project.class, R.string.no_projects);
+        }
+
+        @Override
+        protected Class<ProjectActivity> getEditActivityClass() {
+            return ProjectActivity.class;
+        }
+
+        @Override
+        protected Criteria createBlotterCriteria(Project p) {
+            return Criteria.eq(BlotterFilter.PROJECT_ID, String.valueOf(p.id));
+        }
+
+        @Override
+        protected void deleteItem(View v, int position, long id) {
+            db.deleteProject(id);
+            recreateCursor();
+        }
+
     }
 
 }

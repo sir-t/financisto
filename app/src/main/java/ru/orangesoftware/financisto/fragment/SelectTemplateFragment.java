@@ -19,10 +19,10 @@ import ru.orangesoftware.financisto.widget.SearchFilterTextWatcherListener;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
-import static ru.orangesoftware.financisto.activity.MyEntityListActivity.FILTER_DELAY_MILLIS;
 import static ru.orangesoftware.financisto.blotter.BlotterFilter.CATEGORY_NAME;
 import static ru.orangesoftware.financisto.blotter.BlotterFilter.TEMPLATE_NAME;
 import static ru.orangesoftware.financisto.filter.WhereFilter.Operation.LIKE;
+import static ru.orangesoftware.financisto.fragment.MyEntityListFragment.FILTER_DELAY_MILLIS;
 
 public class SelectTemplateFragment extends TemplatesListFragment {
 

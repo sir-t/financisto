@@ -12,31 +12,43 @@ package ru.orangesoftware.financisto.activity;
 
 import android.view.View;
 
+import androidx.fragment.app.Fragment;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.filter.Criteria;
+import ru.orangesoftware.financisto.fragment.MyEntityListFragment;
 import ru.orangesoftware.financisto.model.MyLocation;
 
-public class LocationsListActivity extends MyEntityListActivity<MyLocation> {
-
-    public LocationsListActivity() {
-        super(MyLocation.class, R.string.no_locations);
-    }
+public class LocationsListActivity extends SingleFragmentActivity {
 
     @Override
-    protected Class<LocationActivity> getEditActivityClass() {
-        return LocationActivity.class;
+    protected Fragment createFragment() {
+        return new LocationsListFragment();
     }
 
-    @Override
-    protected Criteria createBlotterCriteria(MyLocation location) {
-        return Criteria.eq(BlotterFilter.LOCATION_ID, String.valueOf(location.id));
-    }
+    public static class LocationsListFragment extends MyEntityListFragment<MyLocation> {
 
-    @Override
-    protected void deleteItem(View v, int position, long id) {
-        db.deleteLocation(id);
-        recreateCursor();
+        public LocationsListFragment() {
+            super(MyLocation.class, R.string.no_locations);
+        }
+
+        @Override
+        protected Class<LocationActivity> getEditActivityClass() {
+            return LocationActivity.class;
+        }
+
+        @Override
+        protected Criteria createBlotterCriteria(MyLocation location) {
+            return Criteria.eq(BlotterFilter.LOCATION_ID, String.valueOf(location.id));
+        }
+
+        @Override
+        protected void deleteItem(View v, int position, long id) {
+            db.deleteLocation(id);
+            recreateCursor();
+        }
+
     }
 
 }
