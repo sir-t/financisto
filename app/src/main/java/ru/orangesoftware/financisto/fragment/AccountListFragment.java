@@ -65,16 +65,6 @@ public class AccountListFragment extends AbstractListFragment {
         super(R.layout.account_list);
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        context = getActivity();
-        super.onCreateView(inflater,container,savedInstanceState);
-
-        return view;
-    }
-
-
     protected void addItem() {
         Intent intent = new Intent(context, AccountActivity.class);
         startActivityForResult(intent, NEW_ACCOUNT_REQUEST);
