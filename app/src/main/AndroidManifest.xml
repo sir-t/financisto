@@ -251,7 +251,7 @@
             android:label="@string/exchange_rate" />
 
         <activity
-            android:name=".activity.CategoryListActivity2"
+            android:name=".activity.CategoryListActivity"
             android:label="@string/categories" />
 
         <activity
