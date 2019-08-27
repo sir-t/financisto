@@ -194,7 +194,7 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
     protected abstract void viewItem(View v, int position, long id);
 
     public void recreateCursor() {
-        Log.i("AbstractListActivity", "Recreating cursor");
+        Log.i("AbstractListFragment", "Recreating cursor");
         Parcelable state = getListView().onSaveInstanceState();
         try {
             if (cursor != null) {
