@@ -1,5 +1,5 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="fill_parent" android:layout_width="fill_parent"
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent"
 	android:orientation="vertical">
 	<LinearLayout android:layout_height="wrap_content"
 		android:layout_width="fill_parent">
@@ -9,12 +9,12 @@
 			android:text="@string/info"
 			android:id="@+id/bInfo"/>
 	</LinearLayout>
-	<ListView android:id="@android:id/list" android:layout_width="fill_parent"
-		android:layout_weight="1" android:layout_height="wrap_content"
-		android:choiceMode="singleChoice">
-	</ListView>
-	<TextView android:id="@android:id/empty" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:layout_weight="1"
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/list" android:layout_width="match_parent"
+		android:layout_height="0dp" android:layout_weight="1">
+	</androidx.recyclerview.widget.RecyclerView>
+	<TextView android:id="@+id/list_empty" android:layout_width="fill_parent"
+		android:layout_height="0dp" android:layout_weight="1"
 		android:gravity="center" android:text="@string/no_items" />
 	<LinearLayout android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:background="#FFF"
@@ -31,3 +31,4 @@
 			android:id="@+id/bBack"/>
 	</LinearLayout>
 </LinearLayout>
+</layout>

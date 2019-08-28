@@ -1,24 +1,24 @@
 package ru.orangesoftware.financisto.fragment;
 
-import android.content.Context;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONObject;
 
 import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.adapter.BlotterListAdapter;
+import ru.orangesoftware.financisto.databinding.ReceiptItemBinding;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.Utils;
 
-public class ReceiptFragment extends AbstractListFragment {
+public class ReceiptFragment extends AbstractRecycleFragment {
 
     private static final String ARG_CURRENCY_ID = "CURRENCY_ID";
     private static final String ARG_RECEIPT_DATA = "RECEIPT_DATA";
@@ -26,9 +26,6 @@ public class ReceiptFragment extends AbstractListFragment {
     private long currencyId;
     private String receiptData;
     private JSONObject receiptJSON;
-
-    private Button bBack;
-    private Button bDelete;
 
     public static ReceiptFragment newInstance(long currencyId, String receiptData) {
         Bundle args = new Bundle();
@@ -46,10 +43,7 @@ public class ReceiptFragment extends AbstractListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        bBack = view.findViewById(R.id.bBack);
-        bDelete = view.findViewById(R.id.bDelete);
+        View v = super.onCreateView(inflater, container, savedInstanceState);
 
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -63,93 +57,111 @@ public class ReceiptFragment extends AbstractListFragment {
             }
         }
 
-        return view;
-    }
-
-    @Override
-    protected Cursor createCursor() {
-        return null;
+        return v;
     }
 
     @Override
     protected void updateAdapter() {
-        if (adapter == null) {
-            adapter = new ReceiptAdapter(context, this.receiptJSON);
-            setListAdapter(adapter);
+        if (getListAdapter() == null) {
+            setListAdapter(new ReceiptAdapter(this.receiptJSON));
         }
     }
 
-    @Override
-    protected void deleteItem(View v, int position, long id) {
+    private class ReceiptItem {
 
-    }
+        private String mName;
+        private long mSum;
+        private String mQuantity;
+        private long mPrice;
 
-    @Override
-    protected void editItem(View v, int position, long id) {
-
-    }
-
-    @Override
-    protected void viewItem(View v, int position, long id) {
-
-    }
-
-    private class ReceiptAdapter extends BaseAdapter {
-
-        private final JSONObject jsonObject;
-
-        private ReceiptAdapter(Context context, JSONObject jsonObject) {
-            this.jsonObject = jsonObject;
-        }
-
-        @Override
-        public int getCount() {
+        ReceiptItem(JSONObject jsonObject) {
             try {
-                return jsonObject.getJSONArray("items").length();
-            } catch (Exception ex) {
-                return 0;
-            }
-        }
-
-        @Override
-        public JSONObject getItem(int i) {
-            try {
-                return jsonObject.getJSONArray("items").getJSONObject(i);
-            } catch (Exception ex) {
-                return null;
-            }
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            BlotterListAdapter.BlotterViewHolder v;
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.blotter_list_item, parent, false);
-                v = new BlotterListAdapter.BlotterViewHolder(convertView);
-                convertView.setTag(v);
-            } else {
-                v = (BlotterListAdapter.BlotterViewHolder)convertView.getTag();
-            }
-            JSONObject c = getItem(position);
-            try {
-                Currency ccache = CurrencyCache.getCurrency(db, currencyId);
-                v.topView.setText(c.getString("name"));
-                v.centerView.setText(Utils.amountToString(ccache, c.getLong("sum"), false));
-                v.bottomView.setVisibility(View.GONE);
-                v.rightCenterView.setText(c.getString("quantity"));
-                v.rightView.setText(Utils.amountToString(ccache, c.getLong("price"), false));
-                v.indicator.setVisibility(View.GONE);
-                v.iconView.setVisibility(View.GONE);
-                v.eReceiptView.setVisibility(View.GONE);
+                mName = jsonObject.getString("name");
+                mSum = jsonObject.getLong("sum");
+                mQuantity = jsonObject.getString("quantity");
+                mPrice = jsonObject.getLong("price");
             } catch (Exception ex) {
                 Log.e("Financisto", "getView", ex);
             }
-            return convertView;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public long getSum() {
+            return mSum;
+        }
+
+        public String getQuantity() {
+            return mQuantity;
+        }
+
+        public long getPrice() {
+            return mPrice;
+        }
+    }
+
+    private class ReceiptHolder extends RecyclerView.ViewHolder {
+
+        private ReceiptItem mItem;
+        private final ReceiptItemBinding mBinding;
+
+        private final Currency ccache;
+
+        ReceiptHolder(ReceiptItemBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
+
+            ccache = CurrencyCache.getCurrency(db, currencyId);
+        }
+
+        void bind(ReceiptItem item) {
+            mItem = item;
+
+            mBinding.top.setText(mItem.getName());
+            mBinding.center.setText(Utils.amountToString(ccache, mItem.getSum(),false));
+            mBinding.bottom.setVisibility(View.GONE);
+            mBinding.rightCenter.setText(mItem.getQuantity());
+            mBinding.right.setText(Utils.amountToString(ccache, mItem.getPrice(),false));
+            mBinding.indicator.setVisibility(View.GONE);
+            mBinding.rightTop.setVisibility(View.GONE);
+            mBinding.eReceipt.setVisibility(View.GONE);
+        }
+
+    }
+
+    private class ReceiptAdapter extends RecyclerView.Adapter<ReceiptHolder> {
+
+        private final JSONObject mJsonObject;
+
+        private ReceiptAdapter(JSONObject jsonObject) {
+            mJsonObject = jsonObject;
+        }
+
+        @NonNull
+        @Override
+        public ReceiptHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            ReceiptItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.receipt_item, parent, false);
+            return new ReceiptHolder(binding);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ReceiptHolder holder, int position) {
+            try {
+                ReceiptItem item = new ReceiptItem(mJsonObject.getJSONArray("items").getJSONObject(position));
+                holder.bind(item);
+            } catch (Exception ex) { }
+        }
+
+        @Override
+        public int getItemCount() {
+            try {
+                return mJsonObject.getJSONArray("items").length();
+            } catch (Exception ex) {
+                return 0;
+            }
         }
 
     }
