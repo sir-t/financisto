@@ -16,26 +16,18 @@
 
 package ru.orangesoftware.financisto.adapter.dragndrop;
 
-import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
- * Interface to notify an item ViewHolder of relevant callbacks from {@link
- * androidx.recyclerview.widget.ItemTouchHelper.Callback}.
- *
- * @author Paul Burke (ipaulpro)
+ * Listener for manual initiation of a drag.
  */
-public interface ItemTouchHelperViewHolder {
+public interface OnStartDragListener {
 
     /**
-     * Called when the {@link ItemTouchHelper} first registers an item as being moved or swiped.
-     * Implementations should update the item view to indicate it's active state.
+     * Called when a view is requesting a start of a drag.
+     *
+     * @param viewHolder The holder of the view to drag.
      */
-    void onItemSelected();
+    void onStartDrag(RecyclerView.ViewHolder viewHolder);
 
-
-    /**
-     * Called when the {@link ItemTouchHelper} has completed the move or swipe, and the active item
-     * state should be cleared.
-     */
-    void onItemClear();
 }
