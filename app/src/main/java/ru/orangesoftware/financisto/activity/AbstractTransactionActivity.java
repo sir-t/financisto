@@ -39,16 +39,19 @@ import ru.orangesoftware.financisto.db.DatabaseHelper.TransactionColumns;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.Attribute;
 import ru.orangesoftware.financisto.model.Category;
+import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.SystemAttribute;
 import ru.orangesoftware.financisto.model.Transaction;
 import ru.orangesoftware.financisto.model.TransactionAttribute;
 import ru.orangesoftware.financisto.model.TransactionStatus;
 import ru.orangesoftware.financisto.recur.NotificationOptions;
 import ru.orangesoftware.financisto.recur.Recurrence;
+import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.EnumUtils;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.PicturesUtil;
 import ru.orangesoftware.financisto.utils.TransactionUtils;
+import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.financisto.view.AttributeView;
 import ru.orangesoftware.financisto.view.AttributeViewFactory;
 import ru.orangesoftware.financisto.widget.RateLayoutView;
@@ -515,7 +518,8 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     protected Account selectAccount(long accountId, boolean selectLast) {
         Account a = db.getAccount(accountId);
         if (a != null) {
-            accountText.setText(a.title);
+            Currency c = CurrencyCache.getCurrency(db, a.currency.id);
+            accountText.setText(a.title + " (" + Utils.amountToString(c, a.totalAmount) + ")");
             rateView.selectCurrencyFrom(a.currency);
             selectedAccount = a;
         }

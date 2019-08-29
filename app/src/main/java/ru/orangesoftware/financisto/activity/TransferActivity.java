@@ -8,8 +8,11 @@ import android.widget.Toast;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.db.DatabaseHelper.AccountColumns;
 import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.MyPreferences;
+import ru.orangesoftware.financisto.utils.Utils;
 
 import static ru.orangesoftware.financisto.activity.CategorySelector.SelectorType.TRANSFER;
 
@@ -162,7 +165,8 @@ public class TransferActivity extends AbstractTransactionActivity {
 	}
 
 	protected void selectAccount(Account account, TextView accountText, boolean selectLast) {
-        accountText.setText(account.title);
+        Currency c = CurrencyCache.getCurrency(db, account.currency.id);
+        accountText.setText(account.title + " (" + Utils.amountToString(c, account.totalAmount) + ")");
         if (selectLast && isRememberLastAccount) {
             selectToAccount(account.lastAccountId);
         }
