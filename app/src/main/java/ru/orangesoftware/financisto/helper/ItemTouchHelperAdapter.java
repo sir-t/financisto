@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ru.orangesoftware.financisto.adapter.dragndrop;
+package ru.orangesoftware.financisto.helper;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -39,7 +39,13 @@ public interface ItemTouchHelperAdapter {
      * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
      * @see RecyclerView.ViewHolder#getAdapterPosition()
      */
-    boolean onItemMove(int fromPosition, int toPosition);
+    boolean onDrag(int fromPosition, int toPosition);
+
+    /**view dropped,need commit data
+     * @param fromPosition
+     * @param toPosition
+     */
+    void onDrop(int fromPosition, int toPosition);
 
 
     /**
@@ -49,9 +55,9 @@ public interface ItemTouchHelperAdapter {
      * adjusting the underlying data to reflect this removal.
      *
      * @param position The position of the item dismissed.
-     * @param i
+     * @param direction Swipe to Left or Right
      * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
      * @see RecyclerView.ViewHolder#getAdapterPosition()
      */
-    void onItemDismiss(int position, int i);
+    void onItemDismiss(int position, int direction);
 }

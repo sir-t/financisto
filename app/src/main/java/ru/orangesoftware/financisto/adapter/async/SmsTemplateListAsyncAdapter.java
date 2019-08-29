@@ -16,14 +16,13 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 import androidx.recyclerview.widget.RecyclerView;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.SmsDragListActivity;
 import ru.orangesoftware.financisto.activity.SmsTemplateActivity;
-import ru.orangesoftware.financisto.adapter.dragndrop.ItemTouchHelperAdapter;
-import ru.orangesoftware.financisto.adapter.dragndrop.ItemTouchHelperViewHolder;
+import ru.orangesoftware.financisto.helper.ItemTouchHelperAdapter;
+import ru.orangesoftware.financisto.helper.ItemTouchHelperViewHolder;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.SmsTemplate;
@@ -49,7 +48,6 @@ public class SmsTemplateListAsyncAdapter extends AsyncAdapter<SmsTemplate, SmsTe
     private final DatabaseAdapter db;
     private final Context context;
     private final SmsDragListActivity activity;
-    private AtomicLong draggedItemId = new AtomicLong(0);
 
     public SmsTemplateListAsyncAdapter(int chunkSize,
                                        DatabaseAdapter db,
@@ -137,13 +135,18 @@ public class SmsTemplateListAsyncAdapter extends AsyncAdapter<SmsTemplate, SmsTe
     }
 
     @Override
-    public boolean onItemMove(int fromPosition, int toPosition) {
-        final SmsTemplate itemSrc = listUtil.getItem(fromPosition);
-        final SmsTemplate itemTarget = listUtil.getItem(toPosition);
-        draggedItemId.set(itemTarget.getId());
-        Log.d(TAG, String.format("dragged %s item to %s item", itemSrc.getId(), itemTarget.getId()));
+    public boolean onDrag(int fromPosition, int toPosition) {
+        Log.d(TAG, String.format("dragged %s item to %s item", fromPosition, toPosition));
         notifyItemMoved(fromPosition, toPosition);
         return true;
+    }
+
+    @Override
+    public void onDrop(int fromPosition, int toPosition) {
+        final SmsTemplate itemSrc = listUtil.getItem(fromPosition);
+        final SmsTemplate itemTarget = listUtil.getItem(toPosition);
+        Log.d(TAG, String.format("dropped %s item to %s item", itemSrc.getId(), itemTarget.getId()));
+        new UpdateSortOrderTask().execute(itemSrc.getId(), itemTarget.getId());
     }
 
     @Override
@@ -200,14 +203,6 @@ public class SmsTemplateListAsyncAdapter extends AsyncAdapter<SmsTemplate, SmsTe
         @Override
         public void onItemClear() {
             //numberView.setTextColor(Color.WHITE);
-            long targetId = draggedItemId.get();
-            if (targetId > 0) { // dragged up or down
-                long srcId = (long) itemView.getTag(R.id.sms_tpl_id);
-                Log.d(TAG, String.format("`%s` moving to `%s`...", numberView.getText(), targetId));
-
-                new UpdateSortOrderTask().execute(srcId, targetId);
-                draggedItemId.set(0);
-            }
         }
     }
 

@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.adapter.async.SmsTemplateListAsyncAdapter;
 import ru.orangesoftware.financisto.adapter.async.SmsTemplateListSource;
-import ru.orangesoftware.financisto.adapter.dragndrop.SimpleItemTouchHelperCallback;
+import ru.orangesoftware.financisto.helper.SimpleItemTouchHelperCallback;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.utils.StringUtil;
 
@@ -84,7 +84,7 @@ public class SmsDragListActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
 
         if (dragnDrop) {
-            ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
+            ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter).setDragHorizontal(true).setDragVertical(true).setEnableSwipe(true);
             ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(callback);
             mItemTouchHelper.attachToRecyclerView(recyclerView);
         }
@@ -98,6 +98,8 @@ public class SmsDragListActivity extends AppCompatActivity {
             adapter.reloadVisibleItems();
         } else if (resultCode == RESULT_CANCELED) {
             adapter.revertSwipeBack();
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

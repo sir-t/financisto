@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ru.orangesoftware.financisto.adapter.dragndrop;
+package ru.orangesoftware.financisto.helper;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
 
