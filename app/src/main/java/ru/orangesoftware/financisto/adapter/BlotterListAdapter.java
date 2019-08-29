@@ -26,7 +26,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
@@ -57,8 +59,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
 
     private final int colors[];
 
-    private boolean allChecked = false;
-    private final List<Long> checkedItems = new ArrayList<>();
+    private final Set<Long> checkedItems = new HashSet<>();
 
     private boolean showRunningBalance;
 
@@ -114,7 +115,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         final BlotterViewHolder v = (BlotterViewHolder) view.getTag();
         final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
         final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
-        if (getCheckedState(id)) {
+        if (isUnchecked(id)) {
             v.layout.setBackgroundResource(R.color.material_blue_gray);
         } else {
             v.layout.setBackgroundResource(R.color.holo_gray_dark);
@@ -218,23 +219,10 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     }
 
     public void toggleSelection(long id, View layout) {
-        boolean checked = !getCheckedState(id);
+        boolean checked = !isUnchecked(id);
         updateCheckedState(id, checked);
         if (checked) {
             layout.setBackgroundResource(R.color.material_blue_gray);
-        } else if (allChecked) {
-            allChecked = false;
-            List<Long> allItems = new ArrayList<>();
-            Cursor cursor = getCursor();
-            boolean notempty = cursor.moveToFirst();
-            if (notempty) {
-                do {
-                    allItems.add(cursor.getLong(0));
-                } while (cursor.moveToNext());
-            }
-            allItems.remove(id);
-            checkedItems.addAll(allItems);
-            layout.setBackgroundResource(R.color.holo_gray_dark);
         } else {
             layout.setBackgroundResource(R.color.holo_gray_dark);
         }
@@ -280,8 +268,8 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         v.indicator.setBackgroundColor(colors[status.ordinal()]);
     }
 
-    private boolean getCheckedState(long id) {
-        return !checkedItems.contains(id) == allChecked;
+    private boolean isUnchecked(long id) {
+        return checkedItems.contains(id);
     }
 
     private void updateCheckedState(long id, boolean checked) {
@@ -293,17 +281,23 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     }
 
     public int getCheckedCount() {
-        return allChecked ? getCount() - checkedItems.size() : checkedItems.size();
+        return checkedItems.size();
     }
 
     public void checkAll() {
-        allChecked = true;
-        checkedItems.clear();
+        List<Long> allItems = new ArrayList<>();
+        Cursor cursor = getCursor();
+        boolean notEmpty = cursor.moveToFirst();
+        if (notEmpty) {
+            do {
+                allItems.add(cursor.getLong(0));
+            } while (cursor.moveToNext());
+        }
+        checkedItems.addAll(allItems);
         notifyDataSetInvalidated();
     }
 
     public void uncheckAll() {
-        allChecked = false;
         checkedItems.clear();
         notifyDataSetInvalidated();
     }
@@ -335,25 +329,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     }
 
     public long[] getAllCheckedIds() {
-        int checkedCount = getCheckedCount();
-        long[] ids = new long[checkedCount];
-        int k = 0;
-        if (allChecked) {
-            int count = getCount();
-            boolean addAll = count == checkedCount;
-            for (int i = 0; i < count; i++) {
-                long id = getItemId(i);
-                boolean checked = addAll || getCheckedState(id);
-                if (checked) {
-                    ids[k++] = id;
-                }
-            }
-        } else {
-            for (Long id : checkedItems) {
-                ids[k++] = id;
-            }
-        }
-        return ids;
+        return checkedItems.stream().mapToLong(l -> l).toArray();
     }
 
 }
