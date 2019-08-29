@@ -2,20 +2,26 @@ package ru.orangesoftware.financisto.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.helper.ItemTouchHelperAdapter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.helper.RecyclerTouchListener;
+import ru.orangesoftware.financisto.helper.SimpleItemTouchHelperCallback;
 import ru.orangesoftware.financisto.utils.PinProtection;
 
 public abstract class AbstractRecycleFragment extends Fragment {
@@ -201,6 +207,38 @@ public abstract class AbstractRecycleFragment extends Fragment {
         mAdapter = adapter;
         if (mList != null) {
             mList.setAdapter(adapter);
+
+            ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(new Test()).setDragVertical(true);
+            ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(mList);
+
+            RecyclerTouchListener touchListener = new RecyclerTouchListener(getActivity(), mList)
+                    .setClickable(new RecyclerTouchListener.OnRowClickListener() {
+                        @Override
+                        public void onRowClicked(int position) {
+                            Toast.makeText(context, "Clicked #" + position, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onIndependentViewClicked(int independentViewID, int position) {
+
+                        }
+                    })
+                    .setLongClickable(false, position -> Toast.makeText(context, "Long clicked #" + position, Toast.LENGTH_SHORT).show())
+                    .setSwipeOptionViews(R.id.delete_task, R.id.edit_task)
+                    .setSwipeable(R.id.rowFG, R.id.rowBG, (viewID, position) -> {
+                        switch (viewID){
+                            case R.id.delete_task:
+                                Toast.makeText(context, "Delete Not Available", Toast.LENGTH_SHORT).show();
+                                break;
+                            case R.id.edit_task:
+                                Toast.makeText(context, "Edit Not Available", Toast.LENGTH_SHORT).show();
+                                break;
+
+                        }
+                    });
+            mList.addOnItemTouchListener(touchListener);
+
             if (!mListShown && !hadAdapter) {
                 // The list was hidden, and previously didn't have an
                 // adapter.  It is now time to show it.
@@ -240,6 +278,27 @@ public abstract class AbstractRecycleFragment extends Fragment {
     public RecyclerView getListView() {
         ensureList();
         return mList;
+    }
+
+    private class Test implements ItemTouchHelperAdapter {
+
+        @Override
+        public boolean onDrag(int fromPosition, int toPosition) {
+            Log.e("Financisto", "onDrag from " + fromPosition + " to " + toPosition);
+            mAdapter.notifyItemMoved(fromPosition, toPosition);
+            return true;
+        }
+
+        @Override
+        public void onDrop(int fromPosition, int toPosition) {
+            Log.e("Financisto", "onDrop from " + fromPosition + " to " + toPosition);
+        }
+
+        @Override
+        public void onItemDismiss(int position, int i) {
+            Log.e("Financisto", "onItemDismiss " + position+ " -> " + i);
+        }
+
     }
 
 }
