@@ -9,7 +9,9 @@ import ru.orangesoftware.financisto.filter.WhereFilter;
 public class FilterState {
 
     public static void updateFilterColor(Context context, WhereFilter filter, ImageButton button) {
-        int color = filter.isEmpty() ? context.getResources().getColor(R.color.bottom_bar_tint) : context.getResources().getColor(R.color.holo_blue_dark);
+        int color = button.isEnabled()
+                ? (filter.isEmpty() ? context.getResources().getColor(R.color.bottom_bar_tint) : context.getResources().getColor(R.color.holo_blue_dark))
+                : context.getResources().getColor(R.color.bottom_bar_tint_white);
         button.setColorFilter(color);
     }
 

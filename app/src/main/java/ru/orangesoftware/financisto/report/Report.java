@@ -165,6 +165,10 @@ public abstract class Report {
         if (c != null) {
             filter.put(c);
         }
+        c = parentFilter.get(BlotterFilter.FROM_ACCOUNT_ID);
+        if (c != null) {
+            filter.put(c);
+        }
         c = parentFilter.get(BlotterFilter.CATEGORY_LEFT);
         if (c != null) {
             filter.put(c);

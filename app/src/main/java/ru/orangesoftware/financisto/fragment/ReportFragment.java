@@ -12,7 +12,6 @@ package ru.orangesoftware.financisto.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -22,13 +21,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import org.achartengine.ChartFactory;
-import org.achartengine.model.CategorySeries;
-import org.achartengine.renderer.DefaultRenderer;
-import org.achartengine.renderer.SimpleSeriesRenderer;
-
-import java.math.BigDecimal;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,13 +34,14 @@ import ru.orangesoftware.financisto.adapter.ReportAdapter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.dialog.ReportTypeSelectionDialog;
 import ru.orangesoftware.financisto.filter.WhereFilter;
-import ru.orangesoftware.financisto.graph.GraphUnit;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.Total;
 import ru.orangesoftware.financisto.report.IncomeExpense;
+import ru.orangesoftware.financisto.report.PeriodReport;
 import ru.orangesoftware.financisto.report.Report;
 import ru.orangesoftware.financisto.report.ReportData;
 import ru.orangesoftware.financisto.report.ReportType;
+import ru.orangesoftware.financisto.report.SubCategoryReport;
 import ru.orangesoftware.financisto.utils.PinProtection;
 import ru.orangesoftware.financisto.utils.Utils;
 
@@ -59,17 +52,23 @@ import static ru.orangesoftware.financisto.report.ReportType.BY_LOCATION;
 import static ru.orangesoftware.financisto.report.ReportType.BY_PAYEE;
 import static ru.orangesoftware.financisto.report.ReportType.BY_PERIOD;
 import static ru.orangesoftware.financisto.report.ReportType.BY_PROJECT;
+import static ru.orangesoftware.financisto.report.ReportType.BY_SUB_CATEGORY;
 
 public class ReportFragment extends ListFragment implements RefreshSupportedActivity {
 
-    public static final String FILTER_INCOME_EXPENSE = "FILTER_INCOME_EXPENSE";
-    public static final int CHANGE_REPORT_TYPE_REQUEST = 2000;
+    private static final String ARG_FILTER = "filter";
+    private static final String ARG_REPORT_TYPE = "report_type";
+    private static final String ARG_FILTER_INCOME_EXPENSE = "filter_income_expense";
+    private static final String PREF_FILTER_INCOME_EXPENSE = "FILTER_INCOME_EXPENSE";
+
+    private static final int FILTER_REQUEST = 1;
+    private static final int CHANGE_REPORT_TYPE_REQUEST = 2000;
     public static final int REPORT_TYPE_PERIOD = 2001;
     public static final int REPORT_TYPE_CATEGORY = 2002;
     public static final int REPORT_TYPE_PAYEE = 2003;
     public static final int REPORT_TYPE_PROJECT = 2004;
     public static final int REPORT_TYPE_LOCATION = 2005;
-    protected static final int FILTER_REQUEST = 1;
+
     private DatabaseAdapter db;
     private ImageButton bFilter;
     private ImageButton bToggle;
@@ -77,12 +76,23 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
     private ReportAsyncTask reportTask;
 
     private WhereFilter filter = WhereFilter.empty();
-    private boolean saveFilter = false;
+    private boolean needSaveFilter = false;
 
     private IncomeExpense incomeExpenseState = IncomeExpense.BOTH;
     private View view;
     private FragmentActivity context;
     private Button bTypeSwitcher;
+
+    public static ReportFragment newInstance(Bundle filterBundle, String reportType, String incomeExpenseName) {
+        Bundle args = new Bundle();
+        args.putBundle(ARG_FILTER, filterBundle);
+        args.putString(ARG_REPORT_TYPE, reportType);
+        args.putString(ARG_FILTER_INCOME_EXPENSE, incomeExpenseName);
+
+        ReportFragment fragment = new ReportFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -125,9 +135,22 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         bTypeSwitcher = view.findViewById(R.id.bTypeSwitcher);
         bTypeSwitcher.setOnClickListener(a -> showSwitchTypeDialog());
 
-        switchReport(BY_PERIOD);
+        ReportType type = BY_PERIOD;
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            Bundle filterBundle = bundle.getBundle(ARG_FILTER);
+            if (filterBundle != null) {
+                filter = WhereFilter.fromBundle(filterBundle);
+                String incomeExpenseName = bundle.getString(ARG_FILTER_INCOME_EXPENSE, null);
+                if (incomeExpenseName != null)
+                    incomeExpenseState = IncomeExpense.valueOf(incomeExpenseName);
+            }
+            String reportTypeName = bundle.getString(ARG_REPORT_TYPE);
+            if (reportTypeName != null)
+                type = ReportType.valueOf(reportTypeName);
+        }
+        switchReport(type, true);
 
-        FilterState.updateFilterColor(context, filter, bFilter);
         applyIncomeExpense();
         showOrRemoveTotals();
     }
@@ -138,12 +161,19 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         reportTypeSelectionDialog.show(context.getSupportFragmentManager(), this.getClass().getName());
     }
 
-    private void switchReport(ReportType type) {
+    private void switchReport(ReportType type, boolean firstStart) {
+        saveFilter(false);
         bTypeSwitcher.setText(type.getTitleId());
         currentReport = createReport(type);
-        filter = new WhereFilter("Empty");
-        FilterState.updateFilterColor(context, filter, bFilter);
+        if ((type == BY_SUB_CATEGORY) || (firstStart && !filter.isEmpty()))
+            applyFilter();
+        else
+            loadPrefsFilter();
         selectReport();
+    }
+
+    private void switchReport(ReportType type) {
+        switchReport(type, false);
     }
 
     private SharedPreferences getPreferencesForReport() {
@@ -155,7 +185,7 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         int nextIndex = incomeExpenseState.ordinal() + 1;
         incomeExpenseState = nextIndex < values.length ? values[nextIndex] : values[0];
         applyIncomeExpense();
-        FilterState.updateFilterColor(context, filter, bFilter);
+        saveFilter(true);
         selectReport();
     }
 
@@ -226,11 +256,11 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         if (requestCode == FILTER_REQUEST) {
             if (resultCode == RESULT_FIRST_USER) {
                 filter.clear();
-                FilterState.updateFilterColor(context, filter, bFilter);
+                saveFilter(true);
                 selectReport();
             } else if (resultCode == RESULT_OK) {
                 filter = WhereFilter.fromIntent(data);
-                FilterState.updateFilterColor(context, filter, bFilter);
+                saveFilter(true);
                 selectReport();
             }
         }
@@ -253,6 +283,32 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
                     break;
             }
         }
+    }
+
+    private void applyFilter() {
+        bFilter.setEnabled(!(currentReport instanceof PeriodReport));
+        FilterState.updateFilterColor(context, filter, bFilter);
+        bTypeSwitcher.setVisibility(currentReport instanceof SubCategoryReport ? View.GONE : View.VISIBLE);
+    }
+
+    private void saveFilter(boolean needApplyFilter) {
+        if (needSaveFilter) {
+            SharedPreferences preferences = getPreferencesForReport();
+            filter.toSharedPreferences(preferences);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(PREF_FILTER_INCOME_EXPENSE, incomeExpenseState.name());
+            editor.apply();
+        }
+        if (needApplyFilter)
+            applyFilter();
+    }
+
+    private void loadPrefsFilter() {
+        SharedPreferences preferences = getPreferencesForReport();
+        filter = WhereFilter.fromSharedPreferences(preferences);
+        incomeExpenseState = IncomeExpense.valueOf(preferences.getString(PREF_FILTER_INCOME_EXPENSE, IncomeExpense.BOTH.name()));
+        needSaveFilter = true;
+        applyFilter();
     }
 
     private void displayTotal(Total total) {
@@ -292,65 +348,6 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
             ((TextView) view.findViewById(android.R.id.empty)).setText(R.string.empty_report);
             ReportAdapter adapter = new ReportAdapter(context, data.units);
             setListAdapter(adapter);
-        }
-
-    }
-
-    private class PieChartGeneratorTask extends AsyncTask<Void, Void, Intent> {
-
-        @Override
-        protected void onPreExecute() {
-            context.setProgressBarIndeterminateVisibility(true);
-        }
-
-        @Override
-        protected Intent doInBackground(Void... voids) {
-            return createPieChart();
-        }
-
-        private Intent createPieChart() {
-            DefaultRenderer renderer = new DefaultRenderer();
-            renderer.setLabelsTextSize(getResources().getDimension(R.dimen.report_labels_text_size));
-            renderer.setLegendTextSize(getResources().getDimension(R.dimen.report_legend_text_size));
-            renderer.setMargins(new int[]{0, 0, 0, 0});
-            ReportData report = currentReport.getReportForChart(db, WhereFilter.copyOf(filter));
-            CategorySeries series = new CategorySeries("AAA");
-            long total = Math.abs(report.total.amount) + Math.abs(report.total.balance);
-            int[] colors = generateColors(2 * report.units.size());
-            int i = 0;
-            for (GraphUnit unit : report.units) {
-                addSeries(series, renderer, unit.name, unit.getIncomeExpense().income, total, colors[i++]);
-                addSeries(series, renderer, unit.name, unit.getIncomeExpense().expense, total, colors[i++]);
-            }
-            renderer.setZoomButtonsVisible(true);
-            renderer.setZoomEnabled(true);
-            renderer.setChartTitleTextSize(20);
-            return ChartFactory.getPieChartIntent(context, series, renderer, getString(R.string.report));
-        }
-
-        public int[] generateColors(int n) {
-            int[] colors = new int[n];
-            for (int i = 0; i < n; i++) {
-                colors[i] = Color.HSVToColor(new float[]{360 * (float) i / (float) n, .75f, .85f});
-            }
-            return colors;
-        }
-
-        private void addSeries(CategorySeries series, DefaultRenderer renderer, String name, BigDecimal expense, long total, int color) {
-            long amount = expense.longValue();
-            if (amount != 0 && total != 0) {
-                long percentage = 100 * Math.abs(amount) / total;
-                series.add((amount > 0 ? "+" : "-") + name + "(" + percentage + "%)", percentage);
-                SimpleSeriesRenderer r = new SimpleSeriesRenderer();
-                r.setColor(color);
-                renderer.addSeriesRenderer(r);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Intent intent) {
-            context.setProgressBarIndeterminateVisibility(false);
-            startActivity(intent);
         }
 
     }

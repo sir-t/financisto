@@ -18,7 +18,6 @@ import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.filter.Criteria;
 import ru.orangesoftware.financisto.filter.WhereFilter;
-import ru.orangesoftware.financisto.fragment.ReportFragment;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.Currency;
 
@@ -40,10 +39,7 @@ public class CategoryReport extends Report {
 	@Override
 	public Intent createActivityIntent(Context context, DatabaseAdapter db, WhereFilter parentFilter, long id) {
         WhereFilter filter = createFilterForSubCategory(db, parentFilter, id);
-		Intent intent = new Intent(context, ReportActivity.class);
-		filter.toIntent(intent);
-		intent.putExtra(ReportFragment.FILTER_INCOME_EXPENSE, incomeExpense.name());
-		return intent;
+		return ReportActivity.newIntent(context, filter, ReportType.BY_SUB_CATEGORY.name(), incomeExpense.name());
 	}
 
     public WhereFilter createFilterForSubCategory(DatabaseAdapter db, WhereFilter parentFilter, long id) {
@@ -52,6 +48,10 @@ public class CategoryReport extends Report {
         if (c != null) {
             filter.put(c);
         }
+		c = parentFilter.get(BlotterFilter.FROM_ACCOUNT_ID);
+		if (c != null) {
+			filter.put(c);
+		}
 		c = parentFilter.get(BlotterFilter.CATEGORY_LEFT);
 		if (c != null) {
 			filter.put(c);

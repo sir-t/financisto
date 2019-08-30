@@ -27,6 +27,7 @@
 	<color name="category_type_income">#39b54a</color>
 	<color name="category_type_expense">#f26522</color>
 	<color name="bottom_bar_tint">#555555</color>
+	<color name="bottom_bar_tint_white">#ffffff</color>
 	<color name="ic_backround">#5587B1</color>
 	<dimen name="picker_width">62dp</dimen>
 	<dimen name="calculator_button_width">56dp</dimen>
