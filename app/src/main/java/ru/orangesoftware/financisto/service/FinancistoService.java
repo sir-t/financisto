@@ -26,7 +26,7 @@ import android.util.Pair;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.AbstractTransactionActivity;
 import ru.orangesoftware.financisto.activity.AccountWidget;
-import ru.orangesoftware.financisto.activity.MassOpActivity;
+import ru.orangesoftware.financisto.activity.MainActivity;
 import ru.orangesoftware.financisto.backup.DatabaseExport;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
@@ -202,7 +202,7 @@ public class FinancistoService extends JobIntentService {
         String text = getString(R.string.scheduled_transactions_have_been_restored, count);
         String contentTitle = getString(R.string.scheduled_transactions_restored);
 
-        Intent notificationIntent = new Intent(this, MassOpActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         WhereFilter filter = new WhereFilter("");
         filter.eq(BlotterFilter.STATUS, TransactionStatus.RS.name());
         filter.toIntent(notificationIntent);

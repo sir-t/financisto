@@ -69,7 +69,7 @@ public class ReportsListFragment extends ListFragment {
     }
 
     public static Report createReport(Context context, MyEntityManager em, Bundle extras) {
-        String reportTypeName = extras.getString(EXTRA_REPORT_TYPE);
+        String reportTypeName = ReportType.BY_PERIOD.name();
         ReportType reportType = ReportType.valueOf(reportTypeName);
         Currency c = em.getHomeCurrency();
         return reportType.createReport(context, c);

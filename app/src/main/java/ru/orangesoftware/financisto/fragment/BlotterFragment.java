@@ -1,5 +1,7 @@
 package ru.orangesoftware.financisto.fragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -22,6 +25,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.List;
 
 import greendroid.widget.QuickActionGrid;
@@ -45,12 +49,16 @@ import ru.orangesoftware.financisto.blotter.AccountTotalCalculationTask;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.blotter.BlotterTotalCalculationTask;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
+import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.dialog.AbstractDialogFragment;
+import ru.orangesoftware.financisto.dialog.MassOperationsDialog;
 import ru.orangesoftware.financisto.dialog.TransactionInfoDialog;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.Transaction;
 import ru.orangesoftware.financisto.utils.IntegrityCheckRunningBalance;
+import ru.orangesoftware.financisto.utils.LocalizableEnum;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.view.NodeInflater;
@@ -75,6 +83,11 @@ public class BlotterFragment extends AbstractListFragment {
     private static final int MENU_SAVE_AS_TEMPLATE = MENU_ADD + 2;
     public static final int RESULT_CREATE_ANOTHER_TRANSACTION = 100;
     public static final int RESULT_CREATE_ANOTHER_TRANSFER = 101;
+    public static final int MASS_OPERATION = 1001;
+    public static final int MASS_OPERATION_CLEAR = 1002;
+    public static final int MASS_OPERATION_DELETE = 1003;
+    public static final int MASS_OPERATION_RECONCILE = 1004;
+    public static final int MASS_OPERATION_PENDING = 1005;
 
     protected TextView totalText;
     protected ImageButton bFilter;
@@ -94,6 +107,13 @@ public class BlotterFragment extends AbstractListFragment {
     protected boolean isAccountBlotter = false;
     protected boolean showAllBlotterButtons = true;
 
+    boolean selectionMode = false;
+
+    private View defaultBottomBar;
+    private View selectionBottomBar;
+    private TextView selectionCountText;
+    private int shortAnimationDuration;
+
     public BlotterFragment() {
         super(R.layout.blotter);
     }
@@ -109,6 +129,94 @@ public class BlotterFragment extends AbstractListFragment {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         integrityCheck();
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setOnItemLongClickListener((parent, v, position, id) -> {
+                    selectItem(v, id);
+                    return true;
+                }
+        );
+        defaultBottomBar = view.findViewById(R.id.defaultBottomBar);
+        shortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime
+        );
+        selectionBottomBar = view.findViewById(R.id.selectionBottomBar);
+
+        selectionBottomBar.findViewById(R.id.bCheckAll).setOnClickListener(arg0 -> selectAll());
+        selectionBottomBar.findViewById(R.id.bUncheckAll).setOnClickListener(arg0 -> deselectAll());
+        selectionBottomBar.findViewById(R.id.bSelectionAction).setOnClickListener(arg0 -> showSelectionActionDialog());
+
+        selectionCountText = selectionBottomBar.findViewById(R.id.selectionCount);
+
+        if (selectionMode) {
+            defaultBottomBar.setVisibility(View.GONE);
+            selectionBottomBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void selectAll() {
+        ((BlotterListAdapter) adapter).checkAll();
+        updateCount();
+    }
+
+    private void showSelectionActionDialog() {
+        AbstractDialogFragment massOperationsDialog = new MassOperationsDialog();
+        massOperationsDialog.setTargetFragment(this, 1001);
+        massOperationsDialog.show(getActivity().getSupportFragmentManager(), "MultiSelectActionsDialog");
+    }
+
+    private void deselectAll() {
+        ((BlotterListAdapter) adapter).uncheckAll();
+        updateSelectionMode(false);
+        updateCount();
+    }
+
+    private void updateCount() {
+        int count = ((BlotterListAdapter) adapter).getCheckedCount();
+        selectionCountText.setText(String.valueOf(count));
+        if (count == 0) {
+            updateSelectionMode(false);
+        }
+    }
+
+    private void selectItem(View v, long id) {
+        ((BlotterListAdapter) adapter).toggleSelection(id, v);
+        updateSelectionMode(((BlotterListAdapter) adapter).getCheckedCount() > 0);
+        updateCount();
+    }
+
+    private void updateSelectionMode(boolean selectionModeOn) {
+        if (selectionModeOn != selectionMode) {
+            selectionMode = selectionModeOn;
+            if (selectionModeOn) {
+                crossfade(selectionBottomBar, defaultBottomBar);
+            } else {
+                crossfade(defaultBottomBar, selectionBottomBar);
+            }
+        }
+    }
+
+    private void crossfade(View in, View out) {
+        in.setAlpha(0f);
+        in.setVisibility(View.VISIBLE);
+
+        in.animate()
+                .alpha(1f)
+                .setDuration(shortAnimationDuration)
+                .setListener(null);
+
+        out.animate()
+                .alpha(0f)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        out.setVisibility(View.GONE);
+                    }
+                });
     }
 
     protected void calculateTotals() {
@@ -546,6 +654,43 @@ public class BlotterFragment extends AbstractListFragment {
         if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
             calculateTotals();
         }
+        if (requestCode == MASS_OPERATION) {
+            switch (resultCode) {
+                case MASS_OPERATION_CLEAR:
+                    applyMassOp(BlotterFragment.MassOp.CLEAR);
+                    break;
+                case MASS_OPERATION_DELETE:
+                    applyMassOp(BlotterFragment.MassOp.DELETE);
+                    break;
+                case MASS_OPERATION_PENDING:
+                    applyMassOp(BlotterFragment.MassOp.PENDING);
+                    break;
+                case MASS_OPERATION_RECONCILE:
+                    applyMassOp(BlotterFragment.MassOp.RECONCILE);
+                    break;
+            }
+        }
+    }
+
+    private void applyMassOp(final MassOp op) {
+        BlotterListAdapter blotterAdapter = (BlotterListAdapter) adapter;
+        int count = blotterAdapter.getCheckedCount();
+        if (count > 0) {
+            new AlertDialog.Builder(context)
+                    .setMessage(getString(R.string.apply_mass_op, getString(op.getTitleId()), count))
+                    .setPositiveButton(R.string.yes, (arg0, arg1) -> {
+                        long[] ids = blotterAdapter.getAllCheckedIds();
+                        Log.d("Financisto", "Will apply " + op + " on " + Arrays.toString(ids));
+                        op.apply(db, ids);
+                            deselectAll();
+                        blotterAdapter.changeCursor(createCursor());
+                        updateCount();
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show();
+        } else {
+            Toast.makeText(context, R.string.apply_mass_op_zero_count, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void createTransactionFromTemplate(Intent data) {
@@ -591,11 +736,15 @@ public class BlotterFragment extends AbstractListFragment {
 
     @Override
     protected void onItemClick(View v, int position, long id) {
-        if (isQuickMenuEnabledForTransaction(context)) {
-            selectedId = id;
-            transactionActionGrid.show(v);
+        if (selectionMode) {
+            selectItem(v, id);
         } else {
-            showTransactionInfo(id);
+            if (isQuickMenuEnabledForTransaction(context)) {
+                selectedId = id;
+                transactionActionGrid.show(v);
+            } else {
+                showTransactionInfo(id);
+            }
         }
     }
 
@@ -612,5 +761,46 @@ public class BlotterFragment extends AbstractListFragment {
     @Override
     public void integrityCheck() {
         new IntegrityCheckTask(context).execute(new IntegrityCheckRunningBalance(context, db));
+    }
+
+    public enum MassOp implements LocalizableEnum {
+        CLEAR(R.string.mass_operations_clear_all) {
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.clearSelectedTransactions(ids);
+            }
+        },
+        RECONCILE(R.string.mass_operations_reconcile) {
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.reconcileSelectedTransactions(ids);
+            }
+        },
+        PENDING(R.string.transaction_status_pending) {
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.setPendingSelectedTransactions(ids);
+            }
+        },
+        DELETE(R.string.mass_operations_delete) {
+            @Override
+            public void apply(DatabaseAdapter db, long[] ids) {
+                db.deleteSelectedTransactions(ids);
+                db.rebuildRunningBalances();
+            }
+        };
+
+        private final int titleId;
+
+        MassOp(int titleId) {
+            this.titleId = titleId;
+        }
+
+        public abstract void apply(DatabaseAdapter db, long[] ids);
+
+        @Override
+        public int getTitleId() {
+            return titleId;
+        }
     }
 }

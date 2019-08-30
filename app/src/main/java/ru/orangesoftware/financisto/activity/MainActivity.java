@@ -41,7 +41,7 @@ import ru.orangesoftware.financisto.fragment.AccountListFragment;
 import ru.orangesoftware.financisto.fragment.BlotterFragment;
 import ru.orangesoftware.financisto.fragment.BudgetListFragment;
 import ru.orangesoftware.financisto.fragment.MenuFragment;
-import ru.orangesoftware.financisto.fragment.ReportsListFragment;
+import ru.orangesoftware.financisto.fragment.ReportFragment;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.PinProtection;
@@ -78,7 +78,7 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         accListFragment = new AccountListFragment();
         blotterFragment = new BlotterFragment();
         budgetsFragment = new BudgetListFragment();
-        reportsFragment = new ReportsListFragment();
+        reportsFragment = new ReportFragment();
         menuFragment = new MenuFragment();
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);

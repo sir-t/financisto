@@ -128,9 +128,6 @@ public class AccountListFragment extends AbstractListFragment {
             case R.id.backup:
                 MenuListItem.MENU_BACKUP.call(context);
                 break;
-            case R.id.go_to_menu:
-                GreenRobotBus_.getInstance_(context).post(new SwitchToMenuTabEvent());
-                break;
         }
     }
 

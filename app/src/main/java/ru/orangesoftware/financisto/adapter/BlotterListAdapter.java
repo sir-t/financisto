@@ -15,31 +15,36 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.text.format.DateUtils;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper.BlotterColumns;
-import static ru.orangesoftware.financisto.model.Category.isSplit;
 import ru.orangesoftware.financisto.model.CategoryEntity;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.TransactionStatus;
 import ru.orangesoftware.financisto.recur.Recurrence;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.MyPreferences;
-import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
-
 import ru.orangesoftware.financisto.utils.StringUtil;
 import ru.orangesoftware.financisto.utils.Utils;
+
+import static ru.orangesoftware.financisto.model.Category.isSplit;
+import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
 
 public class BlotterListAdapter extends ResourceCursorAdapter {
 
@@ -55,8 +60,7 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
 
     private final int colors[];
 
-    private boolean allChecked = true;
-    private final HashMap<Long, Boolean> checkedItems = new HashMap<Long, Boolean>();
+    private final Set<Long> checkedItems = new HashSet<>();
 
     private boolean showRunningBalance;
 
@@ -110,6 +114,13 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         final BlotterViewHolder v = (BlotterViewHolder) view.getTag();
+        final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
+        final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
+        if (isUnchecked(id)) {
+            v.layout.setBackgroundResource(R.color.material_blue_gray);
+        } else {
+            v.layout.setBackgroundResource(R.color.holo_gray_dark);
+        }
         bindView(v, context, cursor);
     }
 
@@ -219,17 +230,15 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
             }
         }
         removeRightViewIfNeeded(v);
-        if (v.checkBox != null) {
-            final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
-            final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
-            v.checkBox.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View arg0) {
-                    updateCheckedState(id, allChecked ^ v.checkBox.isChecked());
-                }
-            });
-            boolean isChecked = getCheckedState(id);
-            v.checkBox.setChecked(isChecked);
+    }
+
+    public void toggleSelection(long id, View layout) {
+        boolean checked = !isUnchecked(id);
+        updateCheckedState(id, checked);
+        if (checked) {
+            layout.setBackgroundResource(R.color.material_blue_gray);
+        } else {
+            layout.setBackgroundResource(R.color.holo_gray_dark);
         }
     }
 
@@ -273,30 +282,36 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         v.indicator.setBackgroundColor(colors[status.ordinal()]);
     }
 
-    private boolean getCheckedState(long id) {
-        return checkedItems.get(id) == null == allChecked;
+    private boolean isUnchecked(long id) {
+        return checkedItems.contains(id);
     }
 
     private void updateCheckedState(long id, boolean checked) {
         if (checked) {
-            checkedItems.put(id, true);
+            checkedItems.add(id);
         } else {
             checkedItems.remove(id);
         }
     }
 
     public int getCheckedCount() {
-        return allChecked ? getCount() - checkedItems.size() : checkedItems.size();
+        return checkedItems.size();
     }
 
     public void checkAll() {
-        allChecked = true;
-        checkedItems.clear();
+        List<Long> allItems = new ArrayList<>();
+        Cursor cursor = getCursor();
+        boolean notEmpty = cursor.moveToFirst();
+        if (notEmpty) {
+            do {
+                allItems.add(cursor.getLong(0));
+            } while (cursor.moveToNext());
+        }
+        checkedItems.addAll(allItems);
         notifyDataSetInvalidated();
     }
 
     public void uncheckAll() {
-        allChecked = false;
         checkedItems.clear();
         notifyDataSetInvalidated();
     }
@@ -315,40 +330,32 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         public final TextView eReceiptView;
 
         public BlotterViewHolder(View view) {
-            layout = (RelativeLayout) view.findViewById(R.id.layout);
-            indicator = (TextView) view.findViewById(R.id.indicator);
-            topView = (TextView) view.findViewById(R.id.top);
-            centerView = (TextView) view.findViewById(R.id.center);
-            bottomView = (TextView) view.findViewById(R.id.bottom);
-            rightCenterView = (TextView) view.findViewById(R.id.right_center);
-            rightView = (TextView) view.findViewById(R.id.right);
-            iconView = (ImageView) view.findViewById(R.id.right_top);
-            checkBox = (CheckBox) view.findViewById(R.id.cb);
-            eReceiptView = (TextView) view.findViewById(R.id.e_receipt);
+            layout = view.findViewById(R.id.layout);
+            indicator = view.findViewById(R.id.indicator);
+            topView = view.findViewById(R.id.top);
+            centerView = view.findViewById(R.id.center);
+            bottomView = view.findViewById(R.id.bottom);
+            rightCenterView = view.findViewById(R.id.right_center);
+            rightView = view.findViewById(R.id.right);
+            iconView = view.findViewById(R.id.right_top);
+            checkBox = view.findViewById(R.id.cb);
+            eReceiptView = view.findViewById(R.id.e_receipt);
         }
 
     }
 
     public long[] getAllCheckedIds() {
-        int checkedCount = getCheckedCount();
-        long[] ids = new long[checkedCount];
-        int k = 0;
-        if (allChecked) {
-            int count = getCount();
-            boolean addAll = count == checkedCount;
-            for (int i = 0; i < count; i++) {
-                long id = getItemId(i);
-                boolean checked = addAll || getCheckedState(id);
-                if (checked) {
-                    ids[k++] = id;
-                }
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return checkedItems.stream().mapToLong(l -> l).toArray();
         } else {
-            for (Long id : checkedItems.keySet()) {
+            int checkedCount = getCheckedCount();
+            long[] ids = new long[checkedCount];
+            int k = 0;
+            for (Long id : checkedItems) {
                 ids[k++] = id;
             }
+            return ids;
         }
-        return ids;
     }
 
 }

@@ -369,7 +369,11 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
             data.putExtra(TransactionColumns._id.name(), id);
             data.putExtra(DATETIME_EXTRA, transaction.dateTime);
             setResult(result, data);
-            finish();
+            if (getIntent().getBooleanExtra(DIRECT_TRANSACTION_EXTRA, false)) {
+                finishAndRemoveTask();
+            } else {
+                finish();
+            }
             return true;
         }
         return false;

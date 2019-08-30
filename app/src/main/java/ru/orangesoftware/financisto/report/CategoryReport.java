@@ -18,6 +18,7 @@ import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.filter.Criteria;
 import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.fragment.ReportFragment;
 import ru.orangesoftware.financisto.fragment.ReportsListFragment;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.Currency;
@@ -43,7 +44,7 @@ public class CategoryReport extends Report {
 		Intent intent = new Intent(context, ReportActivity.class);
 		filter.toIntent(intent);
 		intent.putExtra(ReportsListFragment.EXTRA_REPORT_TYPE, ReportType.BY_SUB_CATEGORY.name());
-        intent.putExtra(ReportActivity.FILTER_INCOME_EXPENSE, incomeExpense.name());
+		intent.putExtra(ReportFragment.FILTER_INCOME_EXPENSE, incomeExpense.name());
 		return intent;
 	}
 

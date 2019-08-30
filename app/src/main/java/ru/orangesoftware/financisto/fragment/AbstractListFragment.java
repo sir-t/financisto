@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.ListFragment;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.RefreshSupportedActivity;
@@ -105,20 +106,20 @@ public abstract class AbstractListFragment extends ListFragment implements Refre
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getListView().setOnItemLongClickListener((parent, view2, position, id) -> {
-            PopupMenu popupMenu = new PopupMenu(context, view2);
-            Menu menu = popupMenu.getMenu();
-            List<MenuItemInfo> menus = createContextMenus(id);
-            int i = 0;
-            for (MenuItemInfo m : menus) {
-                if (m.enabled) {
-                    menu.add(0, m.menuId, i++, m.titleId);
-                }
-            }
-            popupMenu.setOnMenuItemClickListener(item -> onPopupItemSelected(item.getItemId(), view2, position, id));
-            popupMenu.show();
-            return true;
-        });
+//        getListView().setOnItemLongClickListener((parent, view2, position, id) -> {
+//            PopupMenu popupMenu = new PopupMenu(context, view2);
+//            Menu menu = popupMenu.getMenu();
+//            List<MenuItemInfo> menus = createContextMenus(id);
+//            int i = 0;
+//            for (MenuItemInfo m : menus) {
+//                if (m.enabled) {
+//                    menu.add(0, m.menuId, i++, m.titleId);
+//                }
+//            }
+//            popupMenu.setOnMenuItemClickListener(item -> onPopupItemSelected(item.getItemId(), view2, position, id));
+//            popupMenu.show();
+//            return true;
+//        });
     }
 
     protected abstract Cursor createCursor();

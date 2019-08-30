@@ -12,7 +12,7 @@
 		android:layout_weight="1" android:layout_height="wrap_content"
         android:choiceMode="singleChoice">
 	</ListView>
-	<TextView android:id="@id/android:empty" android:layout_width="fill_parent"
+	<TextView android:id="@android:id/empty" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:layout_weight="1"
 		android:gravity="center" android:text="@string/no_categories" />
 	<LinearLayout android:layout_height="wrap_content"
