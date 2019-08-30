@@ -55,6 +55,7 @@ import ru.orangesoftware.financisto.utils.Utils;
 import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.Activity.RESULT_OK;
 import static ru.orangesoftware.financisto.report.ReportType.BY_CATEGORY;
+import static ru.orangesoftware.financisto.report.ReportType.BY_LOCATION;
 import static ru.orangesoftware.financisto.report.ReportType.BY_PAYEE;
 import static ru.orangesoftware.financisto.report.ReportType.BY_PERIOD;
 import static ru.orangesoftware.financisto.report.ReportType.BY_PROJECT;
@@ -67,6 +68,7 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
     public static final int REPORT_TYPE_CATEGORY = 2002;
     public static final int REPORT_TYPE_PAYEE = 2003;
     public static final int REPORT_TYPE_PROJECT = 2004;
+    public static final int REPORT_TYPE_LOCATION = 2005;
     protected static final int FILTER_REQUEST = 1;
     private DatabaseAdapter db;
     private ImageButton bFilter;
@@ -131,7 +133,7 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
     }
 
     private void showSwitchTypeDialog() {
-        ReportTypeSelectionDialog reportTypeSelectionDialog = new ReportTypeSelectionDialog();
+        ReportTypeSelectionDialog reportTypeSelectionDialog = new ReportTypeSelectionDialog(context);
         reportTypeSelectionDialog.setTargetFragment(this, CHANGE_REPORT_TYPE_REQUEST);
         reportTypeSelectionDialog.show(context.getSupportFragmentManager(), this.getClass().getName());
     }
@@ -245,6 +247,9 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
                     break;
                 case REPORT_TYPE_PROJECT:
                     switchReport(BY_PROJECT);
+                    break;
+                case REPORT_TYPE_LOCATION:
+                    switchReport(BY_LOCATION);
                     break;
             }
         }

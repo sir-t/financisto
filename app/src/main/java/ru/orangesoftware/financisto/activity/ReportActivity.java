@@ -10,23 +10,14 @@
  ******************************************************************************/
 package ru.orangesoftware.financisto.activity;
 
-import android.os.Bundle;
-import android.widget.LinearLayout;
+import androidx.fragment.app.Fragment;
+import ru.orangesoftware.financisto.fragment.ReportFragment;
 
-import androidx.fragment.app.FragmentActivity;
-import ru.orangesoftware.financisto.R;
+public class ReportActivity extends SingleFragmentActivity {
 
-public class ReportActivity extends FragmentActivity {
-
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        LinearLayout content = new LinearLayout(this);
-        content.setId(R.id.main_container);
-        setContentView(content);
-
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.main_container, new ru.orangesoftware.financisto.fragment.ReportFragment())
-                .commit();
+    @Override
+    protected Fragment createFragment() {
+        return new ReportFragment();
     }
 
 }
