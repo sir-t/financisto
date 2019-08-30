@@ -27,6 +27,7 @@ public class MyPreferences {
     public static final String NALOG_PASSWORD = "nalog_password";
     public static final String ENTITY_SELECTOR_LIST = "list";
     public static final String ENTITY_SELECTOR_FILTER = "filter";
+    public static final String LAST_REPORT_TYPE = "last_report_type";
 
     public enum AccountSortOrder {
         SORT_ORDER_ASC("sortOrder", true),
@@ -738,6 +739,15 @@ public class MyPreferences {
     public static boolean shouldSaveSmsToTransactionNote(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean("sms_transaction_note", true);
+    }
+
+    public static String getLastReportType(Context context, String defValue) {
+        return getString(context, LAST_REPORT_TYPE, defValue);
+    }
+
+    public static void setLastReportType(Context context, String reportType) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putString(LAST_REPORT_TYPE, reportType).apply();
     }
 
     public static long getLastAutobackupCheck(Context context) {

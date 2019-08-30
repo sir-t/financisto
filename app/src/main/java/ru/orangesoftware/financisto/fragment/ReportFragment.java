@@ -42,6 +42,7 @@ import ru.orangesoftware.financisto.report.Report;
 import ru.orangesoftware.financisto.report.ReportData;
 import ru.orangesoftware.financisto.report.ReportType;
 import ru.orangesoftware.financisto.report.SubCategoryReport;
+import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.PinProtection;
 import ru.orangesoftware.financisto.utils.Utils;
 
@@ -135,7 +136,7 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         bTypeSwitcher = view.findViewById(R.id.bTypeSwitcher);
         bTypeSwitcher.setOnClickListener(a -> showSwitchTypeDialog());
 
-        ReportType type = BY_PERIOD;
+        String reportTypeName = MyPreferences.getLastReportType(context, BY_PERIOD.name());
         Bundle bundle = getArguments();
         if (bundle != null) {
             Bundle filterBundle = bundle.getBundle(ARG_FILTER);
@@ -145,11 +146,11 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
                 if (incomeExpenseName != null)
                     incomeExpenseState = IncomeExpense.valueOf(incomeExpenseName);
             }
-            String reportTypeName = bundle.getString(ARG_REPORT_TYPE);
-            if (reportTypeName != null)
-                type = ReportType.valueOf(reportTypeName);
+            String reportType = bundle.getString(ARG_REPORT_TYPE);
+            if (reportType != null)
+                reportTypeName = reportType;
         }
-        switchReport(type, true);
+        switchReport(ReportType.valueOf(reportTypeName), true);
 
         applyIncomeExpense();
         showOrRemoveTotals();
@@ -165,6 +166,8 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
         saveFilter(false);
         bTypeSwitcher.setText(type.getTitleId());
         currentReport = createReport(type);
+        if (!firstStart)
+            MyPreferences.setLastReportType(context, type.name());
         if ((type == BY_SUB_CATEGORY) || (firstStart && !filter.isEmpty()))
             applyFilter();
         else

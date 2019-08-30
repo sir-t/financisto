@@ -20,6 +20,7 @@ import android.preference.PreferenceManager;
 
 import ru.orangesoftware.financisto.export.Export;
 import ru.orangesoftware.financisto.rates.ExchangeRateProviderFactory;
+import ru.orangesoftware.financisto.report.ReportType;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.Utils;
 
@@ -32,6 +33,7 @@ import static ru.orangesoftware.financisto.db.DatabaseHelper.ACCOUNT_TABLE;
 import static ru.orangesoftware.financisto.utils.MyPreferences.DROPBOX_AUTHORIZE;
 import static ru.orangesoftware.financisto.utils.MyPreferences.DROPBOX_AUTH_TOKEN;
 import static ru.orangesoftware.financisto.utils.MyPreferences.ENTITY_SELECTOR_FILTER;
+import static ru.orangesoftware.financisto.utils.MyPreferences.LAST_REPORT_TYPE;
 import static ru.orangesoftware.financisto.utils.MyPreferences.NALOG_LOGIN;
 import static ru.orangesoftware.financisto.utils.MyPreferences.NALOG_PASSWORD;
 import static ru.orangesoftware.orb.EntityManager.DEF_SORT_COL;
@@ -183,6 +185,8 @@ public class DatabaseExport extends Export {
         exportPreference(bw, "boolean", "pin_protection_haptic_feedback", true);
         exportPreference(bw, "boolean", "include_transfers_into_reports", false);
         exportPreference(bw, "boolean", "restore_missed_scheduled_transactions", true);
+        // Report
+        exportPreference(bw, "string", LAST_REPORT_TYPE, ReportType.BY_PERIOD.name());
     }
 
     private void exportPreference(BufferedWriter bw, String type, String key, Object defValue) throws IOException {
