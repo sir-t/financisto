@@ -1,12 +1,12 @@
 package ru.orangesoftware.financisto.fragment;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,28 +26,23 @@ import ru.orangesoftware.financisto.utils.PinProtection;
 
 public abstract class AbstractRecycleFragment extends Fragment {
 
-//    protected static final int MENU_VIEW = Menu.FIRST + 1;
-//    protected static final int MENU_EDIT = Menu.FIRST + 2;
-//    protected static final int MENU_DELETE = Menu.FIRST + 3;
-//    protected static final int MENU_ADD = Menu.FIRST + 4;
-
     private final int mContentId;
     private ViewDataBinding mBinding;
     private RecyclerView mList;
     private View mEmptyView;
     private boolean mListShown;
 
+    private ItemTouchHelper.Callback mItemTouchHelperCallback;
+    private RecyclerTouchListener mTouchListener;
+
+    private Cursor mCursor;
     private RecyclerView.Adapter mAdapter;
     protected DatabaseAdapter db;
     protected Context context;
 
-    protected boolean enablePin = true;
+    private boolean enablePin = true;
 
     protected abstract void updateAdapter();
-//    protected abstract void viewItem(View v, int position, long id);
-//    protected abstract void editItem(View v, int position, long id);
-//    protected abstract void deleteItem(View v, int position, long id);
-//    protected abstract void addItem();
 
     AbstractRecycleFragment(int contentId) {
         mContentId = contentId;
@@ -94,26 +89,12 @@ public abstract class AbstractRecycleFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ensureList();
-
-//        getListView().setOnItemLongClickListener((parent, v, pos, id) -> {
-//            PopupMenu popupMenu = new PopupMenu(context, v);
-//            Menu menu = popupMenu.getMenu();
-//            List<MenuItemInfo> menus = createContextMenus(id);
-//            int i = 0;
-//            for (MenuItemInfo m : menus) {
-//                if (m.enabled) {
-//                    menu.add(0, m.menuId, i++, m.titleId);
-//                }
-//            }
-//            popupMenu.setOnMenuItemClickListener(item -> onPopupItemSelected(item.getItemId(), v, pos, id));
-//            popupMenu.show();
-//            return true;
-//        });
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mCursor = createCursor();
         updateAdapter();
     }
 
@@ -159,37 +140,58 @@ public abstract class AbstractRecycleFragment extends Fragment {
         } else {
             setListShown(false, false);
         }
+
+        if (AbstractRecycleFragment.this instanceof ItemDragAndDrop) {
+            mItemTouchHelperCallback = new SimpleItemTouchHelperCallback(new DragAndDropHelper()).setDragVertical(true);
+            ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(mItemTouchHelperCallback);
+            mItemTouchHelper.attachToRecyclerView(mList);
+        }
+
+        mTouchListener = new RecyclerTouchListener(getActivity(), mList)
+                .setClickable(new RecyclerTouchListener.OnRowClickListener() {
+                    @Override
+                    public void onRowClicked(View view, int position) {
+                        ItemClick listener = (AbstractRecycleFragment.this instanceof ItemClick) ? ((ItemClick) AbstractRecycleFragment.this) : null;
+                        if (listener != null) {
+                            Log.e("Financisto", "onItemClick " + position);
+                            listener.onItemClick(view, position);
+                        }
+                    }
+
+                    @Override
+                    public void onIndependentViewClicked(int independentViewID, int position) {
+
+                    }
+                })
+                .setLongClickable(false, (view, position) -> {
+                    ItemLongClick listener = (AbstractRecycleFragment.this instanceof ItemLongClick) ? ((ItemLongClick) AbstractRecycleFragment.this) : null;
+                    if (listener != null) {
+                        Log.e("Financisto", "onItemLongClick " + position);
+                        listener.onItemLongClick(view, position);
+                    }
+                });
+        mList.addOnItemTouchListener(mTouchListener);
     }
 
-//    protected List<MenuItemInfo> createContextMenus(long id) {
-//        List<MenuItemInfo> menus = new LinkedList<>();
-//        menus.add(new MenuItemInfo(MENU_VIEW, R.string.view));
-//        menus.add(new MenuItemInfo(MENU_EDIT, R.string.edit));
-//        menus.add(new MenuItemInfo(MENU_DELETE, R.string.delete));
-//        return menus;
-//    }
-//
-//    public boolean onPopupItemSelected(int itemId, View view, int position, long id) {
-//        switch (itemId) {
-//            case MENU_VIEW: {
-//                viewItem(view, position, id);
-//                return true;
-//            }
-//            case MENU_EDIT: {
-//                editItem(view, position, id);
-//                return true;
-//            }
-//            case MENU_DELETE: {
-//                deleteItem(view, position, id);
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
     @Nullable
-    public RecyclerView.Adapter getListAdapter() {
+    RecyclerView.Adapter getListAdapter() {
         return mAdapter;
+    }
+
+    ViewDataBinding getBinding() {
+        return mBinding;
+    }
+
+    @NonNull
+    RecyclerView getRecyclerView() {
+        ensureList();
+        return mList;
+    }
+
+    @NonNull
+    RecyclerTouchListener getTouchListener() {
+        ensureList();
+        return mTouchListener;
     }
 
     @NonNull
@@ -207,44 +209,30 @@ public abstract class AbstractRecycleFragment extends Fragment {
         mAdapter = adapter;
         if (mList != null) {
             mList.setAdapter(adapter);
-
-            ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(new Test()).setDragVertical(true);
-            ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(callback);
-            mItemTouchHelper.attachToRecyclerView(mList);
-
-            RecyclerTouchListener touchListener = new RecyclerTouchListener(getActivity(), mList)
-                    .setClickable(new RecyclerTouchListener.OnRowClickListener() {
-                        @Override
-                        public void onRowClicked(int position) {
-                            Toast.makeText(context, "Clicked #" + position, Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onIndependentViewClicked(int independentViewID, int position) {
-
-                        }
-                    })
-                    .setLongClickable(false, position -> Toast.makeText(context, "Long clicked #" + position, Toast.LENGTH_SHORT).show())
-                    .setSwipeOptionViews(R.id.delete_task, R.id.edit_task)
-                    .setSwipeable(R.id.rowFG, R.id.rowBG, (viewID, position) -> {
-                        switch (viewID){
-                            case R.id.delete_task:
-                                Toast.makeText(context, "Delete Not Available", Toast.LENGTH_SHORT).show();
-                                break;
-                            case R.id.edit_task:
-                                Toast.makeText(context, "Edit Not Available", Toast.LENGTH_SHORT).show();
-                                break;
-
-                        }
-                    });
-            mList.addOnItemTouchListener(touchListener);
-
             if (!mListShown && !hadAdapter) {
                 // The list was hidden, and previously didn't have an
                 // adapter.  It is now time to show it.
                 setListShown(true, requireView().getWindowToken() != null);
             }
         }
+    }
+
+    protected Cursor createCursor() {
+        return null;
+    }
+
+    protected void recreateCursor() {
+        if (mCursor != null) {
+            mCursor.close();
+        }
+        mCursor = createCursor();
+        if (mCursor != null) {
+            updateAdapter();
+        }
+    }
+
+    protected Cursor getCursor() {
+        return mCursor;
     }
 
     public void setListShown(boolean shown) {
@@ -270,35 +258,41 @@ public abstract class AbstractRecycleFragment extends Fragment {
         }
     }
 
-    public ViewDataBinding getBinding() {
-        return mBinding;
-    }
-
-    @NonNull
-    public RecyclerView getListView() {
-        ensureList();
-        return mList;
-    }
-
-    private class Test implements ItemTouchHelperAdapter {
+    private class DragAndDropHelper implements ItemTouchHelperAdapter {
 
         @Override
         public boolean onDrag(int fromPosition, int toPosition) {
-            Log.e("Financisto", "onDrag from " + fromPosition + " to " + toPosition);
             mAdapter.notifyItemMoved(fromPosition, toPosition);
             return true;
         }
 
         @Override
         public void onDrop(int fromPosition, int toPosition) {
-            Log.e("Financisto", "onDrop from " + fromPosition + " to " + toPosition);
+            ItemDragAndDrop listener = (AbstractRecycleFragment.this instanceof ItemDragAndDrop) ? ((ItemDragAndDrop) AbstractRecycleFragment.this) : null;
+            if (listener != null) {
+                if (!listener.onDragAndDrop(fromPosition, toPosition)) {
+                    mAdapter.notifyItemMoved(toPosition, fromPosition);
+                }
+            }
         }
 
         @Override
         public void onItemDismiss(int position, int i) {
-            Log.e("Financisto", "onItemDismiss " + position+ " -> " + i);
+
         }
 
+    }
+
+    public interface ItemDragAndDrop {
+        boolean onDragAndDrop(int fromPosition, int toPosition);
+    }
+
+    public interface ItemClick {
+        void onItemClick(View view, int position);
+    }
+
+    public interface ItemLongClick {
+        void onItemLongClick(View view, int position);
     }
 
 }

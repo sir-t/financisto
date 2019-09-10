@@ -88,7 +88,7 @@ public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener, 
 //                    Vibrator vibe = (Vibrator) act.getSystemService(Context.VIBRATOR_SERVICE);
 //                    vibe.vibrate(100); // do we really need to add vibrate service
                 }
-                mRowLongClickListener.onRowLongClicked(touchedPosition);
+                mRowLongClickListener.onRowLongClicked(touchedView, touchedPosition);
             }
         }
     };
@@ -712,7 +712,7 @@ public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener, 
                     // On Click listener for rows
                     else if (clickable && !bgVisible && touchedPosition >= 0 && !unClickableRows.contains(touchedPosition)
                             && isIndependentViewClicked(motionEvent) && !isRViewScrolling) {
-                        mRowClickListener.onRowClicked(touchedPosition);
+                        mRowClickListener.onRowClicked(touchedView, touchedPosition);
                     }
                     // On Click listener for independent views inside the rows
                     else if (clickable && !bgVisible && touchedPosition >= 0 && !unClickableRows.contains(touchedPosition)
@@ -885,13 +885,13 @@ public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener, 
     ///////////////////////////////////////////////////////////////////////////////////////
 
     public interface OnRowClickListener {
-        void onRowClicked(int position);
+        void onRowClicked(View view, int position);
 
         void onIndependentViewClicked(int independentViewID, int position);
     }
 
     public interface OnRowLongClickListener {
-        void onRowLongClicked(int position);
+        void onRowLongClicked(View view, int position);
     }
 
     public interface OnSwipeOptionsClickListener {
