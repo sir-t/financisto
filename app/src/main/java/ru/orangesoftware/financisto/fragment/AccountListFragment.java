@@ -10,16 +10,18 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.PopupMenu;
-import android.widget.ProgressBar;
-import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
@@ -29,16 +31,16 @@ import ru.orangesoftware.financisto.activity.AccountActivity;
 import ru.orangesoftware.financisto.activity.AccountListTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.GenericBlotterActivity;
-import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
 import ru.orangesoftware.financisto.activity.MenuListItem;
 import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.PurgeAccountActivity;
 import ru.orangesoftware.financisto.activity.TransactionActivity;
 import ru.orangesoftware.financisto.activity.TransferActivity;
+import ru.orangesoftware.financisto.adapter.BaseCursorRecyclerAdapter;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
-import ru.orangesoftware.financisto.bus.GreenRobotBus_;
-import ru.orangesoftware.financisto.bus.SwitchToMenuTabEvent;
+import ru.orangesoftware.financisto.databinding.AccountListBinding;
+import ru.orangesoftware.financisto.databinding.AccountListItemBinding;
 import ru.orangesoftware.financisto.datetime.DateUtils;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.dialog.AccountInfoDialog;
@@ -48,7 +50,6 @@ import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.CardIssuer;
 import ru.orangesoftware.financisto.model.ElectronicPaymentType;
 import ru.orangesoftware.financisto.model.Total;
-import ru.orangesoftware.financisto.utils.IntegrityCheckAutobackup;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.financisto.view.NodeInflater;
@@ -56,7 +57,7 @@ import ru.orangesoftware.orb.EntityManager;
 
 import static ru.orangesoftware.financisto.fragment.BlotterFragment.SAVE_FILTER;
 
-public class AccountListFragment extends AbstractListFragment {
+public class AccountListFragment extends AbstractRecycleFragment implements AbstractRecycleFragment.ItemClick, AbstractRecycleFragment.ItemLongClick {
 
     private static final int NEW_ACCOUNT_REQUEST = 1;
     private static final int EDIT_ACCOUNT_REQUEST = 2;
@@ -66,45 +67,31 @@ public class AccountListFragment extends AbstractListFragment {
     private QuickActionWidget accountActionGrid;
     private long selectedId = -1;
 
-    protected ListAdapter adapter;
-
     private AccountTotalsCalculationTask totalCalculationTask;
 
     public AccountListFragment(){
         super(R.layout.account_list);
     }
 
-    protected void addItem() {
-        Intent intent = new Intent(context, AccountActivity.class);
-        startActivityForResult(intent, NEW_ACCOUNT_REQUEST);
-    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setupUi();
-        setupMenuButton();
-        calculateTotals();
-        integrityCheck();
 
-    }
+        getRecyclerView().addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        getRecyclerView().setItemAnimator(new DefaultItemAnimator());
 
-    private void setupUi() {
-        view.findViewById(R.id.integrity_error).setOnClickListener(v -> v.setVisibility(View.GONE));
-        getListView().setOnItemLongClickListener((parent, view, position, id) -> {
-            selectedId = id;
-            prepareAccountActionGrid();
-            accountActionGrid.show(view);
-            return true;
+        AccountListBinding binding = (AccountListBinding) getBinding();
+        binding.integrityError.setOnClickListener(v -> v.setVisibility(View.GONE));
+        binding.bAdd.setOnClickListener(v -> {
+            Intent intent = new Intent(context, AccountActivity.class);
+            startActivityForResult(intent, NEW_ACCOUNT_REQUEST);
         });
-    }
 
-    private void setupMenuButton() {
-        final ImageButton bMenu = view.findViewById(R.id.bMenu);
+        final ImageButton bMenu = binding.bMenu;
         if (MyPreferences.isShowMenuButtonOnAccountsScreen(context)) {
             bMenu.setOnClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(context, bMenu);
-                MenuInflater inflater = context.getMenuInflater();
+                MenuInflater inflater = getActivity().getMenuInflater();
                 inflater.inflate(R.menu.account_list_menu, popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(item -> {
                     handlePopupMenu(item.getItemId());
@@ -115,23 +102,72 @@ public class AccountListFragment extends AbstractListFragment {
         } else {
             bMenu.setVisibility(View.GONE);
         }
-    }
 
+        calculateTotals();
+//        integrityCheck();
+    }
 
     @Override
-    public void integrityCheck() {
-        new IntegrityCheckTask(context).execute(new IntegrityCheckAutobackup(context, TimeUnit.DAYS.toMillis(7)));
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        getTouchListener().setSwipeOptionViews(R.id.delete_task, R.id.edit_task)
+                .setSwipeable(R.id.rowFG, R.id.rowBG, (viewID, position) -> {
+                    long id = getListAdapter().getItemId(position);
+                    switch (viewID) {
+                        case R.id.delete_task:
+                            new AlertDialog.Builder(context)
+                                    .setMessage(R.string.delete_account_confirm)
+                                    .setPositiveButton(R.string.yes, (arg0, arg1) -> {
+                                        db.deleteAccount(id);
+                                        recreateCursor();
+                                    })
+                                    .setNegativeButton(R.string.no, null)
+                                    .show();
+                            break;
+                        case R.id.edit_task:
+                            editAccount(id);
+                            break;
+
+                    }
+                });
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VIEW_ACCOUNT_REQUEST || requestCode == PURGE_ACCOUNT_REQUEST) {
+            recreateCursor();
+        }
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        long id = getListAdapter().getItemId(position);
+        showAccountTransactions(id);
+    }
+
+    @Override
+    public void onItemLongClick(View view, int position) {
+        selectedId = getListAdapter().getItemId(position);
+        prepareAccountActionGrid();
+        accountActionGrid.show(view);
+    }
+
+//    @Override
+//    public void integrityCheck() {
+//        new IntegrityCheckTask(context).execute(new IntegrityCheckAutobackup(context, TimeUnit.DAYS.toMillis(7)));
+//    }
 
     private void handlePopupMenu(int id) {
         switch (id) {
             case R.id.backup:
-                MenuListItem.MENU_BACKUP.call(context);
+                MenuListItem.MENU_BACKUP.call(getActivity());
                 break;
         }
     }
 
-    protected void prepareAccountActionGrid() {
+    private void prepareAccountActionGrid() {
         Account a = db.getAccount(selectedId);
         accountActionGrid = new QuickActionGrid(context);
         accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_info, R.string.info));
@@ -150,45 +186,36 @@ public class AccountListFragment extends AbstractListFragment {
         accountActionGrid.setOnQuickActionClickListener(accountActionListener);
     }
 
-    @Override
-    public void onDestroy() {
-        db.close();
-        super.onDestroy();
-    }
-
-    private QuickActionWidget.OnQuickActionClickListener accountActionListener = new QuickActionWidget.OnQuickActionClickListener() {
-        public void onQuickActionClicked(QuickActionWidget widget, int position) {
-            switch (position) {
-                case 0:
-                    showAccountInfo(selectedId);
-                    break;
-                case 1:
-                    showAccountTransactions(selectedId);
-                    break;
-                case 2:
-                    editAccount(selectedId);
-                    break;
-                case 3:
-                    addTransaction(selectedId, TransactionActivity.class);
-                    break;
-                case 4:
-                    addTransaction(selectedId, TransferActivity.class);
-                    break;
-                case 5:
-                    updateAccountBalance(selectedId);
-                    break;
-                case 6:
-                    purgeAccount();
-                    break;
-                case 7:
-                    closeOrOpenAccount();
-                    break;
-                case 8:
-                    deleteAccount();
-                    break;
-            }
+    private QuickActionWidget.OnQuickActionClickListener accountActionListener = (widget, position) -> {
+        switch (position) {
+            case 0:
+                showAccountInfo(selectedId);
+                break;
+            case 1:
+                showAccountTransactions(selectedId);
+                break;
+            case 2:
+                editAccount(selectedId);
+                break;
+            case 3:
+                addTransaction(selectedId, TransactionActivity.class);
+                break;
+            case 4:
+                addTransaction(selectedId, TransferActivity.class);
+                break;
+            case 5:
+                updateAccountBalance(selectedId);
+                break;
+            case 6:
+                purgeAccount();
+                break;
+            case 7:
+                closeOrOpenAccount();
+                break;
+            case 8:
+                deleteAccount();
+                break;
         }
-
     };
 
     private boolean updateAccountBalance(long id) {
@@ -215,18 +242,10 @@ public class AccountListFragment extends AbstractListFragment {
         }
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == VIEW_ACCOUNT_REQUEST || requestCode == PURGE_ACCOUNT_REQUEST) {
-            recreateCursor();
-        }
-    }
-
     private void showAccountInfo(long id) {
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         NodeInflater inflater = new NodeInflater(layoutInflater);
-        AccountInfoDialog accountInfoDialog = new AccountInfoDialog(context, id, db, inflater);
+        AccountInfoDialog accountInfoDialog = new AccountInfoDialog(getActivity(), id, db, inflater);
         accountInfoDialog.show();
     }
 
@@ -241,7 +260,6 @@ public class AccountListFragment extends AbstractListFragment {
         intent.putExtra(TransactionActivity.ACCOUNT_ID_EXTRA, accountId);
         startActivityForResult(intent, VIEW_ACCOUNT_REQUEST);
     }
-
 
     private void purgeAccount() {
         Intent intent = new Intent(context, PurgeAccountActivity.class);
@@ -279,45 +297,13 @@ public class AccountListFragment extends AbstractListFragment {
         recreateCursor();
     }
 
-
-    @Override
-    protected void viewItem(View v, int position, long id) {
-        showAccountTransactions(id);
-    }
-
-    @Override
-    public void editItem(View v, int position, long id) {
-        editAccount(id);
-    }
-
-    @Override
-    protected void deleteItem(View v, int position, final long id) {
-        new AlertDialog.Builder(context)
-                .setMessage(R.string.delete_account_confirm)
-                .setPositiveButton(R.string.yes, (arg0, arg1) -> {
-                    db.deleteAccount(id);
-                    recreateCursor();
-                })
-                .setNegativeButton(R.string.no, null)
-                .show();
-    }
-
-
     @Override
     protected void updateAdapter() {
-        if(adapter==null){
-            adapter = new AccountListAdapter(context, cursor);
-            setListAdapter(adapter);
-        }else{
-            ((AccountListAdapter) adapter).changeCursor(cursor);
-            ((AccountListAdapter) adapter).notifyDataSetChanged();
+        if (getListAdapter() == null) {
+            setListAdapter(new AccountRecyclerAdapter(context, getCursor()));
+        } else {
+            ((AccountRecyclerAdapter) getListAdapter()).swapCursor(getCursor());
         }
-    }
-
-    @Override
-    public void recreateCursor() {
-        super.recreateCursor();
-        calculateTotals();
     }
 
     @Override
@@ -329,12 +315,18 @@ public class AccountListFragment extends AbstractListFragment {
         }
     }
 
+    @Override
+    protected void recreateCursor() {
+        super.recreateCursor();
+        calculateTotals();
+    }
+
     private void calculateTotals() {
         if (totalCalculationTask != null) {
             totalCalculationTask.stop();
             totalCalculationTask.cancel(true);
         }
-        TextView totalText = view.findViewById(R.id.total);
+        TextView totalText = getView().findViewById(R.id.total);
         totalText.setOnClickListener(view -> showTotals());
         totalCalculationTask = new AccountTotalsCalculationTask(context, db, totalText);
         totalCalculationTask.execute();
@@ -366,48 +358,34 @@ public class AccountListFragment extends AbstractListFragment {
         startActivityForResult(intent, -1);
     }
 
-    public class AccountListAdapter extends ResourceCursorAdapter {
+    private static class AccountRecyclerItemHolder extends RecyclerView.ViewHolder {
 
-        private final Utils u;
-        private DateFormat df;
-        private boolean isShowAccountLastTransactionDate;
+        private final AccountListItemBinding mBinding;
 
-        public AccountListAdapter(Context context, Cursor c) {
-            super(context, R.layout.account_list_item, c);
-            this.u = new Utils(context);
-            this.df = DateUtils.getShortDateFormat(context);
-            this.isShowAccountLastTransactionDate = MyPreferences.isShowAccountLastTransactionDate(context);
+        AccountRecyclerItemHolder(AccountListItemBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
         }
 
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            View view = super.newView(context, cursor, parent);
-            return AccountListItemHolder.create(view);
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            Account a = EntityManager.loadFromCursor(cursor, Account.class);
-            AccountListItemHolder v = (AccountListItemHolder) view.getTag();
-
-            v.centerView.setText(a.title);
+        void bind(Account a, Context context, Utils u, DateFormat df, boolean isShowAccountLastTransactionDate) {
+            mBinding.center.setText(a.title);
 
             AccountType type = AccountType.valueOf(a.type);
             if (type.isCard && a.cardIssuer != null) {
                 CardIssuer cardIssuer = CardIssuer.valueOf(a.cardIssuer);
-                v.iconView.setImageResource(cardIssuer.iconId);
+                mBinding.icon.setImageResource(cardIssuer.iconId);
             } else if (type.isElectronic && a.cardIssuer != null) {
                 ElectronicPaymentType paymentType = ElectronicPaymentType.valueOf(a.cardIssuer);
-                v.iconView.setImageResource(paymentType.iconId);
+                mBinding.icon.setImageResource(paymentType.iconId);
             } else {
-                v.iconView.setImageResource(type.iconId);
+                mBinding.icon.setImageResource(type.iconId);
             }
             if (a.isActive) {
-                v.iconView.getDrawable().mutate().setAlpha(0xFF);
-                v.iconOverView.setVisibility(View.INVISIBLE);
+                mBinding.icon.getDrawable().mutate().setAlpha(0xFF);
+                mBinding.activeIcon.setVisibility(View.INVISIBLE);
             } else {
-                v.iconView.getDrawable().mutate().setAlpha(0x77);
-                v.iconOverView.setVisibility(View.VISIBLE);
+                mBinding.icon.getDrawable().mutate().setAlpha(0x77);
+                mBinding.activeIcon.setVisibility(View.VISIBLE);
             }
 
             StringBuilder sb = new StringBuilder();
@@ -420,60 +398,62 @@ public class AccountListFragment extends AbstractListFragment {
             if (sb.length() == 0) {
                 sb.append(context.getString(type.titleId));
             }
-            v.topView.setText(sb.toString());
+            mBinding.top.setText(sb.toString());
 
             long date = a.creationDate;
             if (isShowAccountLastTransactionDate && a.lastTransactionDate > 0) {
                 date = a.lastTransactionDate;
             }
-            v.bottomView.setText(df.format(new Date(date)));
+            mBinding.bottom.setText(df.format(new Date(date)));
 
             long amount = a.totalAmount;
             if (type == AccountType.CREDIT_CARD && a.limitAmount != 0) {
                 long limitAmount = Math.abs(a.limitAmount);
                 long balance = limitAmount + amount;
                 long balancePercentage = 10000 * balance / limitAmount;
-                u.setAmountText(v.rightView, a.currency, amount, false);
-                u.setAmountText(v.rightCenterView, a.currency, balance, false);
-                v.rightView.setVisibility(View.VISIBLE);
-                v.progressBar.setMax(10000);
-                v.progressBar.setProgress((int) balancePercentage);
-                v.progressBar.setVisibility(View.VISIBLE);
+                u.setAmountText(mBinding.right, a.currency, amount, false);
+                u.setAmountText(mBinding.rightCenter, a.currency, balance, false);
+                mBinding.right.setVisibility(View.VISIBLE);
+                mBinding.progress.setMax(10000);
+                mBinding.progress.setProgress((int) balancePercentage);
+                mBinding.progress.setVisibility(View.VISIBLE);
             } else {
-                u.setAmountText(v.rightCenterView, a.currency, amount, false);
-                v.rightView.setVisibility(View.GONE);
-                v.progressBar.setVisibility(View.GONE);
+                u.setAmountText(mBinding.rightCenter, a.currency, amount, false);
+                mBinding.right.setVisibility(View.GONE);
+                mBinding.progress.setVisibility(View.GONE);
             }
         }
 
     }
 
-    private static class AccountListItemHolder {
-        ImageView iconView;
-        ImageView iconOverView;
-        TextView topView;
-        TextView centerView;
-        TextView bottomView;
-        TextView rightCenterView;
-        TextView rightView;
-        ProgressBar progressBar;
+    public class AccountRecyclerAdapter extends BaseCursorRecyclerAdapter<AccountRecyclerItemHolder> {
 
-        public static View create(View view) {
-            AccountListItemHolder v = new AccountListItemHolder();
-            v.iconView = view.findViewById(R.id.icon);
-            v.iconOverView = view.findViewById(R.id.active_icon);
-            v.topView = view.findViewById(R.id.top);
-            v.centerView = view.findViewById(R.id.center);
-            v.bottomView = view.findViewById(R.id.bottom);
-            v.rightCenterView = view.findViewById(R.id.right_center);
-            v.rightView = view.findViewById(R.id.right);
-            v.rightView.setVisibility(View.GONE);
-            v.progressBar = view.findViewById(R.id.progress);
-            v.progressBar.setVisibility(View.GONE);
-            view.setTag(v);
-            return view;
+        private final Context context;
+        private final Utils u;
+        private DateFormat df;
+        private boolean isShowAccountLastTransactionDate;
+
+        AccountRecyclerAdapter(Context context, Cursor c) {
+            super(c);
+            this.context = context;
+            this.u = new Utils(context);
+            this.df = DateUtils.getShortDateFormat(context);
+            this.isShowAccountLastTransactionDate = MyPreferences.isShowAccountLastTransactionDate(context);
         }
 
+        @NonNull
+        @Override
+        public AccountRecyclerItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            AccountListItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.account_list_item, parent, false);
+            return new AccountRecyclerItemHolder(binding);
+        }
+
+        @Override
+        public void onBindViewHolder(AccountRecyclerItemHolder holder, Cursor cursor) {
+            Account a = EntityManager.loadFromCursor(cursor, Account.class);
+            holder.bind(a, context, u, df, isShowAccountLastTransactionDate);
+        }
     }
 
 }
