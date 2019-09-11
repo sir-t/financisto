@@ -96,6 +96,12 @@ public abstract class AbstractRecycleFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mCursor = createCursor();
         updateAdapter();
+
+        ItemSwipeable swipeable = (AbstractRecycleFragment.this instanceof ItemSwipeable) ? ((ItemSwipeable) AbstractRecycleFragment.this) : null;
+        if (swipeable != null) {
+            getTouchListener().setSwipeOptionViews(swipeable.getSwipeOptions())
+                    .setSwipeable(R.id.rowFG, R.id.rowBG, swipeable::onSwipeClick);
+        }
     }
 
     @Override
@@ -293,6 +299,11 @@ public abstract class AbstractRecycleFragment extends Fragment {
 
     public interface ItemLongClick {
         void onItemLongClick(View view, int position);
+    }
+
+    public interface ItemSwipeable {
+        Integer[] getSwipeOptions();
+        void onSwipeClick(int viewID, int position);
     }
 
 }

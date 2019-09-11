@@ -55,9 +55,12 @@ import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.financisto.view.NodeInflater;
 import ru.orangesoftware.orb.EntityManager;
 
+import static ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemClick;
+import static ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemLongClick;
+import static ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemSwipeable;
 import static ru.orangesoftware.financisto.fragment.BlotterFragment.SAVE_FILTER;
 
-public class AccountListFragment extends AbstractRecycleFragment implements AbstractRecycleFragment.ItemClick, AbstractRecycleFragment.ItemLongClick {
+public class AccountListFragment extends AbstractRecycleFragment implements ItemClick, ItemLongClick, ItemSwipeable {
 
     private static final int NEW_ACCOUNT_REQUEST = 1;
     private static final int EDIT_ACCOUNT_REQUEST = 2;
@@ -110,27 +113,6 @@ public class AccountListFragment extends AbstractRecycleFragment implements Abst
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        getTouchListener().setSwipeOptionViews(R.id.delete_task, R.id.edit_task)
-                .setSwipeable(R.id.rowFG, R.id.rowBG, (viewID, position) -> {
-                    long id = getListAdapter().getItemId(position);
-                    switch (viewID) {
-                        case R.id.delete_task:
-                            new AlertDialog.Builder(context)
-                                    .setMessage(R.string.delete_account_confirm)
-                                    .setPositiveButton(R.string.yes, (arg0, arg1) -> {
-                                        db.deleteAccount(id);
-                                        recreateCursor();
-                                    })
-                                    .setNegativeButton(R.string.no, null)
-                                    .show();
-                            break;
-                        case R.id.edit_task:
-                            editAccount(id);
-                            break;
-
-                    }
-                });
     }
 
     @Override
@@ -152,6 +134,31 @@ public class AccountListFragment extends AbstractRecycleFragment implements Abst
         selectedId = getListAdapter().getItemId(position);
         prepareAccountActionGrid();
         accountActionGrid.show(view);
+    }
+
+    @Override
+    public Integer[] getSwipeOptions() {
+        return new Integer[]{R.id.delete_task, R.id.edit_task};
+    }
+
+    @Override
+    public void onSwipeClick(int viewID, int position) {
+        long id = getListAdapter().getItemId(position);
+        switch (viewID) {
+            case R.id.delete_task:
+                new AlertDialog.Builder(context)
+                        .setMessage(R.string.delete_account_confirm)
+                        .setPositiveButton(R.string.yes, (arg0, arg1) -> {
+                            db.deleteAccount(id);
+                            recreateCursor();
+                        })
+                        .setNegativeButton(R.string.no, null)
+                        .show();
+                break;
+            case R.id.edit_task:
+                editAccount(id);
+                break;
+        }
     }
 
 //    @Override
