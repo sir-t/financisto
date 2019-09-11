@@ -77,6 +77,7 @@
         android:layout_below="@id/center"
         android:layout_marginLeft="10dp"
         android:layout_toEndOf="@id/bottom"
+        android:layout_toRightOf="@id/bottom"
         android:maxLines="1"
         android:text="e"
         android:textAppearance="?android:attr/textAppearanceSmall" />
