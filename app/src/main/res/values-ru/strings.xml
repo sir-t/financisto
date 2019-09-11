@@ -940,6 +940,7 @@
 
     <string name="no_items">Нет элементов</string>
 
+    <string name="electronic_receipts">Электронные чеки</string>
     <string name="show_e_receipt">Показать \'Электронный кассовый чек\'</string>
     <string name="show_e_receipt_summary">Показывать поле \'Электронный кассовый чек\'</string>
     <string name="no_e_receipt">Добавьте электронный чек</string>

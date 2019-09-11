@@ -1118,6 +1118,16 @@ public class DatabaseAdapter extends MyEntityManager {
     }
 
     // ===================================================================
+    // ELECTRONIC RECEIPTS >>
+    // ===================================================================
+
+    public Cursor getBlotterWithOnlyReceipts() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(BlotterColumns.e_receipt_qr_code.name()).append(" is not null");
+        return getBlotterWithSplits(sb.toString());
+    }
+
+    // ===================================================================
     // ATTRIBUTES
     // ===================================================================
 

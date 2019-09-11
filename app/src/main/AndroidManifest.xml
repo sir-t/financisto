@@ -280,8 +280,12 @@
         <activity
             android:name=".activity.SmsDragListActivity"
             android:label="@string/sms_templates"
-            android:theme="@style/Theme.AppCompat"
-        />
+            android:theme="@style/Theme.AppCompat" />
+
+        <activity
+            android:name=".activity.ReceiptListActivity"
+            android:label="@string/electronic_receipts"
+            android:theme="@style/Theme.AppCompat" />
 
         <activity
             android:name=".activity.DateFilterActivity"

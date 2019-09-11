@@ -125,7 +125,7 @@ public class ReceiptFragment extends AbstractRecycleFragment {
             mBinding.rightCenter.setText(mItem.getQuantity());
             mBinding.right.setText(Utils.amountToString(ccache, mItem.getPrice(),false));
             mBinding.indicator.setVisibility(View.GONE);
-            mBinding.rightTop.setVisibility(View.GONE);
+            mBinding.icon.setVisibility(View.GONE);
             mBinding.eReceipt.setVisibility(View.GONE);
         }
 

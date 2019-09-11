@@ -28,12 +28,12 @@ public class ReceiptActivity extends SingleFragmentActivity {
 
         private Intent intent;
 
-        Builder(Context context, String receiptData) {
+        public Builder(Context context, String receiptData) {
             intent = new Intent(context, ReceiptActivity.class);
             intent.putExtra(EXTRA_RECEIPT_DATA, receiptData);
         }
 
-        Builder setCurrencyId(long currencyId) {
+        public Builder setCurrencyId(long currencyId) {
             intent.putExtra(EXTRA_CURRENCY_ID, currencyId);
             return this;
         }

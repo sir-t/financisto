@@ -8,67 +8,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/rowBG"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:background="#d65819"
-            android:gravity="right"
-            android:orientation="horizontal"
-            android:padding="10dp">
-
-            <RelativeLayout
-                android:id="@+id/edit_task"
-                android:layout_width="40dp"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/img_edit"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center"
-                        android:src="@android:drawable/ic_menu_edit"
-                        android:tint="@android:color/white" />
-                </LinearLayout>
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/delete_task"
-                android:layout_width="40dp"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/img_delete"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="center"
-                        android:src="@android:drawable/ic_delete"
-                        android:tint="@android:color/white" />
-                </LinearLayout>
-            </RelativeLayout>
-
-        </LinearLayout>
+        <include layout="@layout/row_bg_edit_delete" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/rowFG"
@@ -78,13 +18,15 @@
             android:elevation="4dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:visibility="visible">
+            android:visibility="visible"
+            tools:targetApi="lollipop">
 
             <ImageView
-                android:id="@+id/right_top"
+                android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:scaleType="fitEnd"
                 android:src="@drawable/ic_blotter_income"
                 app:layout_constraintBottom_toBottomOf="@+id/top"
@@ -96,10 +38,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                app:layout_constraintEnd_toStartOf="@+id/right_top"
+                app:layout_constraintEnd_toStartOf="@+id/icon"
                 app:layout_constraintStart_toEndOf="@+id/indicator"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="top" />
@@ -118,6 +62,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"
@@ -133,6 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 app:layout_constraintBottom_toBottomOf="@+id/center"
@@ -145,6 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 app:layout_constraintStart_toEndOf="@+id/indicator"
@@ -156,6 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 app:layout_constraintStart_toEndOf="@+id/bottom"
@@ -168,6 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:maxLines="1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/center"
