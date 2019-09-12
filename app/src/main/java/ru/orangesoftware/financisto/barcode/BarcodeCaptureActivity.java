@@ -74,7 +74,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity
         super.onCreate(icicle);
         setContentView(R.layout.barcode_capture);
 
-        mPreview = (CameraSourcePreview) findViewById(R.id.preview);
+        mPreview = findViewById(R.id.preview);
+        mPreview.setOnClickListener(v -> mCameraSource.autoFocus(null));
 
         boolean autoFocus = true;
         boolean useFlash = false;
@@ -169,7 +170,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity
         // make sure that auto focus is an available option
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             builder = builder.setFocusMode(
-                    autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null);
+                    autoFocus ? Camera.Parameters.FOCUS_MODE_MACRO : null);
         }
 
         mCameraSource = builder
