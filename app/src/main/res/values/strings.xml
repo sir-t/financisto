@@ -1025,6 +1025,7 @@
     <string name="e_receipt_nalog_sign_up_summary">Send request for sign-up of nalog.ru</string>
     <string name="e_receipt_nalog_pass_recovery">Recovery password on nalog.ru</string>
     <string name="e_receipt_nalog_pass_recovery_summary">Send request for recovery password of nalog.ru</string>
+    <string name="replace_date_from_e_receipt">Replace date from electronic receipt</string>
 
     <string name="sign_in_success">Authorize success</string>
     <string name="sign_up_success">Sign up success</string>

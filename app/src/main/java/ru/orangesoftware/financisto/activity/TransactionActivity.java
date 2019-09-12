@@ -19,6 +19,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import greendroid.widget.QuickActionGrid;
@@ -674,8 +675,19 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
     @Override
     public void onQRCodeChanged(String qrcode, long amount, long date) {
         rateView.setFromAmount(amount);
-        if (date > 0)
-            this.setDateTime(date);
+        if (date > 0) {
+            if (transaction.id != -1) {
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.replace_date_from_e_receipt)
+                        .setPositiveButton(R.string.yes, (arg0, arg1) -> {
+                            this.setDateTime(date);
+                        })
+                        .setNegativeButton(R.string.no, null)
+                        .show();
+            } else {
+                this.setDateTime(date);
+            }
+        }
 
         boolean taskStart = false;
         if (!qrcode.equals(transaction.eReceiptQRCode)) {

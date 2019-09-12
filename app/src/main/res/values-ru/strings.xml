@@ -953,6 +953,7 @@
     <string name="e_receipt_nalog_sign_up_summary">Отправить запрос на регистрацию в кабинете proverkacheka.nalog.ru</string>
     <string name="e_receipt_nalog_pass_recovery">Восстановить пароль от кабинета</string>
     <string name="e_receipt_nalog_pass_recovery_summary">Отправить запрос на восстановление пароля от кабинета proverkacheka.nalog.ru</string>
+    <string name="replace_date_from_e_receipt">Заменить дату и время транзакции на дату электронного чека</string>
 
     <string name="sign_in_success">Успешная авторизация</string>
     <string name="sign_up_success">Запрос на регистрацию отправлен</string>
