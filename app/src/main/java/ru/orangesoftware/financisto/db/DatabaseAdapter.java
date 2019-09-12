@@ -84,7 +84,6 @@ import static ru.orangesoftware.financisto.db.DatabaseHelper.EXCHANGE_RATES_TABL
 import static ru.orangesoftware.financisto.db.DatabaseHelper.LOCATIONS_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.PAYEE_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.SMS_TEMPLATES_TABLE;
-import static ru.orangesoftware.financisto.db.DatabaseHelper.SmsTemplateColumns.NORMAL_PROJECTION;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.SmsTemplateColumns.category_id;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.SmsTemplateColumns.sort_order;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.SmsTemplateColumns.template;
@@ -1045,7 +1044,7 @@ public class DatabaseAdapter extends MyEntityManager {
     // ===================================================================
 
     public List<SmsTemplate> getSmsTemplatesForCategory(long categoryId) {
-        try (Cursor c = db().query(SMS_TEMPLATES_TABLE, NORMAL_PROJECTION, category_id + "=?",
+        try (Cursor c = db().query(SMS_TEMPLATES_TABLE, SmsTemplateColumns.NORMAL_PROJECTION, category_id + "=?",
                 new String[]{String.valueOf(categoryId)}, null, null, title.name())) {
             List<SmsTemplate> res = new ArrayList<>(c.getCount());
             while (c.moveToNext()) {
@@ -1059,7 +1058,7 @@ public class DatabaseAdapter extends MyEntityManager {
     public List<SmsTemplate> getSmsTemplatesByNumber(String smsNumber) {
         try (Cursor c = db().rawQuery(
                 String.format("select %s from %s where %s=? order by %s, length(%s) desc",
-                    DatabaseUtils.generateSelectClause(NORMAL_PROJECTION, null),
+                    DatabaseUtils.generateSelectClause(SmsTemplateColumns.NORMAL_PROJECTION, null),
                     SMS_TEMPLATES_TABLE, title, sort_order, template), new String[]{smsNumber})) {
             List<SmsTemplate> res = new ArrayList<>(c.getCount());
             while (c.moveToNext()) {
@@ -1082,7 +1081,7 @@ public class DatabaseAdapter extends MyEntityManager {
     }
 
     public Cursor getAllSmsTemplates() {
-        return db().query(SMS_TEMPLATES_TABLE, NORMAL_PROJECTION,
+        return db().query(SMS_TEMPLATES_TABLE, SmsTemplateColumns.NORMAL_PROJECTION,
                 SmsTemplateColumns.template + " is not null", null, null, null, title.name());
     }
 
@@ -1094,7 +1093,7 @@ public class DatabaseAdapter extends MyEntityManager {
         String nativeQuery = String.format(
                 "select %s, c.%s as %s, c.%s as %s " +
                 "from %s t left outer join %s c on t.%s = c.%s ",
-                DatabaseUtils.generateSelectClause(NORMAL_PROJECTION, "t"),
+                DatabaseUtils.generateSelectClause(SmsTemplateColumns.NORMAL_PROJECTION, "t"),
                 CategoryViewColumns.title, SmsTemplateListColumns.cat_name, CategoryViewColumns.level, SmsTemplateListColumns.cat_level,
                 SMS_TEMPLATES_TABLE,
                 V_CATEGORY,
