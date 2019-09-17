@@ -982,5 +982,6 @@
     <string name="user_phone">Телефон</string>
     <string name="hint_search_filter">Введите имя...</string>
     <string name="delete_receipt_confirm">Удалить электронный чек?</string>
+    <string name="delete_entity_confirm">Удалить запись?</string>
 
 </resources>

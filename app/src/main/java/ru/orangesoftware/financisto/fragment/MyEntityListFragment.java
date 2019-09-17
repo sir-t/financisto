@@ -117,7 +117,7 @@ public abstract class MyEntityListFragment<T extends MyEntity> extends AbstractR
         switch (viewID) {
             case R.id.delete_task:
                 new AlertDialog.Builder(context)
-                        .setMessage(R.string.delete_account_confirm)
+                        .setMessage(R.string.delete_entity_confirm)
                         .setPositiveButton(R.string.yes, (arg0, arg1) -> {
                             deleteItem(viewID, position, id);
                         })

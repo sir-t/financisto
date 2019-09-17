@@ -1054,5 +1054,6 @@
     <string name="user_phone">Phone</string>
     <string name="hint_search_filter">Type name...</string>
     <string name="delete_receipt_confirm">Delete electronic receipt?</string>
+    <string name="delete_entity_confirm">Delete entity?</string>
 
 </resources>
