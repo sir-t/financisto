@@ -44,9 +44,9 @@ public class ProjectListActivity extends SingleFragmentActivity {
         }
 
         @Override
-        protected void deleteItem(View v, int position, long id) {
+        protected void deleteItem(int viewID, int position, long id) {
             db.deleteProject(id);
-            recreateCursor();
+            updateAdapter();
         }
 
     }

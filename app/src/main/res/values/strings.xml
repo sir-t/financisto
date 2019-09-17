@@ -1052,5 +1052,6 @@
     <string name="user_email">E-mail</string>
     <string name="user_name">Name</string>
     <string name="user_phone">Phone</string>
+    <string name="hint_search_filter">Type name...</string>
 
 </resources>

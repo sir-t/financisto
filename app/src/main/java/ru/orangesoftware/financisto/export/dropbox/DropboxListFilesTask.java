@@ -13,7 +13,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 
 import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.activity.MenuListItem;
 import ru.orangesoftware.financisto.bus.GreenRobotBus_;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.export.ImportExportAsyncTask;

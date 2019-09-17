@@ -980,5 +980,6 @@
     <string name="user_email">Электронная почта</string>
     <string name="user_name">Имя</string>
     <string name="user_phone">Телефон</string>
+    <string name="hint_search_filter">Введите имя...</string>
 
 </resources>
