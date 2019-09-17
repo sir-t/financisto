@@ -1145,6 +1145,18 @@ public class DatabaseAdapter extends MyEntityManager {
         return getBlotterWithSplits(sb.toString());
     }
 
+    public void deleteElectronicReceiptForTransaction(long id) {
+        SQLiteDatabase db = db();
+        db.beginTransaction();
+        try {
+            String[] p = new String[]{String.valueOf(id)};
+            db.delete(ELECTRONIC_RECEIPTS_TABLE, ElectronicReceiptColumns.TRANSACTION_ID + "=?", p);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     public long insertOrUpdate(ElectronicReceipt e_receipt) {
         if (e_receipt.id == -1) {
             return insertElectronicReceipt(e_receipt);

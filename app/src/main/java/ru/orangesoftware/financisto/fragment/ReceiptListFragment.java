@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,11 +33,11 @@ import ru.orangesoftware.financisto.utils.StringUtil;
 import ru.orangesoftware.financisto.utils.Utils;
 
 import static ru.orangesoftware.financisto.db.DatabaseHelper.*;
-import static ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemClick;
+import static ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.*;
 import static ru.orangesoftware.financisto.model.Category.isSplit;
 import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
 
-public class ReceiptListFragment extends AbstractRecycleFragment implements ItemClick {
+public class ReceiptListFragment extends AbstractRecycleFragment implements ItemClick, ItemSwipeable {
 
 	public ReceiptListFragment() {
 		super(R.layout.receipts_list);
@@ -79,6 +80,28 @@ public class ReceiptListFragment extends AbstractRecycleFragment implements Item
 		}
 	}
 
+	@Override
+	public Integer[] getSwipeOptions() {
+		return new Integer[]{R.id.delete_task};
+	}
+
+	@Override
+	public void onSwipeClick(int viewID, int position) {
+		long id = getListAdapter().getItemId(position);
+		switch (viewID) {
+			case R.id.delete_task:
+				new AlertDialog.Builder(context)
+						.setMessage(R.string.delete_receipt_confirm)
+						.setPositiveButton(R.string.yes, (arg0, arg1) -> {
+							db.deleteElectronicReceiptForTransaction(id);
+							recreateCursor();
+						})
+						.setNegativeButton(R.string.no, null)
+						.show();
+				break;
+		}
+	}
+
 	private class ReceiptRecyclerItemHolder extends RecyclerView.ViewHolder {
 
 		private final ReceiptItemBinding mBinding;
@@ -86,6 +109,7 @@ public class ReceiptListFragment extends AbstractRecycleFragment implements Item
 		ReceiptRecyclerItemHolder(ReceiptItemBinding binding) {
 			super(binding.getRoot());
 			mBinding = binding;
+			mBinding.getRoot().findViewById(R.id.edit_task).setVisibility(View.GONE);
 		}
 
 		void bind(Transaction t, Cursor cursor, Context context) {
