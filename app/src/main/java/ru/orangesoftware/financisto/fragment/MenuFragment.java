@@ -91,27 +91,27 @@ public class MenuFragment extends ListFragment implements HasViews, OnViewChange
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 2: {
+            case MenuListItem.ACTIVITY_CSV_EXPORT: {
                 onCsvExportResult(resultCode, data);
                 break;
             }
-            case 3: {
+            case MenuListItem.ACTIVITY_QIF_EXPORT: {
                 onQifExportResult(resultCode, data);
                 break;
             }
-            case 4: {
+            case MenuListItem.ACTIVITY_CSV_IMPORT: {
                 onCsvImportResult(resultCode, data);
                 break;
             }
-            case 5: {
+            case MenuListItem.ACTIVITY_QIF_IMPORT: {
                 onQifImportResult(resultCode, data);
                 break;
             }
-            case 6: {
+            case MenuListItem.ACTIVITY_CHANGE_PREFERENCES: {
                 onChangePreferences();
                 break;
             }
-            case 1: {
+            case RESOLVE_CONNECTION_REQUEST_CODE: {
                 onConnectionRequest(resultCode);
                 break;
             }
