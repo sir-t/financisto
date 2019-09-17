@@ -21,8 +21,11 @@ SELECT
 	pp._id as payee_id,
 	pp.title as payee,
 	t.note as note,
-	t.e_receipt_qr_code as e_receipt_qr_code,
-	t.e_receipt_data as e_receipt_data,
+	er._id as e_receipt_id,
+	er.qr_code as e_receipt_qr_code,
+	er.check_status as e_receipt_check_status,
+	er.request_status as e_receipt_request_status,
+	er.response_data as e_receipt_data,
 	t.from_amount as from_amount,
 	t.to_amount as to_amount,
 	t.datetime as datetime,
@@ -50,4 +53,5 @@ FROM
 	LEFT OUTER JOIN currency as c2 ON c2._id=a2.currency_id
 	LEFT OUTER JOIN project as p ON p._id=t.project_id
 	LEFT OUTER JOIN locations as loc ON loc._id=t.location_id
+	LEFT OUTER JOIN electronic_receipt as er ON er.transaction_id = t._id
 	LEFT OUTER JOIN payee as pp ON pp._id=t.payee_id;

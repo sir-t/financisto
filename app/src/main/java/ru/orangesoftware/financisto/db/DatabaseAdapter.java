@@ -43,6 +43,7 @@ import ru.orangesoftware.financisto.db.DatabaseHelper.CategoryAttributeColumns;
 import ru.orangesoftware.financisto.db.DatabaseHelper.CategoryColumns;
 import ru.orangesoftware.financisto.db.DatabaseHelper.CategoryViewColumns;
 import ru.orangesoftware.financisto.db.DatabaseHelper.CreditCardClosingDateColumns;
+import ru.orangesoftware.financisto.db.DatabaseHelper.ElectronicReceiptColumns;
 import ru.orangesoftware.financisto.db.DatabaseHelper.ExchangeRateColumns;
 import ru.orangesoftware.financisto.db.DatabaseHelper.SmsTemplateColumns;
 import ru.orangesoftware.financisto.db.DatabaseHelper.SmsTemplateListColumns;
@@ -56,6 +57,7 @@ import ru.orangesoftware.financisto.model.Budget;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.CategoryTree;
 import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.model.ElectronicReceipt;
 import ru.orangesoftware.financisto.model.MyLocation;
 import ru.orangesoftware.financisto.model.Payee;
 import ru.orangesoftware.financisto.model.Project;
@@ -80,6 +82,7 @@ import static ru.orangesoftware.financisto.db.DatabaseHelper.ATTRIBUTES_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.CATEGORY_ATTRIBUTE_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.CATEGORY_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.CCARD_CLOSING_DATE_TABLE;
+import static ru.orangesoftware.financisto.db.DatabaseHelper.ELECTRONIC_RECEIPTS_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.EXCHANGE_RATES_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.LOCATIONS_TABLE;
 import static ru.orangesoftware.financisto.db.DatabaseHelper.PAYEE_TABLE;
@@ -1120,10 +1123,43 @@ public class DatabaseAdapter extends MyEntityManager {
     // ELECTRONIC RECEIPTS >>
     // ===================================================================
 
+    public Cursor getAllElectronicReceipts() {
+        return db().query(ELECTRONIC_RECEIPTS_TABLE, ElectronicReceiptColumns.NORMAL_PROJECTION,
+                null, null, null, null, null);
+    }
+
+    public ElectronicReceipt getElectronicReceiptForTransaction(long transactionId) {
+        try (Cursor c = db().query(ELECTRONIC_RECEIPTS_TABLE, ElectronicReceiptColumns.NORMAL_PROJECTION,
+                ElectronicReceiptColumns.TRANSACTION_ID + "=?",
+                new String[]{String.valueOf(transactionId)}, null, null, null)) {
+            if (c.moveToFirst()) {
+                return ElectronicReceipt.fromCursor(c);
+            }
+        }
+        return new ElectronicReceipt();
+    }
+
     public Cursor getBlotterWithOnlyReceipts() {
         StringBuilder sb = new StringBuilder();
         sb.append(BlotterColumns.e_receipt_qr_code.name()).append(" is not null");
         return getBlotterWithSplits(sb.toString());
+    }
+
+    public long insertOrUpdate(ElectronicReceipt e_receipt) {
+        if (e_receipt.id == -1) {
+            return insertElectronicReceipt(e_receipt);
+        } else {
+            updateElectronicReceipt(e_receipt);
+            return e_receipt.id;
+        }
+    }
+
+    private long insertElectronicReceipt(ElectronicReceipt e_receipt) {
+        return db().insert(ELECTRONIC_RECEIPTS_TABLE, null, e_receipt.toValues());
+    }
+
+    private void updateElectronicReceipt(ElectronicReceipt e_receipt) {
+        db().update(ELECTRONIC_RECEIPTS_TABLE, e_receipt.toValues(), AttributeColumns.ID + "=?", new String[]{String.valueOf(e_receipt.id)});
     }
 
     // ===================================================================

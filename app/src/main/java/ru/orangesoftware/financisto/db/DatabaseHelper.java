@@ -48,6 +48,7 @@ public class DatabaseHelper extends DatabaseSchemaEvolution {
     public static final String PAYEE_TABLE = "payee";
     public static final String CCARD_CLOSING_DATE_TABLE = "ccard_closing_date";
     public static final String EXCHANGE_RATES_TABLE = "currency_exchange_rate";
+    public static final String ELECTRONIC_RECEIPTS_TABLE = "electronic_receipt";
 
     public static final String V_ALL_TRANSACTIONS = "v_all_transactions";
     public static final String V_BLOTTER = "v_blotter";
@@ -89,9 +90,7 @@ public class DatabaseHelper extends DatabaseSchemaEvolution {
         attached_picture,
         is_ccard_payment,
         last_recurrence,
-        blob_key,
-        e_receipt_qr_code,
-        e_receipt_data;
+        blob_key;
 
         public static String[] NORMAL_PROJECTION = asStringArray(TransactionColumns.values());
 
@@ -118,6 +117,11 @@ public class DatabaseHelper extends DatabaseSchemaEvolution {
         payee_id,
         payee,
         note,
+        e_receipt_id,
+        e_receipt_qr_code,
+        e_receipt_check_status,
+        e_receipt_request_status,
+        e_receipt_data,
         from_amount,
         to_amount,
         datetime,
@@ -133,9 +137,7 @@ public class DatabaseHelper extends DatabaseSchemaEvolution {
         last_recurrence,
         from_account_balance,
         to_account_balance,
-        is_transfer,
-        e_receipt_qr_code,
-        e_receipt_data;
+        is_transfer;
 
         public static final String[] NORMAL_PROJECTION = asStringArray(BlotterColumns.values());
 
@@ -285,6 +287,33 @@ public class DatabaseHelper extends DatabaseSchemaEvolution {
     public enum SmsTemplateListColumns {
         cat_name,
         cat_level
+    }
+
+    public static class ElectronicReceiptColumns {
+        public static final String RECEIPT_ID = "_id";
+        public static final String TRANSACTION_ID = "transaction_id";
+        public static final String QR_CODE = "qr_code";
+        public static final String CHECK_STATUS = "check_status";
+        public static final String REQUEST_STATUS = "request_status";
+        public static final String RESPONSE_DATA = "response_data";
+
+        public static final String[] NORMAL_PROJECTION = {
+                RECEIPT_ID,
+                TRANSACTION_ID,
+                QR_CODE,
+                CHECK_STATUS,
+                REQUEST_STATUS,
+                RESPONSE_DATA
+        };
+
+        public static class Indicies {
+            public static final int RECEIPT_ID = 0;
+            public static final int TRANSACTION_ID = 1;
+            public static final int QR_CODE = 2;
+            public static final int CHECK_STATUS = 3;
+            public static final int REQUEST_STATUS = 4;
+            public static final int RESPONSE_DATA = 5;
+        }
     }
 
     public static class TransactionAttributeColumns {

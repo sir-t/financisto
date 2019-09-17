@@ -309,7 +309,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
         selectCurrency(transaction);
         fetchSplits();
         selectPayee(transaction.payeeId);
-        selectElectronicReceipt(transaction);
+        selectElectronicReceipt(e_receipt);
     }
 
     private void selectCurrency(Transaction transaction) {
@@ -335,24 +335,28 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
         }
     }
 
-    private void selectElectronicReceipt(Transaction transaction) {
+    private void selectElectronicReceipt(ElectronicReceipt e_receipt) {
         String[] statuses = {
                 "QRCode: NO",
                 "QRCode: OK",
-                "QRCode: OK, ReceiptData: NO",
+                "QRCode: OK, ReceiptData: Scan",
                 "QRCode: OK, ReceiptData: ERR",
                 "QRCode: OK, ReceiptData: OK",
         };
         String status = "";
-        if (transaction.eReceiptQRCode != null && !transaction.eReceiptQRCode.isEmpty()) {
-            if (transaction.eReceiptData != null && !transaction.eReceiptData.isEmpty()) {
-                if (transaction.eReceiptData.startsWith("{")) {
+        if (e_receipt.qr_code != null && !e_receipt.qr_code.isEmpty()) {
+            if (e_receipt.response_data != null && !e_receipt.response_data.isEmpty()) {
+                if (e_receipt.response_data.startsWith("{")) {
                     status = statuses[4];
                 } else {
-                    status = statuses[3] + " " + transaction.eReceiptData;
+                    status = statuses[3] + " " + e_receipt.response_data;
                 }
             } else {
                 status = statuses[MyPreferences.isNalogAuthorized(this) ? 2 : 1];
+                if (e_receipt.check_status != 0)
+                    status += " check " + e_receipt.check_status;
+                if (e_receipt.request_status != 0)
+                    status += " req " + e_receipt.request_status;
             }
         } else {
             status = statuses[0];
@@ -434,15 +438,15 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
                 x.selectItemId(this, R.id.currency, R.string.currency, adapter, selectedPos);
                 break;
             case R.id.e_receipt_info:
-                if (transaction.eReceiptData != null && transaction.eReceiptData.startsWith("{")) {
-                    ReceiptActivity.Builder builder = new ReceiptActivity.Builder(this, transaction.eReceiptData);
+                if (e_receipt.response_data != null && e_receipt.response_data.startsWith("{")) {
+                    ReceiptActivity.Builder builder = new ReceiptActivity.Builder(this, e_receipt.qr_code, e_receipt.check_status, e_receipt.request_status, e_receipt.response_data);
                     if (isDifferentCurrency() || selectedAccount != null)
                         builder.setCurrencyId(isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
                     startActivityForResult(builder.build(), VIEW_RECEIPT);
                 }
                 break;
             case R.id.e_receipt_get:
-                BarcodeInput input = BarcodeInput_.builder().qrcode(transaction.eReceiptQRCode).build();
+                BarcodeInput input = BarcodeInput_.builder().qrcode(e_receipt.qr_code).build();
                 input.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
                 input.setListener(this);
                 input.show(getSupportFragmentManager(), "barcode_input");
@@ -690,11 +694,11 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
         }
 
         boolean taskStart = false;
-        if (!qrcode.equals(transaction.eReceiptQRCode)) {
-            transaction.eReceiptQRCode = qrcode;
-            selectElectronicReceipt(transaction);
+        if (!qrcode.equals(e_receipt.qr_code)) {
+            e_receipt.qr_code = qrcode;
+            selectElectronicReceipt(e_receipt);
             taskStart = true;
-        } else if (transaction.eReceiptData == null || transaction.eReceiptData.isEmpty() || !transaction.eReceiptData.startsWith("{")) {
+        } else if (e_receipt.response_data == null || e_receipt.response_data.isEmpty() || !e_receipt.response_data.startsWith("{")) {
             taskStart = true;
         }
 
@@ -708,9 +712,19 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
     }
 
     @Override
-    public void onElectronicReceiptChanged(String data) {
-        transaction.eReceiptData = data;
-        selectElectronicReceipt(transaction);
+    public void onElectronicReceiptChanged(int type, Object data) {
+        switch (type) {
+            case 1:
+                e_receipt.check_status = (int) data;
+                break;
+            case 2:
+                e_receipt.request_status = (int) data;
+                break;
+            case 3:
+                e_receipt.response_data = (String) data;
+                break;
+        }
+        selectElectronicReceipt(e_receipt);
     }
 
     private static class ActivityState implements Serializable {

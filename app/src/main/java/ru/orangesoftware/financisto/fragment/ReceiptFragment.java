@@ -14,22 +14,47 @@ import org.json.JSONObject;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.databinding.ReceiptItemBinding;
+import ru.orangesoftware.financisto.databinding.ReceiptItemsListBinding;
 import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.model.ElectronicReceipt;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.Utils;
 
 public class ReceiptFragment extends AbstractRecycleFragment {
 
     private static final String ARG_CURRENCY_ID = "CURRENCY_ID";
+    private static final String ARG_TRANSACTION_ID = "TRANSACTION_ID";
+    private static final String ARG_QR_CODE = "QR_CODE";
+    private static final String ARG_CHECK_STATUS = "CHECK_STATUS";
+    private static final String ARG_REQUEST_STATUS = "REQUEST_STATUS";
     private static final String ARG_RECEIPT_DATA = "RECEIPT_DATA";
 
     private long currencyId;
+    private long transactionId;
+    private ElectronicReceipt eReceipt;
+
+    private String qrCodeStatus;
+    private long checkStatus;
+    private long requestStatus;
     private String receiptData;
     private JSONObject receiptJSON;
 
-    public static ReceiptFragment newInstance(long currencyId, String receiptData) {
+    public static ReceiptFragment newInstance(long currencyId, long transactionId) {
         Bundle args = new Bundle();
         args.putLong(ARG_CURRENCY_ID, currencyId);
+        args.putLong(ARG_TRANSACTION_ID, transactionId);
+
+        ReceiptFragment fragment = new ReceiptFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ReceiptFragment newInstance(long currencyId, String qrCode, long checkStatus, long requestStatus, String receiptData) {
+        Bundle args = new Bundle();
+        args.putLong(ARG_CURRENCY_ID, currencyId);
+        args.putString(ARG_QR_CODE, qrCode);
+        args.putLong(ARG_CHECK_STATUS, checkStatus);
+        args.putLong(ARG_REQUEST_STATUS, requestStatus);
         args.putString(ARG_RECEIPT_DATA, receiptData);
 
         ReceiptFragment fragment = new ReceiptFragment();
@@ -48,13 +73,31 @@ public class ReceiptFragment extends AbstractRecycleFragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             currencyId = bundle.getLong(ARG_CURRENCY_ID, 0);
-            receiptData = bundle.getString(ARG_RECEIPT_DATA);
+            transactionId = bundle.getLong(ARG_TRANSACTION_ID, -1);
+            if (transactionId != -1) {
+                eReceipt = db.getElectronicReceiptForTransaction(transactionId);
+                qrCodeStatus = eReceipt.qr_code != null ? "OK" : "null";
+                checkStatus = eReceipt.check_status;
+                requestStatus = eReceipt.request_status;
+                receiptData = eReceipt.response_data;
+            } else {
+                qrCodeStatus = bundle.getString(ARG_QR_CODE, null) != null ? "OK" : "null";
+                checkStatus = bundle.getLong(ARG_CHECK_STATUS);
+                requestStatus = bundle.getLong(ARG_REQUEST_STATUS);
+                receiptData = bundle.getString(ARG_RECEIPT_DATA);
+            }
+
             try {
-                receiptJSON = new JSONObject(this.receiptData);
+                receiptJSON = new JSONObject(receiptData);
                 receiptJSON = receiptJSON.getJSONObject("document").getJSONObject("receipt");
             } catch (Exception ex) {
                 Log.e("Financisto", "jsonObject", ex);
             }
+
+            ReceiptItemsListBinding binding = (ReceiptItemsListBinding) getBinding();
+            binding.bQrCode.setText("QRCode: " + qrCodeStatus);
+            binding.bCheckStatus.setText("Check: " + checkStatus);
+            binding.bRequestStatus.setText("Request: " + requestStatus);
         }
 
         return v;
@@ -126,7 +169,7 @@ public class ReceiptFragment extends AbstractRecycleFragment {
             mBinding.right.setText(Utils.amountToString(ccache, mItem.getPrice(),false));
             mBinding.indicator.setVisibility(View.GONE);
             mBinding.icon.setVisibility(View.GONE);
-            mBinding.eReceipt.setVisibility(View.GONE);
+            mBinding.rightQrCode.setVisibility(View.GONE);
         }
 
     }

@@ -3,6 +3,7 @@ package ru.orangesoftware.financisto.activity;
 import android.Manifest;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -40,6 +41,7 @@ import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.Attribute;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.Currency;
+import ru.orangesoftware.financisto.model.ElectronicReceipt;
 import ru.orangesoftware.financisto.model.SystemAttribute;
 import ru.orangesoftware.financisto.model.Transaction;
 import ru.orangesoftware.financisto.model.TransactionAttribute;
@@ -134,6 +136,7 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     private QuickActionWidget pickImageActionGrid;
 
     protected Transaction transaction = new Transaction();
+    protected ElectronicReceipt e_receipt = new ElectronicReceipt();
 
     protected CompositeDisposable disposable = new CompositeDisposable();
 
@@ -181,9 +184,12 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
                 transaction.categoryAttributes = db.getAllAttributesForTransaction(transactionId);
                 isDuplicate = intent.getBooleanExtra(DUPLICATE_EXTRA, false);
                 isNewFromTemplate = intent.getBooleanExtra(NEW_FROM_TEMPLATE_EXTRA, false);
+                e_receipt = db.getElectronicReceiptForTransaction(transactionId);
                 if (isDuplicate) {
                     transaction.id = -1;
                     transaction.dateTime = System.currentTimeMillis();
+                    e_receipt.id = -1;
+                    e_receipt.transaction_id = -1;
                 }
             }
             transaction.isTemplate = intent.getIntExtra(TEMPLATE_EXTRA, transaction.isTemplate);
@@ -365,11 +371,14 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     private boolean saveWithResult(int result) {
         long id = save();
         if (id > 0) {
+            e_receipt.transaction_id = id;
+            db.insertOrUpdate(e_receipt);
+
             Intent data = new Intent();
             data.putExtra(TransactionColumns._id.name(), id);
             data.putExtra(DATETIME_EXTRA, transaction.dateTime);
             setResult(result, data);
-            if (getIntent().getBooleanExtra(DIRECT_TRANSACTION_EXTRA, false)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && getIntent().getBooleanExtra(DIRECT_TRANSACTION_EXTRA, false)) {
                 finishAndRemoveTask();
             } else {
                 finish();

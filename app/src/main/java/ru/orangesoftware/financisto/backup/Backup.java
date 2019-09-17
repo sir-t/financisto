@@ -26,7 +26,7 @@ public final class Backup {
             CURRENCY_TABLE, LOCATIONS_TABLE, PROJECT_TABLE, TRANSACTION_TABLE,
             PAYEE_TABLE, CCARD_CLOSING_DATE_TABLE, SMS_TEMPLATES_TABLE,
             "split", /* todo: seems not used, found only in old 20110422_0051_create_split_table.sql, should be removed then */
-            EXCHANGE_RATES_TABLE};
+            ELECTRONIC_RECEIPTS_TABLE, EXCHANGE_RATES_TABLE};
 
     public static final String[] BACKUP_TABLES_WITH_SYSTEM_IDS = {
             ATTRIBUTES_TABLE, CATEGORY_TABLE, PROJECT_TABLE, LOCATIONS_TABLE};
@@ -37,7 +37,8 @@ public final class Backup {
     public static final String[] RESTORE_SCRIPTS = {
             "20100114_1158_alter_accounts_types.sql",
             "20110903_0129_alter_template_splits.sql",
-            "20171230_1852_alter_electronic_account_type.sql"
+            "20171230_1852_alter_electronic_account_type.sql",
+            "20190912_add_table_electronic_receipt.sql"
     };
 
     private Backup() {

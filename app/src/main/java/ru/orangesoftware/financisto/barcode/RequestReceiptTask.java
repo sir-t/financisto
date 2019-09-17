@@ -16,7 +16,7 @@ import ru.orangesoftware.financisto.utils.MyPreferences;
 
 import static ru.orangesoftware.financisto.barcode.BarcodeHelper.splitQuery;
 
-public class RequestReceiptTask extends AsyncTask<String, String, String> {
+public class RequestReceiptTask extends AsyncTask<String, Integer, String> {
 
     private volatile boolean isRunning = true;
 
@@ -56,16 +56,19 @@ public class RequestReceiptTask extends AsyncTask<String, String, String> {
             Request request = builder.url(url_1).build();
             Response response_check = client.newCall(request).execute();
             result = Integer.toString(response_check.code());
+            publishProgress(1, response_check.code());
 
             if (response_check.code() == 204) {
                 request = builder.url(url_2).build();
                 Response response_get = client.newCall(request).execute();
                 result = Integer.toString(response_get.code());
+                publishProgress(2, response_get.code());
 
                 if (response_get.code() == 202) {
                     response_get.close();
                     Thread.sleep(500);
                     response_get = client.newCall(request).execute();
+                    publishProgress(2, response_get.code());
                 }
 
                 if (response_get.code() == 200) {
@@ -92,11 +95,21 @@ public class RequestReceiptTask extends AsyncTask<String, String, String> {
     }
 
     @Override
+    protected void onProgressUpdate(Integer... values) {
+        super.onProgressUpdate(values);
+        if (isRunning) {
+            Log.i("RequestReceiptTask", "onProgressUpdate");
+            if (listener != null)
+                listener.onElectronicReceiptChanged(values[0], values[1]);
+        }
+    }
+
+    @Override
     protected void onPostExecute(String result) {
         if (isRunning) {
             Log.i("RequestReceiptTask", "onPostExecute");
             if (listener != null)
-                listener.onElectronicReceiptChanged(result);
+                listener.onElectronicReceiptChanged(3, result);
         }
     }
 

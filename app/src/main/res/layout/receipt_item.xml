@@ -33,17 +33,29 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <ImageView
+                android:id="@+id/right_qr_code"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:adjustViewBounds="false"
+                android:scaleType="fitEnd"
+                android:src="@drawable/ic_qr_code"
+                android:tint="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="@+id/top"
+                app:layout_constraintEnd_toStartOf="@+id/icon"
+                app:layout_constraintTop_toTopOf="@+id/top" />
+
             <TextView
                 android:id="@+id/top"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
                 android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                app:layout_constraintEnd_toStartOf="@+id/icon"
+                app:layout_constraintEnd_toStartOf="@+id/right_qr_code"
                 app:layout_constraintStart_toEndOf="@+id/indicator"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="top" />
@@ -97,18 +109,6 @@
                 app:layout_constraintStart_toEndOf="@+id/indicator"
                 app:layout_constraintTop_toBottomOf="@+id/center"
                 tools:text="bottom" />
-
-            <TextView
-                android:id="@+id/e_receipt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:maxLines="1"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                app:layout_constraintStart_toEndOf="@+id/bottom"
-                app:layout_constraintTop_toBottomOf="@+id/center"
-                tools:text="qr" />
 
             <TextView
                 android:id="@+id/right"

@@ -3,6 +3,7 @@ package ru.orangesoftware.financisto.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -20,8 +21,11 @@ import ru.orangesoftware.financisto.activity.ReceiptActivity;
 import ru.orangesoftware.financisto.adapter.BaseCursorRecyclerAdapter;
 import ru.orangesoftware.financisto.databinding.ReceiptItemBinding;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.model.Account;
+import ru.orangesoftware.financisto.model.CategoryEntity;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.Transaction;
+import ru.orangesoftware.financisto.model.TransactionStatus;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.StringUtil;
@@ -29,6 +33,7 @@ import ru.orangesoftware.financisto.utils.Utils;
 
 import static ru.orangesoftware.financisto.db.DatabaseHelper.*;
 import static ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemClick;
+import static ru.orangesoftware.financisto.model.Category.isSplit;
 import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
 
 public class ReceiptListFragment extends AbstractRecycleFragment implements ItemClick {
@@ -63,11 +68,12 @@ public class ReceiptListFragment extends AbstractRecycleFragment implements Item
 	public void onItemClick(View view, int position) {
 		if (getCursor().moveToPosition(position)) {
 			Transaction t = Transaction.fromBlotterCursor(getCursor());
-			if (t.eReceiptData != null && t.eReceiptData.startsWith("{")) {
-				ReceiptActivity.Builder builder = new ReceiptActivity.Builder(context, t.eReceiptData);
-				builder.setCurrencyId(t.originalCurrencyId);
-//				if (isDifferentCurrency() || selectedAccount != null)
-//					builder.setCurrencyId(isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
+			if (t.receipt.response_data != null && t.receipt.response_data.startsWith("{")) {
+				ReceiptActivity.Builder builder = new ReceiptActivity.Builder(context, t.id);
+				Account a = db.getAccount(t.fromAccountId);
+				if (a != null) {
+					builder.setCurrencyId(a.currency.id);
+				}
 				startActivity(builder.build());
 			}
 		}
@@ -104,23 +110,26 @@ public class ReceiptListFragment extends AbstractRecycleFragment implements Item
 				} else {
 					note = "\u00AB "+toAccount;
 				}
-				mBinding.eReceipt.setVisibility(View.GONE);
+				mBinding.icon.setImageDrawable(icBlotterTransfer);
+				mBinding.icon.setColorFilter(u.transferColor);
+				mBinding.rightQrCode.setVisibility(View.GONE);
 			} else {
 				String title = cursor.getString(BlotterColumns.from_account_title.ordinal());
 				mBinding.top.setText(title);
 				mBinding.center.setTextColor(Color.WHITE);
-				if (t.eReceiptQRCode != null) {
-					String eReceiptData = t.eReceiptData;
-					if (eReceiptData != null && eReceiptData.startsWith("{"))
-						mBinding.eReceipt.setText("qr ok");
-					else if (eReceiptData != null) {
-						mBinding.eReceipt.setText("qr err " + eReceiptData);
+				if (t.receipt.qr_code != null) {
+					mBinding.rightQrCode.setVisibility(View.VISIBLE);
+					String eReceiptData = t.receipt.response_data;
+					if (eReceiptData != null && eReceiptData.startsWith("{")) {
+						mBinding.rightQrCode.setColorFilter(Color.argb(255, 0, 255, 0));
+					} else if (eReceiptData != null) {
+						mBinding.rightQrCode.setColorFilter(Color.argb(255, 255, 0, 0));
 					} else {
-						mBinding.eReceipt.setText("qr");
+						mBinding.rightQrCode.setColorFilter(Color.argb(255, 255, 255, 255));
 					}
-					mBinding.eReceipt.setVisibility(View.VISIBLE);
-				} else
-					mBinding.eReceipt.setVisibility(View.GONE);
+				} else {
+					mBinding.rightQrCode.setVisibility(View.GONE);
+				}
 			}
 
 			long categoryId = t.categoryId;
@@ -144,12 +153,19 @@ public class ReceiptListFragment extends AbstractRecycleFragment implements Item
 				u.setAmountText(mBinding.rightCenter, c, fromAmount, true);
 			}
 
-			if (fromAmount > 0) {
-				mBinding.icon.setImageDrawable(icBlotterIncome);
-				mBinding.icon.setColorFilter(u.positiveColor);
-			} else if (fromAmount < 0) {
-				mBinding.icon.setImageDrawable(icBlotterExpense);
-				mBinding.icon.setColorFilter(u.negativeColor);
+
+			if (isSplit(t.categoryId)) {
+				mBinding.icon.setImageDrawable(icBlotterSplit);
+				mBinding.icon.setColorFilter(u.splitColor);
+			} else {
+				int categoryType = cursor.getInt(BlotterColumns.category_type.ordinal());
+				if ((fromAmount > 0) || (fromAmount == 0 && categoryType == CategoryEntity.TYPE_INCOME)) {
+					mBinding.icon.setImageDrawable(icBlotterIncome);
+					mBinding.icon.setColorFilter(u.positiveColor);
+				} else if ((fromAmount < 0) || (fromAmount == 0 && categoryType == CategoryEntity.TYPE_EXPENSE)) {
+					mBinding.icon.setImageDrawable(icBlotterExpense);
+					mBinding.icon.setColorFilter(u.negativeColor);
+				}
 			}
 
 			long date = t.dateTime;
@@ -164,12 +180,13 @@ public class ReceiptListFragment extends AbstractRecycleFragment implements Item
 			long balance = cursor.getLong(BlotterColumns.from_account_balance.ordinal());
 			mBinding.right.setText(Utils.amountToString(c, balance, false));
 
-			if (mBinding.right != null && !MyPreferences.isShowRunningBalance(context)) {
+			if (!MyPreferences.isShowRunningBalance(context)) {
 				mBinding.right.setVisibility(View.GONE);
 			}
 
-//			TransactionStatus status = TransactionStatus.valueOf(cursor.getString(BlotterColumns.status.ordinal()));
-//			mBinding.indicator.setBackgroundColor(colors[status.ordinal()]);
+			Resources r = context.getResources();
+			TransactionStatus status = TransactionStatus.valueOf(cursor.getString(BlotterColumns.status.ordinal()));
+			mBinding.indicator.setBackgroundColor(r.getColor(status.colorId));
 		}
 
 	}

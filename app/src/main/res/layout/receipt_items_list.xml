@@ -1,13 +1,31 @@
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:android="http://schemas.android.com/apk/res/android">
 <LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent"
 	android:orientation="vertical">
 	<LinearLayout android:layout_height="wrap_content"
 		android:layout_width="fill_parent">
-		<Button android:layout_width="wrap_content"
+
+		<Button
+			android:id="@+id/bQrCode"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
-			android:text="@string/info"
-			android:id="@+id/bInfo"/>
+			android:text="QRCode: 0" />
+
+		<Button
+			android:id="@+id/bCheckStatus"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:text="Check: 0" />
+
+		<Button
+			android:id="@+id/bRequestStatus"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:text="Request: 0" />
+
 	</LinearLayout>
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/list" android:layout_width="match_parent"
