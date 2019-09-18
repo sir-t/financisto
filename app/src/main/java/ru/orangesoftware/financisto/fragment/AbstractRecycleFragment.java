@@ -5,11 +5,13 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
@@ -17,11 +19,14 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.helper.ItemTouchHelperAdapter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.helper.RecyclerTouchListener;
 import ru.orangesoftware.financisto.helper.SimpleItemTouchHelperCallback;
+import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.PinProtection;
 
 public abstract class AbstractRecycleFragment extends Fragment {
@@ -175,6 +180,21 @@ public abstract class AbstractRecycleFragment extends Fragment {
                         Log.e("Financisto", "onItemLongClick " + position);
                         listener.onItemLongClick(view, position);
                     }
+                    ItemMenuShow menuListener = (AbstractRecycleFragment.this instanceof ItemMenuShow) ? ((ItemMenuShow) AbstractRecycleFragment.this) : null;
+                    if (menuListener != null) {
+                        Log.e("Financisto", "MenuShow" + position);
+                        PopupMenu popupMenu = new PopupMenu(context, view);
+                        Menu menu = popupMenu.getMenu();
+                        List<MenuItemInfo> menus = menuListener.getMenuContext(view, position);
+                        int i = 0;
+                        for (MenuItemInfo m : menus) {
+                            if (m.enabled) {
+                                menu.add(0, m.menuId, i++, m.titleId);
+                            }
+                        }
+                        popupMenu.setOnMenuItemClickListener(item -> menuListener.onMenuClick(item.getItemId(), position));
+                        popupMenu.show();
+                    }
                 });
         mList.addOnItemTouchListener(mTouchListener);
     }
@@ -304,6 +324,11 @@ public abstract class AbstractRecycleFragment extends Fragment {
     public interface ItemSwipeable {
         Integer[] getSwipeOptions();
         void onSwipeClick(int viewID, int position);
+    }
+
+    public interface ItemMenuShow {
+        List<MenuItemInfo> getMenuContext(View view, int position);
+        boolean onMenuClick(int menuID, int position);
     }
 
 }
