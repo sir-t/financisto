@@ -45,7 +45,7 @@ public abstract class AbstractRecycleFragment extends Fragment {
     protected DatabaseAdapter db;
     protected Context context;
 
-    private boolean enablePin = true;
+    protected boolean enablePin = true;
 
     protected abstract void updateAdapter();
 

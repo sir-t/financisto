@@ -1,27 +1,28 @@
 package ru.orangesoftware.financisto.fragment;
 
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 
-import java.util.Collections;
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.Map;
 
 import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.adapter.BlotterListAdapter;
+import ru.orangesoftware.financisto.databinding.CategorySelectorBinding;
+import ru.orangesoftware.financisto.databinding.ReceiptItemBinding;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.CategoryTree;
 import ru.orangesoftware.financisto.model.CategoryTreeNavigator;
-import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 
-public class CategorySelectorFragment extends AbstractListFragment {
+public class CategorySelectorFragment extends AbstractRecycleFragment implements AbstractRecycleFragment.ItemClick {
 
     private static final String ARG_SELECTED_CATEGORY_ID = "selected_category_id";
     private static final String ARG_EXCLUDED_SUB_TREE_ID = "excluded_sub_tree_id";
@@ -62,8 +63,8 @@ public class CategorySelectorFragment extends AbstractListFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         Resources resources = getResources();
         incomeColor = resources.getColor(R.color.category_type_income);
@@ -88,43 +89,27 @@ public class CategorySelectorFragment extends AbstractListFragment {
             navigator.selectCategory(args.getLong(ARG_SELECTED_CATEGORY_ID, 0));
         }
 
-        bBack = view.findViewById(R.id.bBack);
-        bBack.setOnClickListener(view -> {
+        CategorySelectorBinding binding = (CategorySelectorBinding) getBinding();
+        bBack = binding.bBack;
+        bBack.setOnClickListener(v -> {
             if (navigator.goBack()) {
                 updateAdapter();
             }
         });
-
-        Button bSelect = view.findViewById(R.id.bSelect);
-        bSelect.setOnClickListener(view -> confirmSelection());
-
-        updateAdapter();
-
-        return view;
-    }
-
-    @Override
-    protected Cursor createCursor() {
-        return null;
+        binding.bSelect.setOnClickListener(v -> confirmSelection());
     }
 
     @Override
     protected void updateAdapter() {
         if (navigator != null) {
             bBack.setEnabled(navigator.canGoBack());
-            adapter = new CategoryAdapter(navigator.categories);
-            setListAdapter(adapter);
+            setListAdapter(new CategoryRecyclerAdapter(navigator.categories));
         }
     }
 
     @Override
-    protected void deleteItem(View v, int position, long id) { }
-
-    @Override
-    protected void editItem(View v, int position, long id) { }
-
-    @Override
-    protected void viewItem(View v, int position, long id) {
+    public void onItemClick(View view, int position) {
+        long id = getListAdapter().getItemId(position);
         if (navigator.navigateTo(id)) {
             updateAdapter();
         } else {
@@ -134,75 +119,81 @@ public class CategorySelectorFragment extends AbstractListFragment {
         }
     }
 
-    @Override
-    protected List<MenuItemInfo> createContextMenus(long id) {
-        return Collections.emptyList();
-    }
-
     private void confirmSelection() {
         mCallbacks.onCategorySelected(navigator.selectedCategoryId);
     }
 
-    private class CategoryAdapter extends BaseAdapter {
+    private class CategoryItemHolder extends RecyclerView.ViewHolder {
+
+        private final ReceiptItemBinding mBinding;
+
+        CategoryItemHolder(ReceiptItemBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
+        }
+
+        void bind(Category c) {
+            if (c.id == CategoryTreeNavigator.INCOME_CATEGORY_ID) {
+                mBinding.center.setText(getString(R.string.income));
+            } else if (c.id == CategoryTreeNavigator.EXPENSE_CATEGORY_ID) {
+                mBinding.center.setText(getString(R.string.expense));
+            } else {
+                mBinding.center.setText(c.title);
+            }
+            mBinding.bottom.setText(c.tag);
+            mBinding.indicator.setBackgroundColor(c.isIncome() ? incomeColor : expenseColor);
+            mBinding.rightCenter.setVisibility(View.INVISIBLE);
+            mBinding.icon.setVisibility(View.INVISIBLE);
+            if (attributes != null && attributes.containsKey(c.id)) {
+                mBinding.right.setText(attributes.get(c.id));
+                mBinding.right.setVisibility(View.VISIBLE);
+            } else {
+                mBinding.right.setVisibility(View.GONE);
+            }
+            mBinding.top.setVisibility(View.INVISIBLE);
+            if (navigator.isSelected(c.id)) {
+                mBinding.rowFG.setBackgroundResource(R.drawable.list_selector_background_focus);
+            } else {
+                mBinding.rowFG.setBackgroundResource(0);
+            }
+            mBinding.rightQrCode.setVisibility(View.GONE);
+            mBinding.getRoot().findViewById(R.id.rowBG).setVisibility(View.GONE);
+        }
+
+    }
+
+    public class CategoryRecyclerAdapter extends RecyclerView.Adapter<CategoryItemHolder> {
 
         private final CategoryTree<Category> categories;
 
-        private CategoryAdapter(CategoryTree<Category> categories) {
+        CategoryRecyclerAdapter(CategoryTree<Category> categories) {
             this.categories = categories;
         }
 
+        @NonNull
         @Override
-        public int getCount() {
+        public CategoryItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            ReceiptItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.receipt_item, parent, false);
+            return new CategoryItemHolder(binding);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull CategoryItemHolder holder, int position) {
+            Category c = categories.getAt(position);
+            holder.bind(c);
+        }
+
+        @Override
+        public int getItemCount() {
             return categories.size();
         }
 
         @Override
-        public Category getItem(int i) {
-            return categories.getAt(i);
+        public long getItemId(int position) {
+            return categories.getAt(position).id;
         }
 
-        @Override
-        public long getItemId(int i) {
-            return getItem(i).id;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            BlotterListAdapter.BlotterViewHolder v;
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.blotter_list_item, parent, false);
-                v = new BlotterListAdapter.BlotterViewHolder(convertView);
-                convertView.setTag(v);
-            } else {
-                v = (BlotterListAdapter.BlotterViewHolder)convertView.getTag();
-            }
-            Category c = getItem(position);
-            if (c.id == CategoryTreeNavigator.INCOME_CATEGORY_ID) {
-                v.centerView.setText(getString(R.string.income));
-            } else if (c.id == CategoryTreeNavigator.EXPENSE_CATEGORY_ID) {
-                v.centerView.setText(getString(R.string.expense));
-            } else {
-                v.centerView.setText(c.title);
-            }
-            v.bottomView.setText(c.tag);
-            v.indicator.setBackgroundColor(c.isIncome() ? incomeColor : expenseColor);
-            v.rightCenterView.setVisibility(View.INVISIBLE);
-            v.iconView.setVisibility(View.INVISIBLE);
-            if (attributes != null && attributes.containsKey(c.id)) {
-                v.rightView.setText(attributes.get(c.id));
-                v.rightView.setVisibility(View.VISIBLE);
-            } else {
-                v.rightView.setVisibility(View.GONE);
-            }
-            v.topView.setVisibility(View.INVISIBLE);
-            if (navigator.isSelected(c.id)) {
-                v.layout.setBackgroundResource(R.drawable.list_selector_background_focus);
-            } else {
-                v.layout.setBackgroundResource(0);
-            }
-            v.eReceiptView.setVisibility(View.GONE);
-            return convertView;
-        }
     }
 
 }
