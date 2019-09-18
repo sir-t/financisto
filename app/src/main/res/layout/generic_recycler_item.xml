@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+
+		<include layout="@layout/row_bg_edit_delete" />
+
+		<RelativeLayout
+			android:id="@+id/rowFG"
+			android:layout_width="fill_parent"
+			android:layout_height="?android:attr/listPreferredItemHeight"
+			android:background="#000000"
+			android:paddingLeft="0dp"
+			android:paddingStart="0dp"
+			android:paddingRight="12dp"
+			android:paddingEnd="12dp">
+
+			<ImageView
+				android:id="@+id/icon"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:layout_alignParentEnd="true"
+				android:layout_alignParentTop="true" />
+
+			<TextView
+				android:id="@+id/amount"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:layout_alignParentEnd="true"
+				android:layout_alignParentBottom="true"
+				android:textAppearance="?android:attr/textAppearanceSmall"
+				android:singleLine="true"
+				android:text=""
+				android:layout_marginBottom="9dp" />
+
+			<TextView
+				android:id="@+id/label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_toRightOf="@+id/divider"
+				android:layout_toEndOf="@+id/divider"
+				android:layout_alignParentBottom="true"
+				android:layout_marginBottom="8dp"
+				android:layout_marginTop="-10dp"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:textAppearance="?android:attr/textAppearanceSmall"
+				android:visibility="invisible"
+				android:layout_marginLeft="5dp"
+				android:layout_marginStart="5dp" />
+
+			<TextView
+				android:id="@+id/number"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="5dp"
+				android:layout_marginStart="5dp"
+				android:layout_toRightOf="@id/label"
+				android:layout_toEndOf="@id/label"
+				android:layout_toLeftOf="@id/amount"
+				android:layout_toStartOf="@id/amount"
+				android:layout_alignBaseline="@id/label"
+				android:layout_alignWithParentIfMissing="true"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:textAppearance="?android:attr/textAppearanceSmall" />
+
+			<TextView
+				android:id="@+id/line"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_toRightOf="@+id/divider"
+				android:layout_toEndOf="@+id/divider"
+				android:layout_alignParentTop="true"
+				android:layout_above="@id/label"
+				android:layout_alignWithParentIfMissing="true"
+				android:textAppearance="?android:attr/textAppearanceLarge"
+				android:singleLine="true"
+				android:gravity="center_vertical"
+				android:text=""
+				android:layout_marginLeft="11dp"
+				android:layout_marginStart="11dp"
+				android:ellipsize="marquee"
+				android:layout_toLeftOf="@id/icon"
+				android:layout_toStartOf="@id/icon" />
+
+		</RelativeLayout>
+
+	</RelativeLayout>
+
+</layout>
