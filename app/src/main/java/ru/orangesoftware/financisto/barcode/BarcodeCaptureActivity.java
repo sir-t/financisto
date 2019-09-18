@@ -76,6 +76,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity
 
         mPreview = findViewById(R.id.preview);
         mPreview.setOnClickListener(v -> mCameraSource.autoFocus(null));
+        mPreview.setOnLongClickListener(v -> mCameraSource.setFlashMode(
+                mCameraSource.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF) ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF)
+        );
 
         boolean autoFocus = true;
         boolean useFlash = false;
