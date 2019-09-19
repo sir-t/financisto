@@ -27,13 +27,14 @@ import ru.orangesoftware.financisto.activity.AttributeListActivity;
 import ru.orangesoftware.financisto.activity.CategoryActivity;
 import ru.orangesoftware.financisto.databinding.CategoryListBinding;
 import ru.orangesoftware.financisto.databinding.CategoryListItemBinding;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemClick;
 import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemMenuShow;
 import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemSwipeable;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.CategoryTree;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 
-public class CategoryListFragment extends AbstractRecycleFragment implements ItemSwipeable, ItemMenuShow {
+public class CategoryListFragment extends AbstractRecycleFragment implements ItemClick, ItemSwipeable, ItemMenuShow {
 
     private static final int EMPTY_REQUEST = 0;
     private static final int NEW_CATEGORY_REQUEST = 1;
@@ -88,6 +89,15 @@ public class CategoryListFragment extends AbstractRecycleFragment implements Ite
     }
 
     @Override
+    public void onItemClick(View view, int position) {
+        CategoryRecyclerAdapter adapter = (CategoryRecyclerAdapter) getListAdapter();
+        Category c = adapter.getItem(position);
+        if (c.hasChildren()) {
+            adapter.onListItemClick(c.id);
+        }
+    }
+
+    @Override
     public Integer[] getSwipeOptions() {
         return new Integer[]{R.id.delete_task, R.id.edit_task};
     }
@@ -127,7 +137,7 @@ public class CategoryListFragment extends AbstractRecycleFragment implements Ite
             menus.add(new MenuItemInfo(1, R.string.position_move_top, R.drawable.ic_btn_round_top));
             menus.add(new MenuItemInfo(2, R.string.position_move_up, R.drawable.ic_btn_round_up));
         }
-        if (pos < categories.size() - 1) {
+        if (pos < tree.size() - 1) {
             menus.add(new MenuItemInfo(3, R.string.position_move_down, R.drawable.ic_btn_round_down));
             menus.add(new MenuItemInfo(4, R.string.position_move_bottom, R.drawable.ic_btn_round_bottom));
         }
@@ -214,13 +224,11 @@ public class CategoryListFragment extends AbstractRecycleFragment implements Ite
             this.levelPadding = 2 * resources.getDimensionPixelSize(R.dimen.category_padding);
         }
 
-        void bind(Category c, HashSet<Long> state, ListItemClick listener) {
+        void bind(Category c, boolean isExpanded) {
             mBinding.title.setText(c.title);
             int padding = levelPadding * (c.level - 1);
             if (c.hasChildren()) {
-                mBinding.span.setImageDrawable(state.contains(c.id) ? expandedDrawable : collapsedDrawable);
-                mBinding.span.setClickable(true);
-                mBinding.span.setOnClickListener(v -> listener.onListItemClick(c.id));
+                mBinding.span.setImageDrawable(isExpanded ? expandedDrawable : collapsedDrawable);
                 mBinding.span.setPadding(padding, 0, 0, 0);
                 mBinding.span.setVisibility(View.VISIBLE);
                 padding += collapsedDrawable.getMinimumWidth();
@@ -247,11 +255,7 @@ public class CategoryListFragment extends AbstractRecycleFragment implements Ite
         }
     }
 
-    private interface ListItemClick {
-        void onListItemClick(long id);
-    }
-
-    private class CategoryRecyclerAdapter extends RecyclerView.Adapter<CategoryItemHolder> implements ListItemClick {
+    private class CategoryRecyclerAdapter extends RecyclerView.Adapter<CategoryItemHolder> {
 
         private CategoryTree<Category> categories;
 
@@ -274,7 +278,7 @@ public class CategoryListFragment extends AbstractRecycleFragment implements Ite
         @Override
         public void onBindViewHolder(@NonNull CategoryItemHolder holder, int position) {
             Category c = list.get(position);
-            holder.bind(c, state, this);
+            holder.bind(c, state.contains(c.id));
         }
 
         @Override
