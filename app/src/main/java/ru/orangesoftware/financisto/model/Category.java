@@ -98,18 +98,12 @@ public class Category extends CategoryEntity<Category> {
         level -= 1;
         if (level <= 0) {
             return "";
-        } else if (level == 1) {
-            return "-- ";
-        } else if (level == 2) {
-            return "---- ";
-        } else if (level == 3) {
-            return "------ ";
         } else {
             StringBuilder sb = new StringBuilder();
-            for (int i = 1; i < level; i++) {
-                sb.append("--");
+            for (int i = 0; i < level; i++) {
+                sb.append("-");
             }
-            return sb.toString();
+            return sb.append(" ").toString();
         }
     }
 

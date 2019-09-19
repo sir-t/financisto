@@ -13,11 +13,17 @@ package ru.orangesoftware.financisto.utils;
 public class MenuItemInfo {
 	public final int menuId;
 	public int titleId;
+	public int iconId;
 	public boolean enabled = true;
 	
 	public MenuItemInfo(int menuId, int titleId) {
+		this(menuId, titleId, 0);
+	}
+
+	public MenuItemInfo(int menuId, int titleId, int iconId) {
 		this.menuId = menuId;
 		this.titleId = titleId;
+		this.iconId = iconId;
 	}
 
 }

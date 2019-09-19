@@ -5,13 +5,14 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
@@ -183,17 +184,35 @@ public abstract class AbstractRecycleFragment extends Fragment {
                     ItemMenuShow menuListener = (AbstractRecycleFragment.this instanceof ItemMenuShow) ? ((ItemMenuShow) AbstractRecycleFragment.this) : null;
                     if (menuListener != null) {
                         Log.e("Financisto", "MenuShow" + position);
-                        PopupMenu popupMenu = new PopupMenu(context, view);
-                        Menu menu = popupMenu.getMenu();
                         List<MenuItemInfo> menus = menuListener.getMenuContext(view, position);
-                        int i = 0;
-                        for (MenuItemInfo m : menus) {
-                            if (m.enabled) {
-                                menu.add(0, m.menuId, i++, m.titleId);
+                        if (menus != null) {
+                            MenuBuilder mMenu = new MenuBuilder(context);
+                            mMenu.setCallback(new MenuBuilder.Callback() {
+                                @Override
+                                public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+                                    return menuListener.onMenuClick(item.getItemId(), position);
+                                }
+
+                                @Override
+                                public void onMenuModeChange(MenuBuilder menu) {
+
+                                }
+                            });
+                            boolean showIcons = false;
+                            int i = 0;
+                            for (MenuItemInfo m : menus) {
+                                if (m.enabled) {
+                                    MenuItem item = mMenu.add(0, m.menuId, i++, m.titleId);
+                                    if (m.iconId != 0) {
+                                        showIcons = true;
+                                        item.setIcon(m.iconId);
+                                    }
+                                }
                             }
+                            MenuPopupHelper mPopup = new MenuPopupHelper(context, mMenu, view);
+                            mPopup.setForceShowIcon(showIcons);
+                            mPopup.show();
                         }
-                        popupMenu.setOnMenuItemClickListener(item -> menuListener.onMenuClick(item.getItemId(), position));
-                        popupMenu.show();
                     }
                 });
         mList.addOnItemTouchListener(mTouchListener);
