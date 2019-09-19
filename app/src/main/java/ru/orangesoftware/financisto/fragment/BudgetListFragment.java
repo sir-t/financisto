@@ -2,10 +2,10 @@ package ru.orangesoftware.financisto.fragment;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +14,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.BudgetActivity;
@@ -22,14 +27,18 @@ import ru.orangesoftware.financisto.activity.BudgetBlotterActivity;
 import ru.orangesoftware.financisto.activity.BudgetListTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.DateFilterActivity;
 import ru.orangesoftware.financisto.activity.FilterState;
-import ru.orangesoftware.financisto.adapter.BudgetListAdapter;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
+import ru.orangesoftware.financisto.databinding.BudgetListBinding;
+import ru.orangesoftware.financisto.databinding.BudgetListItemBinding;
 import ru.orangesoftware.financisto.datetime.PeriodType;
 import ru.orangesoftware.financisto.db.BudgetsTotalCalculator;
 import ru.orangesoftware.financisto.filter.Criteria;
 import ru.orangesoftware.financisto.filter.DateTimeCriteria;
 import ru.orangesoftware.financisto.filter.WhereFilter;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemClick;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemSwipeable;
 import ru.orangesoftware.financisto.model.Budget;
+import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.Total;
 import ru.orangesoftware.financisto.utils.RecurUtils;
 import ru.orangesoftware.financisto.utils.Utils;
@@ -37,8 +46,7 @@ import ru.orangesoftware.financisto.utils.Utils;
 import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.Activity.RESULT_OK;
 
-public class BudgetListFragment extends AbstractListFragment {
-
+public class BudgetListFragment extends AbstractRecycleFragment implements ItemClick, ItemSwipeable {
 
     private static final int NEW_BUDGET_REQUEST = 1;
     private static final int EDIT_BUDGET_REQUEST = 2;
@@ -55,24 +63,24 @@ public class BudgetListFragment extends AbstractListFragment {
 
     private ArrayList<Budget> budgets = new ArrayList<>();
     private Handler handler;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        budgets = db.getAllBudgets(filter);
-        handler = new Handler();
-
-        return view;
-    }
+    private BudgetTotalsCalculationTask totalCalculationTask;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        TextView totalText = view.findViewById(R.id.total);
-        totalText.setOnClickListener(view2 -> showTotals());
 
-        bFilter = view.findViewById(R.id.bFilter);
+        budgets = db.getAllBudgets(filter);
+        handler = new Handler();
+
+        TextView totalText = view.findViewById(R.id.total);
+        totalText.setOnClickListener(v -> showTotals());
+
+        BudgetListBinding binding = (BudgetListBinding) getBinding();
+        binding.bAdd.setOnClickListener(v -> {
+            Intent intent = new Intent(context, BudgetActivity.class);
+            startActivityForResult(intent, NEW_BUDGET_REQUEST);
+        });
+        bFilter = binding.bFilter;
         bFilter.setOnClickListener(v -> {
             Intent intent = new Intent(context, DateFilterActivity.class);
             filter.toIntent(intent);
@@ -83,19 +91,7 @@ public class BudgetListFragment extends AbstractListFragment {
             filter.put(new DateTimeCriteria(PeriodType.THIS_MONTH));
         }
 
-        recreateCursor();
         applyFilter();
-        calculateTotals();
-    }
-
-    private void showTotals() {
-        Intent intent = new Intent(context, BudgetListTotalsDetailsActivity.class);
-        filter.toIntent(intent);
-        startActivityForResult(intent, -1);
-    }
-
-    private void applyFilter() {
-        FilterState.updateFilterColor(context, filter, bFilter);
     }
 
     @Override
@@ -115,63 +111,80 @@ public class BudgetListFragment extends AbstractListFragment {
                 }
             }
         }
-        recreateCursor();
+        updateAdapter();
     }
 
     @Override
     public void updateAdapter() {
-        if(adapter==null) {
-            adapter = new BudgetListAdapter(context, budgets);
-            setListAdapter(adapter);
-        }else{
-            ((BudgetListAdapter) adapter).setBudgets(budgets);
-            ((BudgetListAdapter) adapter).notifyDataSetChanged();
+        budgets = db.getAllBudgets(filter);
+        calculateTotals();
+
+        if (getListAdapter() == null) {
+            setListAdapter(new BudgetRecyclerAdapter(budgets));
+        } else {
+            ((BudgetRecyclerAdapter) getListAdapter()).setBudgets(budgets);
         }
     }
 
     @Override
-    protected Cursor createCursor() {
-        return null;
+    public void onItemClick(View view, int position) {
+        long id = getListAdapter().getItemId(position);
+        Budget b = db.load(Budget.class, id);
+        Intent intent = new Intent(context, BudgetBlotterActivity.class);
+        Criteria.eq(BlotterFilter.BUDGET_ID, String.valueOf(id)).toIntent(b.title, intent);
+        startActivityForResult(intent, VIEW_BUDGET_REQUEST);
     }
 
     @Override
-    public void recreateCursor() {
-        budgets = db.getAllBudgets(filter);
-        updateAdapter();
-        calculateTotals();
+    public Integer[] getSwipeOptions() {
+        return new Integer[]{R.id.delete_task, R.id.edit_task};
     }
 
-    private BudgetTotalsCalculationTask totalCalculationTask;
+    @Override
+    public void onSwipeClick(int viewID, int position) {
+        long id = getListAdapter().getItemId(position);
+        switch (viewID) {
+            case R.id.delete_task:
+                deleteItem(id);
+                break;
+            case R.id.edit_task:
+                editItem(id);
+                break;
+        }
+    }
+
+    private void showTotals() {
+        Intent intent = new Intent(context, BudgetListTotalsDetailsActivity.class);
+        filter.toIntent(intent);
+        startActivityForResult(intent, -1);
+    }
+
+    private void applyFilter() {
+        FilterState.updateFilterColor(context, filter, bFilter);
+    }
 
     private void calculateTotals() {
         if (totalCalculationTask != null) {
             totalCalculationTask.stop();
             totalCalculationTask.cancel(true);
         }
-        TextView totalText = view.findViewById(R.id.total);
+        TextView totalText = getView().findViewById(R.id.total);
         totalCalculationTask = new BudgetTotalsCalculationTask(totalText);
         totalCalculationTask.execute((Void[]) null);
     }
 
-    @Override
-    protected void addItem() {
-        Intent intent = new Intent(context, BudgetActivity.class);
-        startActivityForResult(intent, NEW_BUDGET_REQUEST);
-    }
-
-    @Override
-    protected void deleteItem(View v, int position, final long id) {
+    private void deleteItem(final long id) {
         final Budget b = db.load(Budget.class, id);
         if (b.parentBudgetId > 0) {
             new AlertDialog.Builder(context)
                     .setMessage(R.string.delete_budget_recurring_select)
                     .setPositiveButton(R.string.delete_budget_one_entry, (arg0, arg1) -> {
                         db.deleteBudgetOneEntry(id);
-                        recreateCursor();
+                        updateAdapter();
                     })
                     .setNeutralButton(R.string.delete_budget_all_entries, (arg0, arg1) -> {
                         db.deleteBudget(b.parentBudgetId);
-                        recreateCursor();
+                        updateAdapter();
                     })
                     .setNegativeButton(R.string.cancel, null)
                     .show();
@@ -181,15 +194,14 @@ public class BudgetListFragment extends AbstractListFragment {
                     .setMessage(recur.interval == RecurUtils.RecurInterval.NO_RECUR ? R.string.delete_budget_confirm : R.string.delete_budget_recurring_confirm)
                     .setPositiveButton(R.string.yes, (arg0, arg1) -> {
                         db.deleteBudget(id);
-                        recreateCursor();
+                        updateAdapter();
                     })
                     .setNegativeButton(R.string.no, null)
                     .show();
         }
     }
 
-    @Override
-    public void editItem(View v, int position, long id) {
+    public void editItem(final long id) {
         Budget b = db.load(Budget.class, id);
         RecurUtils.Recur recur = b.getRecur();
         if (recur.interval != RecurUtils.RecurInterval.NO_RECUR) {
@@ -201,13 +213,112 @@ public class BudgetListFragment extends AbstractListFragment {
         startActivityForResult(intent, EDIT_BUDGET_REQUEST);
     }
 
-    @Override
-    protected void viewItem(View v, int position, long id) {
-        Budget b = db.load(Budget.class, id);
-        Intent intent = new Intent(context, BudgetBlotterActivity.class);
-        Criteria.eq(BlotterFilter.BUDGET_ID, String.valueOf(id))
-                .toIntent(b.title, intent);
-        startActivityForResult(intent, VIEW_BUDGET_REQUEST);
+    private class BudgetItemHolder extends RecyclerView.ViewHolder {
+
+        private final BudgetListItemBinding mBinding;
+
+        public BudgetItemHolder(BudgetListItemBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
+        }
+
+        void bind(Budget b) {
+            mBinding.bottom.setText("*/*");
+            mBinding.center.setText(b.title);
+
+            Currency c = b.getBudgetCurrency();
+            long amount = b.amount;
+            mBinding.rightCenter.setText(Utils.amountToString(c, Math.abs(amount)));
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.setLength(0);
+            RecurUtils.Recur r = b.getRecur();
+            if (r.interval != RecurUtils.RecurInterval.NO_RECUR) {
+                sb.append("#").append(b.recurNum+1).append(" ");
+            }
+            sb.append(DateUtils.formatDateRange(context, b.startDate, b.endDate,
+                    DateUtils.FORMAT_SHOW_TIME|DateUtils.FORMAT_SHOW_DATE|DateUtils.FORMAT_ABBREV_MONTH));
+            mBinding.top.setText(sb.toString());
+
+            if (b.updated) {
+                Utils u = new Utils(context);
+
+                long spent = b.spent;
+                long balance = amount+spent;
+                u.setAmountText(mBinding.right1, c, balance, false);
+                u.setAmountText(mBinding.right2, c, spent, false);
+
+                sb.setLength(0);
+                String categoriesText = b.categoriesText;
+                if (Utils.isEmpty(categoriesText)) {
+                    sb.append("*");
+                } else {
+                    sb.append( categoriesText);
+                }
+                if (b.includeSubcategories) {
+                    sb.append("/*");
+                }
+                if (!Utils.isEmpty(b.projectsText)) {
+                    sb.append(" [").append(b.projectsText).append("]");
+                }
+                mBinding.bottom.setText(sb.toString());
+                if (b.amount > 0) {
+                    mBinding.progress.setMax((int)Math.abs(b.amount));
+                    mBinding.progress.setProgress((int)(balance-1));
+                } else {
+                    mBinding.progress.setMax((int)Math.abs(b.amount));
+                    mBinding.progress.setProgress((int)(spent-1));
+                }
+            } else {
+                mBinding.right1.setText(R.string.calculating);
+                mBinding.right2.setText(R.string.calculating);
+                mBinding.progress.setMax(1);
+                mBinding.progress.setSecondaryProgress(0);
+                mBinding.progress.setProgress(0);
+            }
+            mBinding.progress.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    public class BudgetRecyclerAdapter extends RecyclerView.Adapter<BudgetItemHolder> {
+
+        private List<Budget> budgets;
+
+        public BudgetRecyclerAdapter(List<Budget> budgets) {
+            this.budgets = budgets;
+        }
+
+        @NonNull
+        @Override
+        public BudgetItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            BudgetListItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.budget_list_item, parent, false);
+            return new BudgetItemHolder(binding);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull BudgetItemHolder holder, int position) {
+            Budget b = budgets.get(position);
+            holder.bind(b);
+        }
+
+        @Override
+        public int getItemCount() {
+            return budgets.size();
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return budgets.get(i).id;
+        }
+
+        public void setBudgets(List<Budget> budgets) {
+            this.budgets = budgets;
+            notifyDataSetChanged();
+        }
+
     }
 
     public class BudgetTotalsCalculationTask extends AsyncTask<Void, Total, Total> {
@@ -238,7 +349,7 @@ public class BudgetListFragment extends AbstractListFragment {
             if (isRunning) {
                 Utils u = new Utils(context);
                 u.setTotal(totalText, result);
-                ((BudgetListAdapter) adapter).notifyDataSetChanged();
+                ((BudgetRecyclerAdapter) getListAdapter()).notifyDataSetChanged();
             }
         }
 
