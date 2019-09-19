@@ -1039,6 +1039,7 @@ public class DatabaseAdapter extends MyEntityManager {
 
         Cursor c = db().query(CATEGORY_TABLE, new String[]{"min(left)", "max(right)"},
                 "_id > 0", null, null, null, null);
+        c.moveToFirst();
         left = c.getInt(0);
         right = c.getInt(1);
         values.put(CategoryColumns.left.name(), left - 1);
