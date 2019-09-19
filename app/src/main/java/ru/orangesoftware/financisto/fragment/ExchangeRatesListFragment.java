@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,11 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -25,17 +26,19 @@ import java.util.List;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.ExchangeRateActivity;
-import ru.orangesoftware.financisto.adapter.GenericViewHolder;
+import ru.orangesoftware.financisto.databinding.ExchangeRateListBinding;
+import ru.orangesoftware.financisto.databinding.GenericRecyclerItemBinding;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemClick;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemSwipeable;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.rates.ExchangeRate;
 import ru.orangesoftware.financisto.rates.ExchangeRateProvider;
 import ru.orangesoftware.financisto.utils.CurrencyCache;
-import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 
 import static ru.orangesoftware.financisto.utils.Utils.formatRateDate;
 
-public class ExchangeRatesListFragment extends AbstractListFragment {
+public class ExchangeRatesListFragment extends AbstractRecycleFragment implements ItemClick, ItemSwipeable {
 
     private static final int ADD_RATE = 1;
     private static final int EDIT_RATE = 2;
@@ -53,14 +56,25 @@ public class ExchangeRatesListFragment extends AbstractListFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         currencies = db.getAllCurrenciesList("name");
 
-        fromCurrencySpinner = view.findViewById(R.id.spinnerFromCurrency);
+        ExchangeRateListBinding binding = (ExchangeRateListBinding) getBinding();
+        binding.bAdd.setOnClickListener(v -> {
+            long fromCurrencyId = fromCurrencySpinner.getSelectedItemId();
+            long toCurrencyId = toCurrencySpinner.getSelectedItemId();
+            if (fromCurrencyId > 0 && toCurrencyId > 0) {
+                Intent intent = new Intent(context, ExchangeRateActivity.class);
+                intent.putExtra(ExchangeRateActivity.FROM_CURRENCY_ID, fromCurrencyId);
+                intent.putExtra(ExchangeRateActivity.TO_CURRENCY_ID, toCurrencyId);
+                startActivityForResult(intent, ADD_RATE);
+            }
+        });
+        fromCurrencySpinner = binding.spinnerFromCurrency;
         fromCurrencySpinner.setPromptId(R.string.rate_from_currency);
-        toCurrencySpinner = view.findViewById(R.id.spinnerToCurrency);
+        toCurrencySpinner = binding.spinnerToCurrency;
         toCurrencySpinner.setPromptId(R.string.rate_to_currency);
 
         if (currencies.size() > 0) {
@@ -94,77 +108,9 @@ public class ExchangeRatesListFragment extends AbstractListFragment {
             });
             fromCurrencySpinner.setSelection(findDefaultCurrency());
 
-            ImageButton bFlip = view.findViewById(R.id.bFlip);
-            bFlip.setOnClickListener(arg0 -> flipCurrencies());
-
-            ImageButton bRefresh = view.findViewById(R.id.bRefresh);
-            bRefresh.setOnClickListener(arg0 -> refreshAllRates());
+            binding.bFlip.setOnClickListener(arg0 -> flipCurrencies());
+            binding.bRefresh.setOnClickListener(arg0 -> refreshAllRates());
         }
-
-        return view;
-    }
-
-    @Override
-    protected List<MenuItemInfo> createContextMenus(long id) {
-        List<MenuItemInfo> menus = super.createContextMenus(id);
-        for (MenuItemInfo m : menus) {
-            if (m.menuId == MENU_VIEW) {
-                m.enabled = false;
-                break;
-            }
-        }
-        return menus;
-    }
-
-    @Override
-    protected Cursor createCursor() {
-        return null;
-    }
-
-    @Override
-    protected void updateAdapter() {
-        Currency fromCurrency = (Currency) fromCurrencySpinner.getSelectedItem();
-        Currency toCurrency = (Currency) toCurrencySpinner.getSelectedItem();
-        if (fromCurrency != null && toCurrency != null) {
-            List<ExchangeRate> rates = db.findRates(fromCurrency, toCurrency);
-            ListAdapter adapter = new ExchangeRateListAdapter(context, rates);
-            setListAdapter(adapter);
-        }
-    }
-
-    @Override
-    protected void addItem() {
-        long fromCurrencyId = fromCurrencySpinner.getSelectedItemId();
-        long toCurrencyId = toCurrencySpinner.getSelectedItemId();
-        if (fromCurrencyId > 0 && toCurrencyId > 0) {
-            Intent intent = new Intent(context, ExchangeRateActivity.class);
-            intent.putExtra(ExchangeRateActivity.FROM_CURRENCY_ID, fromCurrencyId);
-            intent.putExtra(ExchangeRateActivity.TO_CURRENCY_ID, toCurrencyId);
-            startActivityForResult(intent, ADD_RATE);
-        }
-    }
-
-    @Override
-    protected void deleteItem(View v, int position, long id) {
-        ExchangeRate rate = (ExchangeRate) getListAdapter().getItem(position);
-        db.deleteRate(rate);
-        updateAdapter();
-    }
-
-    @Override
-    protected void editItem(View v, int position, long id) {
-        ExchangeRate rate = (ExchangeRate) getListAdapter().getItem(position);
-
-        Intent intent = new Intent(context, ExchangeRateActivity.class);
-        intent.putExtra(ExchangeRateActivity.FROM_CURRENCY_ID, rate.fromCurrencyId);
-        intent.putExtra(ExchangeRateActivity.TO_CURRENCY_ID, rate.toCurrencyId);
-        intent.putExtra(ExchangeRateActivity.RATE_DATE, rate.date);
-        startActivityForResult(intent, EDIT_RATE);
-    }
-
-    @Override
-    protected void viewItem(View v, int position, long id) {
-        editItem(v, position, id);
     }
 
     @Override
@@ -173,6 +119,54 @@ public class ExchangeRatesListFragment extends AbstractListFragment {
         if (resultCode == Activity.RESULT_OK) {
             updateAdapter();
         }
+    }
+
+    @Override
+    protected void updateAdapter() {
+        Currency fromCurrency = (Currency) fromCurrencySpinner.getSelectedItem();
+        Currency toCurrency = (Currency) toCurrencySpinner.getSelectedItem();
+        if (fromCurrency != null && toCurrency != null) {
+            List<ExchangeRate> rates = db.findRates(fromCurrency, toCurrency);
+            setListAdapter(new ExchangeRateRecyclerAdapter(rates));
+        }
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        editItem(position);
+    }
+
+    @Override
+    public Integer[] getSwipeOptions() {
+        return new Integer[]{R.id.delete_task, R.id.edit_task};
+    }
+
+    @Override
+    public void onSwipeClick(int viewID, int position) {
+        switch (viewID) {
+            case R.id.delete_task:
+                deleteItem(position);
+                break;
+            case R.id.edit_task:
+                editItem(position);
+                break;
+        }
+    }
+
+    protected void deleteItem(int position) {
+        ExchangeRate rate = ((ExchangeRateRecyclerAdapter) getListAdapter()).getItem(position);
+        db.deleteRate(rate);
+        updateAdapter();
+    }
+
+    protected void editItem(int position) {
+        ExchangeRate rate = ((ExchangeRateRecyclerAdapter) getListAdapter()).getItem(position);
+
+        Intent intent = new Intent(context, ExchangeRateActivity.class);
+        intent.putExtra(ExchangeRateActivity.FROM_CURRENCY_ID, rate.fromCurrencyId);
+        intent.putExtra(ExchangeRateActivity.TO_CURRENCY_ID, rate.toCurrencyId);
+        intent.putExtra(ExchangeRateActivity.RATE_DATE, rate.date);
+        startActivityForResult(intent, EDIT_RATE);
     }
 
     private SpinnerAdapter createCurrencyAdapter(List<Currency> currencies) {
@@ -308,47 +302,53 @@ public class ExchangeRatesListFragment extends AbstractListFragment {
 
     }
 
-    private class ExchangeRateListAdapter extends BaseAdapter {
+    private class ExchangeRateItemHolder extends RecyclerView.ViewHolder {
 
-        private final Context context;
-        private final LayoutInflater inflater;
+        private final GenericRecyclerItemBinding mBinding;
+
+        ExchangeRateItemHolder(GenericRecyclerItemBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
+        }
+
+        void bind(ExchangeRate rate) {
+            mBinding.line.setText(formatRateDate(context, rate.date));
+            mBinding.amount.setText(nf.format(rate.rate));
+        }
+
+    }
+
+    private class ExchangeRateRecyclerAdapter extends RecyclerView.Adapter<ExchangeRateItemHolder> {
+
         private final List<ExchangeRate> rates;
 
-        private ExchangeRateListAdapter(Context context, List<ExchangeRate> rates) {
-            this.context = context;
-            this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        private ExchangeRateRecyclerAdapter(List<ExchangeRate> rates) {
             this.rates = rates;
         }
 
+        @NonNull
         @Override
-        public int getCount() {
+        public ExchangeRateItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            GenericRecyclerItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.generic_recycler_item, parent, false);
+            return new ExchangeRateItemHolder(binding);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ExchangeRateItemHolder holder, int position) {
+            ExchangeRate rate = rates.get(position);
+            holder.bind(rate);
+        }
+
+        @Override
+        public int getItemCount() {
             return rates.size();
         }
 
-        @Override
-        public ExchangeRate getItem(int i) {
-            return rates.get(i);
+        public ExchangeRate getItem(int position) {
+            return rates.get(position);
         }
 
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            GenericViewHolder v;
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.generic_list_item, parent, false);
-                v = GenericViewHolder.createAndTag(convertView);
-            } else {
-                v = (GenericViewHolder) convertView.getTag();
-            }
-            ExchangeRate rate = getItem(position);
-            v.lineView.setText(formatRateDate(context, rate.date));
-            v.amountView.setText(nf.format(rate.rate));
-            return convertView;
-        }
     }
 
 }
