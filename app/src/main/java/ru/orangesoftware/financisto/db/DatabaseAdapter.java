@@ -1036,6 +1036,11 @@ public class DatabaseAdapter extends MyEntityManager {
                 right = c.right;
             }
         }
+
+        Cursor c = db().query(CATEGORY_TABLE, new String[]{"min(left)", "max(right)"},
+                "_id > 0", null, null, null, null);
+        left = c.getInt(0);
+        right = c.getInt(1);
         values.put(CategoryColumns.left.name(), left - 1);
         values.put(CategoryColumns.right.name(), right + 1);
         sid[0] = String.valueOf(Category.NO_CATEGORY_ID);
