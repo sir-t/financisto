@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.Map;
 
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.databinding.BlotterListItemBinding;
 import ru.orangesoftware.financisto.databinding.CategorySelectorBinding;
-import ru.orangesoftware.financisto.databinding.ReceiptItemBinding;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.CategoryTree;
 import ru.orangesoftware.financisto.model.CategoryTreeNavigator;
@@ -125,9 +125,9 @@ public class CategorySelectorFragment extends AbstractRecycleFragment implements
 
     private class CategoryItemHolder extends RecyclerView.ViewHolder {
 
-        private final ReceiptItemBinding mBinding;
+        private final BlotterListItemBinding mBinding;
 
-        CategoryItemHolder(ReceiptItemBinding binding) {
+        CategoryItemHolder(BlotterListItemBinding binding) {
             super(binding.getRoot());
             mBinding = binding;
         }
@@ -174,7 +174,7 @@ public class CategorySelectorFragment extends AbstractRecycleFragment implements
         @Override
         public CategoryItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
-            ReceiptItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.receipt_item, parent, false);
+            BlotterListItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.blotter_list_item, parent, false);
             return new CategoryItemHolder(binding);
         }
 
