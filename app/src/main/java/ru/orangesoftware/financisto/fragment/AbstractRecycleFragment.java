@@ -38,7 +38,6 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
     private View root;
     private RecyclerView mList;
     private View mEmptyView;
-    private boolean mListShown;
 
     private ItemTouchHelper.Callback mItemTouchHelperCallback;
     private RecyclerTouchListener mTouchListener;
@@ -141,13 +140,12 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
             mList = (RecyclerView) rawListView;
         }
         mList.setLayoutManager(new LinearLayoutManager(context));
-        mListShown = true;
         if (mAdapter != null) {
             RecyclerView.Adapter adapter = mAdapter;
             mAdapter = null;
             setListAdapter(adapter);
         } else {
-            setListShown(false, false);
+            setListShown(false);
         }
 
         if (AbstractRecycleFragment.this instanceof ItemDragAndDrop) {
@@ -251,11 +249,7 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
         mAdapter = adapter;
         if (mList != null) {
             mList.setAdapter(adapter);
-            if (!mListShown && !hadAdapter) {
-                // The list was hidden, and previously didn't have an
-                // adapter.  It is now time to show it.
-                setListShown(true, requireView().getWindowToken() != null);
-            }
+            setListShown(true);
         }
     }
 
@@ -283,20 +277,8 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
 
     }
 
-    public void setListShown(boolean shown) {
-        setListShown(shown, true);
-    }
-
-    public void setListShownNoAnimation(boolean shown) {
-        setListShown(shown, false);
-    }
-
-    private void setListShown(boolean shown, boolean animate) {
+    private void setListShown(boolean shown) {
         ensureList();
-        if (mListShown == shown) {
-            return;
-        }
-        mListShown = shown;
         if (shown) {
             mEmptyView.setVisibility(View.GONE);
             mList.setVisibility(View.VISIBLE);

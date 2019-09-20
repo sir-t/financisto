@@ -70,7 +70,6 @@ public class BudgetListFragment extends AbstractRecycleFragment implements ItemC
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        budgets = db.getAllBudgets(filter);
         handler = new Handler();
 
         TextView totalText = view.findViewById(R.id.total);
