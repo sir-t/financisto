@@ -14,7 +14,7 @@
             android:id="@+id/rowFG"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#000000"
+            android:background="@color/holo_gray_dark"
             android:elevation="4dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"

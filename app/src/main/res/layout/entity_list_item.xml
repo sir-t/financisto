@@ -14,7 +14,7 @@
         android:id="@+id/rowFG"
         android:layout_width="fill_parent"
         android:layout_height="?android:attr/listPreferredItemHeight"
-        android:background="#000000">
+        android:background="@color/holo_gray_dark">
 
         <ImageView
             android:id="@+id/icon"

@@ -22,7 +22,7 @@
             android:id="@+id/rowFG"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#000000"
+            android:background="@color/holo_gray_dark"
             android:paddingLeft="10dp"
             android:paddingStart="10dp"
             android:paddingRight="12dp"
