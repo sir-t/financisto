@@ -35,6 +35,7 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
 
     private final int mContentId;
     private ViewDataBinding mBinding;
+    private View root;
     private RecyclerView mList;
     private View mEmptyView;
     private boolean mListShown;
@@ -88,14 +89,10 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
         super.onCreateView(inflater, container, savedInstanceState);
 
         mBinding = DataBindingUtil.inflate(inflater, mContentId, container, false);
-
-        return mBinding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        root = mBinding.getRoot();
         ensureList();
+
+        return root;
     }
 
     @Override
@@ -123,7 +120,6 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
         if (mList != null) {
             return;
         }
-        View root = getView();
         if (root == null) {
             throw new IllegalStateException("Content view not yet created");
         }
