@@ -309,11 +309,11 @@ public class BlotterRecyclerAdapter extends BaseCursorRecyclerAdapter<BlotterRec
         notifyDataSetChanged();
     }
 
-    static class BlotterListItemHolder extends RecyclerView.ViewHolder {
+    public static class BlotterListItemHolder extends RecyclerView.ViewHolder {
 
         private final BlotterListItemBinding mBinding;
 
-        BlotterListItemHolder(BlotterListItemBinding binding) {
+        public BlotterListItemHolder(BlotterListItemBinding binding) {
             super(binding.getRoot());
             mBinding = binding;
         }
