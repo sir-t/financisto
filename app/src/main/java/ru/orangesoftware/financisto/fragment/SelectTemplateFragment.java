@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.TemplatesListActivity;
 import ru.orangesoftware.financisto.adapter.TemplateRecyclerAdapter;
@@ -37,8 +39,6 @@ public class SelectTemplateFragment extends TemplatesListFragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-//        super.onViewCreated(view, savedInstanceState);
-
         internalOnCreateTemplates();
 
         TemplatesBinding binding = (TemplatesBinding) getBinding();
@@ -75,6 +75,12 @@ public class SelectTemplateFragment extends TemplatesListFragment {
                 recreateCursor();
             }
         });
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getTouchListener().setSwipeable(false);
     }
 
     @Override
