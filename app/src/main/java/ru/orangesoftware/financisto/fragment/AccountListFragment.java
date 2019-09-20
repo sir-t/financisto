@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
@@ -31,6 +32,7 @@ import ru.orangesoftware.financisto.activity.AccountActivity;
 import ru.orangesoftware.financisto.activity.AccountListTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.GenericBlotterActivity;
+import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
 import ru.orangesoftware.financisto.activity.MenuListItem;
 import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.PurgeAccountActivity;
@@ -50,6 +52,7 @@ import ru.orangesoftware.financisto.model.AccountType;
 import ru.orangesoftware.financisto.model.CardIssuer;
 import ru.orangesoftware.financisto.model.ElectronicPaymentType;
 import ru.orangesoftware.financisto.model.Total;
+import ru.orangesoftware.financisto.utils.IntegrityCheckAutobackup;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.Utils;
 import ru.orangesoftware.financisto.view.NodeInflater;
@@ -107,7 +110,7 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
         }
 
         calculateTotals();
-//        integrityCheck();
+        integrityCheck();
     }
 
     @Override
@@ -161,10 +164,10 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
         }
     }
 
-//    @Override
-//    public void integrityCheck() {
-//        new IntegrityCheckTask(context).execute(new IntegrityCheckAutobackup(context, TimeUnit.DAYS.toMillis(7)));
-//    }
+    @Override
+    public void integrityCheck() {
+        new IntegrityCheckTask(getActivity()).execute(new IntegrityCheckAutobackup(context, TimeUnit.DAYS.toMillis(7)));
+    }
 
     private void handlePopupMenu(int id) {
         switch (id) {
@@ -323,7 +326,7 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
     }
 
     @Override
-    protected void recreateCursor() {
+    public void recreateCursor() {
         super.recreateCursor();
         calculateTotals();
     }

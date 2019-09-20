@@ -8,14 +8,16 @@
   Contributors:
       Denis Solonenko - initial API and implementation
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+<LinearLayout
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/material_gray_dark"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@android:id/list"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -23,7 +25,7 @@
         android:fastScrollEnabled="true" />
 
     <TextView
-        android:id="@android:id/empty"
+        android:id="@+id/list_empty"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -51,6 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
             android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             android:background="@android:drawable/ic_delete"
             android:visibility="gone" />
     </FrameLayout>
@@ -148,3 +151,5 @@
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>
+
+</layout>

@@ -59,6 +59,10 @@ public abstract class BaseCursorRecyclerAdapter<V extends RecyclerView.ViewHolde
         return mCursor;
     }
 
+    public Cursor getCursor() {
+        return mCursor;
+    }
+
     public void swapCursor(Cursor newCursor) {
         if (newCursor == mCursor) {
             return;

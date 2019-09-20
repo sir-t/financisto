@@ -17,6 +17,7 @@ import android.text.format.DateUtils;
 import android.view.View;
 
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.databinding.BlotterListItemBinding;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper.BlotterColumns;
 import ru.orangesoftware.financisto.model.Currency;
@@ -26,14 +27,14 @@ import ru.orangesoftware.financisto.utils.Utils;
 
 import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
 
-public class TransactionsListAdapter extends BlotterListAdapter {
-	
-	public TransactionsListAdapter(Context context, DatabaseAdapter db, Cursor c) {
+public class TransactionsRecyclerAdapter extends BlotterRecyclerAdapter {
+
+	public TransactionsRecyclerAdapter(Context context, DatabaseAdapter db, Cursor c) {
 		super(context, db, c);
 	}
 
     @Override
-    protected void bindView(BlotterViewHolder v, Context context, Cursor cursor) {
+    public void bindView(final BlotterListItemBinding v, Context context, Cursor cursor) {
         long toAccountId = cursor.getLong(BlotterColumns.to_account_id.ordinal());
         String payee = cursor.getString(BlotterColumns.payee.ordinal());
         String note = cursor.getString(BlotterColumns.note.ordinal());
@@ -45,29 +46,30 @@ public class TransactionsListAdapter extends BlotterListAdapter {
         String toAccount = cursor.getString(BlotterColumns.to_account_title.ordinal());
         long fromAmount = cursor.getLong(BlotterColumns.from_amount.ordinal());
         if (toAccountId > 0) {
-            v.topView.setText(R.string.transfer);
+            v.top.setText(R.string.transfer);
             if (fromAmount > 0) {
                 note = toAccount+" \u00BB";
             } else {
                 note = "\u00AB "+toAccount;
             }
-            v.eReceiptView.setVisibility(View.GONE);
+            v.rightQrCode.setVisibility(View.GONE);
         } else {
             String title = cursor.getString(BlotterColumns.from_account_title.ordinal());
-            v.topView.setText(title);
-            v.centerView.setTextColor(Color.WHITE);
+            v.top.setText(title);
+            v.center.setTextColor(Color.WHITE);
             if (cursor.getString(BlotterColumns.e_receipt_qr_code.ordinal()) != null) {
+                v.rightQrCode.setVisibility(View.VISIBLE);
                 String eReceiptData = cursor.getString(BlotterColumns.e_receipt_data.ordinal());
-                if (eReceiptData != null && eReceiptData.startsWith("{"))
-                    v.eReceiptView.setText("qr ok");
-                else if (eReceiptData != null) {
-                    v.eReceiptView.setText("qr err " + eReceiptData);
+                if (eReceiptData != null && eReceiptData.startsWith("{")) {
+                    v.rightQrCode.setColorFilter(Color.argb(255, 0, 255, 0));
+                } else if (eReceiptData != null) {
+                    v.rightQrCode.setColorFilter(Color.argb(255, 255, 0, 0));
                 } else {
-                    v.eReceiptView.setText("qr");
+                    v.rightQrCode.setColorFilter(Color.argb(255, 255, 255, 255));
                 }
-                v.eReceiptView.setVisibility(View.VISIBLE);
-            } else
-                v.eReceiptView.setVisibility(View.GONE);
+            } else {
+                v.rightQrCode.setVisibility(View.GONE);
+            }
         }
 
         long categoryId = cursor.getLong(BlotterColumns.category_id.ordinal());
@@ -76,7 +78,7 @@ public class TransactionsListAdapter extends BlotterListAdapter {
             category = cursor.getString(BlotterColumns.category_title.ordinal());
         }
         String text = generateTransactionTitle(sb, payee, note, location, categoryId, category);
-        v.centerView.setText(text);
+        v.center.setText(text);
         sb.setLength(0);
 
         long currencyId = cursor.getLong(BlotterColumns.from_account_currency_id.ordinal());
@@ -85,29 +87,29 @@ public class TransactionsListAdapter extends BlotterListAdapter {
         if (originalCurrencyId > 0) {
             Currency originalCurrency = CurrencyCache.getCurrency(db, originalCurrencyId);
             long originalAmount = cursor.getLong(BlotterColumns.original_from_amount.ordinal());
-            u.setAmountText(sb, v.rightCenterView, originalCurrency, originalAmount, c, fromAmount, true);
+            u.setAmountText(sb, v.rightCenter, originalCurrency, originalAmount, c, fromAmount, true);
         } else {
-            u.setAmountText(v.rightCenterView, c, fromAmount, true);
+            u.setAmountText(v.rightCenter, c, fromAmount, true);
         }
         if (fromAmount > 0) {
-            v.iconView.setImageDrawable(icBlotterIncome);
-            v.iconView.setColorFilter(u.positiveColor);
+            v.icon.setImageDrawable(icBlotterIncome);
+            v.icon.setColorFilter(u.positiveColor);
         } else if (fromAmount < 0) {
-            v.iconView.setImageDrawable(icBlotterExpense);
-            v.iconView.setColorFilter(u.negativeColor);
+            v.icon.setImageDrawable(icBlotterExpense);
+            v.icon.setColorFilter(u.negativeColor);
         }
 
         long date = cursor.getLong(BlotterColumns.datetime.ordinal());
-        v.bottomView.setText(StringUtil.capitalize(DateUtils.formatDateTime(context, date,
+        v.bottom.setText(StringUtil.capitalize(DateUtils.formatDateTime(context, date,
                 DateUtils.FORMAT_SHOW_DATE|DateUtils.FORMAT_SHOW_TIME|DateUtils.FORMAT_ABBREV_MONTH|DateUtils.FORMAT_SHOW_WEEKDAY|DateUtils.FORMAT_ABBREV_WEEKDAY)));
         if (date > System.currentTimeMillis()) {
-            u.setFutureTextColor(v.bottomView);
+            u.setFutureTextColor(v.bottom);
         } else {
-            v.bottomView.setTextColor(v.topView.getTextColors().getDefaultColor());
+            v.bottom.setTextColor(v.top.getTextColors().getDefaultColor());
         }
 
         long balance = cursor.getLong(BlotterColumns.from_account_balance.ordinal());
-        v.rightView.setText(Utils.amountToString(c, balance, false));
+        v.right.setText(Utils.amountToString(c, balance, false));
         removeRightViewIfNeeded(v);
         setIndicatorColor(v, cursor);
     }

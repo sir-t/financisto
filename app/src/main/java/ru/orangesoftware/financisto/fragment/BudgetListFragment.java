@@ -1,6 +1,7 @@
 package ru.orangesoftware.financisto.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -169,7 +170,7 @@ public class BudgetListFragment extends AbstractRecycleFragment implements ItemC
             totalCalculationTask.cancel(true);
         }
         TextView totalText = getView().findViewById(R.id.total);
-        totalCalculationTask = new BudgetTotalsCalculationTask(totalText);
+        totalCalculationTask = new BudgetTotalsCalculationTask(context, totalText);
         totalCalculationTask.execute((Void[]) null);
     }
 
@@ -325,9 +326,11 @@ public class BudgetListFragment extends AbstractRecycleFragment implements ItemC
 
         private volatile boolean isRunning = true;
 
+        private final Context context;
         private final TextView totalText;
 
-        public BudgetTotalsCalculationTask(TextView totalText) {
+        public BudgetTotalsCalculationTask(Context context, TextView totalText) {
+            this.context = context;
             this.totalText = totalText;
         }
 
@@ -349,7 +352,7 @@ public class BudgetListFragment extends AbstractRecycleFragment implements ItemC
             if (isRunning) {
                 Utils u = new Utils(context);
                 u.setTotal(totalText, result);
-                ((BudgetRecyclerAdapter) getListAdapter()).notifyDataSetChanged();
+                getListAdapter().notifyDataSetChanged();
             }
         }
 

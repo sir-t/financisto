@@ -1,19 +1,16 @@
 package ru.orangesoftware.financisto.fragment;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.ContextMenu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.TemplatesListActivity;
-import ru.orangesoftware.financisto.adapter.TemplateListAdapter;
+import ru.orangesoftware.financisto.adapter.TemplateRecyclerAdapter;
+import ru.orangesoftware.financisto.databinding.TemplatesBinding;
 import ru.orangesoftware.financisto.filter.Criteria;
 import ru.orangesoftware.financisto.widget.SearchFilterTextWatcherListener;
 
@@ -39,28 +36,28 @@ public class SelectTemplateFragment extends TemplatesListFragment {
     }
 
     @Override
-    protected void initUI(Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+//        super.onViewCreated(view, savedInstanceState);
+
         internalOnCreateTemplates();
 
-        Button b = view.findViewById(R.id.bEditTemplates);
-        b.setOnClickListener(arg0 -> {
-            context.setResult(RESULT_CANCELED);
-            context.finish();
+        TemplatesBinding binding = (TemplatesBinding) getBinding();
+
+        binding.bEditTemplates.setOnClickListener(arg0 -> {
+            getActivity().setResult(RESULT_CANCELED);
+            getActivity().finish();
             Intent intent = new Intent(context, TemplatesListActivity.class);
             startActivity(intent);
         });
-        b = view.findViewById(R.id.bCancel);
-        b.setOnClickListener(arg0 -> {
-            context.setResult(RESULT_CANCELED);
-            context.finish();
+        binding.bCancel.setOnClickListener(arg0 -> {
+            getActivity().setResult(RESULT_CANCELED);
+            getActivity().finish();
         });
-        multiplierText = view.findViewById(R.id.multiplier);
-        ImageButton ib = view.findViewById(R.id.bPlus);
-        ib.setOnClickListener(arg0 -> incrementMultiplier());
-        ib = view.findViewById(R.id.bMinus);
-        ib.setOnClickListener(arg0 -> decrementMultiplier());
+        multiplierText = binding.multiplier;
+        binding.bPlus.setOnClickListener(arg0 -> incrementMultiplier());
+        binding.bMinus.setOnClickListener(arg0 -> decrementMultiplier());
 
-        searchFilter = view.findViewById(R.id.searchFilter);
+        searchFilter = binding.searchFilter;
         searchFilter.addTextChangedListener(new SearchFilterTextWatcherListener(FILTER_DELAY_MILLIS) {
             @Override
             public void clearFilter(String oldFilter) {
@@ -81,16 +78,24 @@ public class SelectTemplateFragment extends TemplatesListFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        getListView().setOnItemLongClickListener((parent, v, position, id) -> {
-            returnResult(id, true);
-            return true;
-        });
+    protected void updateAdapter() {
+        if (getListAdapter() == null){
+            setListAdapter(new TemplateRecyclerAdapter(context, db, getCursor()));
+        } else {
+            ((TemplateRecyclerAdapter) getListAdapter()).swapCursor(getCursor());
+        }
     }
 
     @Override
-    protected Cursor createCursor() {
-        return super.createCursor();
+    public void onItemClick(View view, int position) {
+        long id = getListAdapter().getItemId(position);
+        returnResult(id, false);
+    }
+
+    @Override
+    public void onItemLongClick(View view, int position) {
+        long id = getListAdapter().getItemId(position);
+        returnResult(id, true);
     }
 
     protected void incrementMultiplier() {
@@ -106,47 +111,12 @@ public class SelectTemplateFragment extends TemplatesListFragment {
         multiplierText.setText("x" + multiplier);
     }
 
-    @Override
-    public void registerForContextMenu(View view) {
-    }
-
-    @Override
-    protected void updateAdapter() {
-        if(adapter ==null){
-            adapter = new TemplateListAdapter(context, db, cursor);
-            setListAdapter(adapter);
-        }else {
-            ((TemplateListAdapter)adapter).changeCursor(cursor);
-            ((TemplateListAdapter)adapter).notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    protected void onItemClick(View v, int position, long id) {
-        returnResult(id, false);
-    }
-
-    @Override
-    protected void viewItem(View v, int position, long id) {
-        returnResult(id, false);
-    }
-
-    @Override
-    public void editItem(View v, int position, long id) {
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
-        // do nothing
-    }
-
     void returnResult(long id, boolean edit) {
         Intent intent = new Intent();
         intent.putExtra(TEMPATE_ID, id);
         intent.putExtra(MULTIPLIER, multiplier);
         if (edit) intent.putExtra(EDIT_AFTER_CREATION, true);
-        context.setResult(RESULT_OK, intent);
-        context.finish();
+        getActivity().setResult(RESULT_OK, intent);
+        getActivity().finish();
     }
 }

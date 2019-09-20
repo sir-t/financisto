@@ -4,14 +4,15 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 
-import ru.orangesoftware.financisto.adapter.TransactionsListAdapter;
+import ru.orangesoftware.financisto.adapter.TransactionsRecyclerAdapter;
 import ru.orangesoftware.financisto.blotter.BlotterTotalCalculationTask;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
 
 public class SplitsBlotterFragment extends BlotterFragment {
+
     @Override
-    protected void initUI(Bundle savedInstanceState) {
-        super.initUI(savedInstanceState);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         bFilter.setVisibility(View.GONE);
     }
 
@@ -22,12 +23,10 @@ public class SplitsBlotterFragment extends BlotterFragment {
 
     @Override
     protected void updateAdapter() {
-        if(adapter == null){
-            adapter = new TransactionsListAdapter(getContext(), db, cursor);
-            setListAdapter(adapter);
-        }else{
-            ((TransactionsListAdapter) adapter).changeCursor(cursor);
-            ((TransactionsListAdapter) adapter).notifyDataSetChanged();
+        if (getListAdapter() == null){
+            setListAdapter(new TransactionsRecyclerAdapter(context, db, getCursor()));
+        } else {
+            ((TransactionsRecyclerAdapter) getListAdapter()).swapCursor(getCursor());
         }
     }
 

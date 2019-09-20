@@ -17,10 +17,12 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.SmsDragListActivity;
 import ru.orangesoftware.financisto.activity.SmsTemplateActivity;
+import ru.orangesoftware.financisto.databinding.GenericRecyclerItemBinding;
 import ru.orangesoftware.financisto.helper.ItemTouchHelperAdapter;
 import ru.orangesoftware.financisto.helper.ItemTouchHelperViewHolder;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
@@ -62,8 +64,9 @@ public class SmsTemplateListAsyncAdapter extends AsyncAdapter<SmsTemplate, SmsTe
 
     @Override
     public LocalViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.generic_list_item, parent, false);
-        view.setOnClickListener(clickedView -> {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        GenericRecyclerItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.generic_recycler_item, parent, false);
+        binding.getRoot().setOnClickListener(clickedView -> {
             final PopupMenu popupMenu = new PopupMenu(context, clickedView);
             int i = 0;
             for (MenuItemInfo m : createContextMenus()) {
@@ -74,7 +77,7 @@ public class SmsTemplateListAsyncAdapter extends AsyncAdapter<SmsTemplate, SmsTe
             popupMenu.setOnMenuItemClickListener(item -> onItemAction(item.getItemId(), clickedView));
             popupMenu.show();
         });
-        return new LocalViewHolder(view);
+        return new LocalViewHolder(binding);
     }
 
     protected boolean onItemAction(int menuId, View itemView) {
@@ -168,36 +171,28 @@ public class SmsTemplateListAsyncAdapter extends AsyncAdapter<SmsTemplate, SmsTe
     }
 
     class LocalViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
-        public TextView lineView;
-        public TextView labelView;
-        public TextView numberView;
-        public TextView amountView;
-        public ImageView iconView;
 
-        public LocalViewHolder(View view) {
-            super(view);
+        public GenericRecyclerItemBinding mBinding;
 
-            lineView = view.findViewById(R.id.line1);
-            labelView = view.findViewById(R.id.label);
-            numberView = view.findViewById(R.id.number);
-            amountView = view.findViewById(R.id.date);
-            iconView = view.findViewById(R.id.icon);
+        public LocalViewHolder(GenericRecyclerItemBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
         }
 
         public void bindView(SmsTemplate item, Integer ignore) {
             if (item != null) {
                 itemView.setTag(R.id.sms_tpl_id, item.getId());
-                lineView.setText(item.title);
-                numberView.setText(item.template);
-                amountView.setVisibility(View.VISIBLE);
-                amountView.setText(Category.getTitle(item.categoryName, item.categoryLevel));
+                mBinding.line.setText(item.title);
+                mBinding.number.setText(item.template);
+                mBinding.amount.setVisibility(View.VISIBLE);
+                mBinding.amount.setText(Category.getTitle(item.categoryName, item.categoryLevel));
             }
         }
 
         @Override
         public void onItemSelected() {
             //numberView.setTextColor(Color.RED);
-            Log.i(TAG, String.format("selected: %s", numberView.getText()));
+            Log.i(TAG, String.format("selected: %s", mBinding.number.getText()));
         }
 
         @Override

@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.activity.RefreshSupportedActivity;
 import ru.orangesoftware.financisto.helper.ItemTouchHelperAdapter;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.helper.RecyclerTouchListener;
@@ -30,7 +31,7 @@ import ru.orangesoftware.financisto.helper.SimpleItemTouchHelperCallback;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.PinProtection;
 
-public abstract class AbstractRecycleFragment extends Fragment {
+public abstract class AbstractRecycleFragment extends Fragment implements RefreshSupportedActivity {
 
     private final int mContentId;
     private ViewDataBinding mBinding;
@@ -262,11 +263,16 @@ public abstract class AbstractRecycleFragment extends Fragment {
         }
     }
 
+    protected Cursor getCursor() {
+        return mCursor;
+    }
+
     protected Cursor createCursor() {
         return null;
     }
 
-    protected void recreateCursor() {
+    @Override
+    public void recreateCursor() {
         if (mCursor != null) {
             mCursor.close();
         }
@@ -276,8 +282,9 @@ public abstract class AbstractRecycleFragment extends Fragment {
         }
     }
 
-    protected Cursor getCursor() {
-        return mCursor;
+    @Override
+    public void integrityCheck() {
+
     }
 
     public void setListShown(boolean shown) {

@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import ru.orangesoftware.financisto.R;
-import ru.orangesoftware.financisto.adapter.BlotterListAdapter;
+import ru.orangesoftware.financisto.adapter.BlotterRecyclerAdapter;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.utils.MyPreferences;
@@ -15,6 +15,7 @@ import ru.orangesoftware.financisto.utils.MyPreferences;
 public class TemplatesListFragment extends BlotterFragment {
 
     public TemplatesListFragment() {
+        super(R.layout.blotter);
     }
 
     @SuppressLint("ValidFragment")
@@ -23,8 +24,29 @@ public class TemplatesListFragment extends BlotterFragment {
     }
 
     @Override
-    protected void calculateTotals() {
-        // do nothing
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // remove filter button and totals
+        bFilter.setVisibility(View.GONE);
+        if (showAllBlotterButtons) {
+            bTemplate.setVisibility(View.GONE);
+        }
+        view.findViewById(R.id.total).setVisibility(View.GONE);
+        internalOnCreateTemplates();
+    }
+
+    @Override
+    protected void updateAdapter() {
+        if (getListAdapter() == null){
+            setListAdapter(new BlotterRecyclerAdapter(context, db, getCursor()) {
+                @Override
+                protected boolean isShowRunningBalance() {
+                    return false;
+                }
+            });
+        } else {
+            ((BlotterRecyclerAdapter) getListAdapter()).swapCursor(getCursor());
+        }
     }
 
     @Override
@@ -49,44 +71,22 @@ public class TemplatesListFragment extends BlotterFragment {
     }
 
     @Override
-    protected void updateAdapter() {
-        if(adapter == null){
-            adapter = new BlotterListAdapter(context, db, cursor) {
-                @Override
-                protected boolean isShowRunningBalance() {
-                    return false;
-                }
-            };
-            setListAdapter(adapter);
-        }else{
-            ((BlotterListAdapter)adapter).changeCursor(cursor);
-            ((BlotterListAdapter)adapter).notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    protected void initUI(Bundle savedInstanceState) {
-        super.initUI(savedInstanceState);
-        // remove filter button and totals
-        bFilter.setVisibility(View.GONE);
-        if (showAllBlotterButtons) {
-            bTemplate.setVisibility(View.GONE);
-        }
-        view.findViewById(R.id.total).setVisibility(View.GONE);
-        internalOnCreateTemplates();
-    }
-
-    @Override
     protected boolean addTemplateToAddButton() {
         return false;
     }
 
+    @Override
+    protected void calculateTotals() {
+        // do nothing
+    }
+
     protected void internalOnCreateTemplates() {
         // change empty list message
-        ((TextView) view.findViewById(android.R.id.empty)).setText(R.string.no_templates);
+        ((TextView) getView().findViewById(R.id.list_empty)).setText(R.string.no_templates);
         // fix filter
         blotterFilter = new WhereFilter("templates");
         blotterFilter.eq(BlotterFilter.IS_TEMPLATE, String.valueOf(1));
         blotterFilter.eq(BlotterFilter.PARENT_ID, String.valueOf(0));
     }
+
 }

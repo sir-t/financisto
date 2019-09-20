@@ -36,7 +36,6 @@ import ru.orangesoftware.financisto.bus.SwitchToMenuTabEvent;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper;
 import ru.orangesoftware.financisto.dialog.WebViewDialog;
-import ru.orangesoftware.financisto.fragment.AbstractListFragment;
 import ru.orangesoftware.financisto.fragment.AccountListFragment;
 import ru.orangesoftware.financisto.fragment.BlotterFragment;
 import ru.orangesoftware.financisto.fragment.BudgetListFragment;
@@ -231,9 +230,9 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
     }
 
     public void refreshCurrentTab() {
-        if (fragment instanceof AbstractListFragment) {
-            ((AbstractListFragment) fragment).recreateCursor();
-            ((AbstractListFragment) fragment).integrityCheck();
+        if (fragment instanceof RefreshSupportedActivity) {
+            ((RefreshSupportedActivity) fragment).recreateCursor();
+            ((RefreshSupportedActivity) fragment).integrityCheck();
         }
     }
 }

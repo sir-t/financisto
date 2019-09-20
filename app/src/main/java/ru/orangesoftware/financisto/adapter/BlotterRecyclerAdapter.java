@@ -17,13 +17,14 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.format.DateUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.databinding.BlotterListItemBinding;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper.BlotterColumns;
 import ru.orangesoftware.financisto.model.CategoryEntity;
@@ -46,7 +48,7 @@ import ru.orangesoftware.financisto.utils.Utils;
 import static ru.orangesoftware.financisto.model.Category.isSplit;
 import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
 
-public class BlotterListAdapter extends ResourceCursorAdapter {
+public class BlotterRecyclerAdapter extends BaseCursorRecyclerAdapter<BlotterRecyclerAdapter.BlotterListItemHolder> {
 
     private final Date dt = new Date();
 
@@ -59,21 +61,14 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
     protected final DatabaseAdapter db;
 
     private final int colors[];
+    private final boolean showRunningBalance;
+    private final Context context;
 
     private final Set<Long> checkedItems = new HashSet<>();
 
-    private boolean showRunningBalance;
-
-    public BlotterListAdapter(Context context, DatabaseAdapter db, Cursor c) {
-        this(context, db, R.layout.blotter_list_item, c, false);
-    }
-
-    public BlotterListAdapter(Context context, DatabaseAdapter db, int layoutId, Cursor c) {
-        this(context, db, layoutId, c, false);
-    }
-
-    public BlotterListAdapter(Context context, DatabaseAdapter db, int layoutId, Cursor c, boolean autoRequery) {
-        super(context, layoutId, c, autoRequery);
+    public BlotterRecyclerAdapter(Context context, DatabaseAdapter db, Cursor c) {
+        super(c);
+        this.context = context;
         this.icBlotterIncome = context.getResources().getDrawable(R.drawable.ic_action_arrow_left_bottom);
         this.icBlotterExpense = context.getResources().getDrawable(R.drawable.ic_action_arrow_right_top);
         this.icBlotterTransfer = context.getResources().getDrawable(R.drawable.ic_action_arrow_top_down);
@@ -82,6 +77,137 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         this.colors = initializeColors(context);
         this.showRunningBalance = MyPreferences.isShowRunningBalance(context);
         this.db = db;
+    }
+
+    @NonNull
+    @Override
+    public BlotterListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        BlotterListItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.blotter_list_item, parent, false);
+        return new BlotterListItemHolder(binding);
+    }
+
+    @Override
+    public void onBindViewHolder(BlotterListItemHolder holder, Cursor cursor) {
+        BlotterListItemBinding v = holder.mBinding;
+
+        final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
+        final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
+        if (isUnchecked(id)) {
+            v.rowFG.setBackgroundResource(R.color.material_blue_gray);
+        } else {
+            v.rowFG.setBackgroundResource(R.color.holo_gray_dark);
+        }
+        bindView(v, context, cursor);
+    }
+
+    protected void bindView(final BlotterListItemBinding v, Context context, Cursor cursor) {
+        long toAccountId = cursor.getLong(BlotterColumns.to_account_id.ordinal());
+        int isTemplate = cursor.getInt(BlotterColumns.is_template.ordinal());
+        TextView noteView = isTemplate == 1 ? v.bottom : v.center;
+        if (toAccountId > 0) {
+            v.top.setText(R.string.transfer);
+
+            String fromAccountTitle = cursor.getString(BlotterColumns.from_account_title.ordinal());
+            String toAccountTitle = cursor.getString(BlotterColumns.to_account_title.ordinal());
+            u.setTransferTitleText(noteView, fromAccountTitle, toAccountTitle);
+
+            long fromCurrencyId = cursor.getLong(BlotterColumns.from_account_currency_id.ordinal());
+            Currency fromCurrency = CurrencyCache.getCurrency(db, fromCurrencyId);
+            long toCurrencyId = cursor.getLong(BlotterColumns.to_account_currency_id.ordinal());
+            Currency toCurrency = CurrencyCache.getCurrency(db, toCurrencyId);
+
+            long fromAmount = cursor.getLong(BlotterColumns.from_amount.ordinal());
+            long toAmount = cursor.getLong(BlotterColumns.to_amount.ordinal());
+            long fromBalance = cursor.getLong(BlotterColumns.from_account_balance.ordinal());
+            long toBalance = cursor.getLong(BlotterColumns.to_account_balance.ordinal());
+            u.setTransferAmountText(v.rightCenter, fromCurrency, fromAmount, toCurrency, toAmount);
+            if (v.right != null) {
+                u.setTransferBalanceText(v.right, fromCurrency, fromBalance, toCurrency, toBalance);
+            }
+            v.icon.setImageDrawable(icBlotterTransfer);
+            v.icon.setColorFilter(u.transferColor);
+            v.rightQrCode.setVisibility(View.GONE);
+        } else {
+            String fromAccountTitle = cursor.getString(BlotterColumns.from_account_title.ordinal());
+            v.top.setText(fromAccountTitle);
+            setTransactionTitleText(cursor, noteView);
+            sb.setLength(0);
+            long fromCurrencyId = cursor.getLong(BlotterColumns.from_account_currency_id.ordinal());
+            Currency fromCurrency = CurrencyCache.getCurrency(db, fromCurrencyId);
+            long amount = cursor.getLong(BlotterColumns.from_amount.ordinal());
+            long originalCurrencyId = cursor.getLong(BlotterColumns.original_currency_id.ordinal());
+            if (originalCurrencyId > 0) {
+                Currency originalCurrency = CurrencyCache.getCurrency(db, originalCurrencyId);
+                long originalAmount = cursor.getLong(BlotterColumns.original_from_amount.ordinal());
+                u.setAmountText(sb, v.rightCenter, originalCurrency, originalAmount, fromCurrency, amount, true);
+            } else {
+                u.setAmountText(sb, v.rightCenter, fromCurrency, amount, true);
+            }
+            long categoryId = cursor.getLong(BlotterColumns.category_id.ordinal());
+            if (isSplit(categoryId)) {
+                v.icon.setImageDrawable(icBlotterSplit);
+                v.icon.setColorFilter(u.splitColor);
+            } else if (amount == 0) {
+                int categoryType = cursor.getInt(BlotterColumns.category_type.ordinal());
+                if (categoryType == CategoryEntity.TYPE_INCOME) {
+                    v.icon.setImageDrawable(icBlotterIncome);
+                    v.icon.setColorFilter(u.positiveColor);
+                } else if (categoryType == CategoryEntity.TYPE_EXPENSE) {
+                    v.icon.setImageDrawable(icBlotterExpense);
+                    v.icon.setColorFilter(u.negativeColor);
+                }
+            } else {
+                if (amount > 0) {
+                    v.icon.setImageDrawable(icBlotterIncome);
+                    v.icon.setColorFilter(u.positiveColor);
+                } else if (amount < 0) {
+                    v.icon.setImageDrawable(icBlotterExpense);
+                    v.icon.setColorFilter(u.negativeColor);
+                }
+            }
+            if (v.right != null) {
+                long balance = cursor.getLong(BlotterColumns.from_account_balance.ordinal());
+                v.right.setText(Utils.amountToString(fromCurrency, balance, false));
+            }
+            if (cursor.getString(BlotterColumns.e_receipt_qr_code.ordinal()) != null) {
+                v.rightQrCode.setVisibility(View.VISIBLE);
+                String eReceiptData = cursor.getString(BlotterColumns.e_receipt_data.ordinal());
+                if (eReceiptData != null && eReceiptData.startsWith("{")) {
+                    v.rightQrCode.setColorFilter(Color.argb(255, 0, 255, 0));
+                } else if (eReceiptData != null) {
+                    v.rightQrCode.setColorFilter(Color.argb(255, 255, 0, 0));
+                } else {
+                    v.rightQrCode.setColorFilter(Color.argb(255, 255, 255, 255));
+                }
+            } else {
+                v.rightQrCode.setVisibility(View.GONE);
+            }
+        }
+        setIndicatorColor(v, cursor);
+        if (isTemplate == 1) {
+            String templateName = cursor.getString(BlotterColumns.template_name.ordinal());
+            v.center.setText(templateName);
+        } else {
+            String recurrence = cursor.getString(BlotterColumns.recurrence.ordinal());
+            if (isTemplate == 2 && recurrence != null) {
+                Recurrence r = Recurrence.parse(recurrence);
+                v.bottom.setText(r.toInfoString(context));
+                v.bottom.setTextColor(v.top.getTextColors().getDefaultColor());
+            } else {
+                long date = cursor.getLong(BlotterColumns.datetime.ordinal());
+                dt.setTime(date);
+                v.bottom.setText(StringUtil.capitalize(DateUtils.formatDateTime(context, dt.getTime(),
+                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY)));
+
+                if (isTemplate == 0 && date > System.currentTimeMillis()) {
+                    u.setFutureTextColor(v.bottom);
+                } else {
+                    v.bottom.setTextColor(v.top.getTextColors().getDefaultColor());
+                }
+            }
+        }
+        removeRightViewIfNeeded(v);
     }
 
     private int[] initializeColors(Context context) {
@@ -99,147 +225,15 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         return showRunningBalance;
     }
 
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = super.newView(context, cursor, parent);
-        createHolder(view);
-        return view;
+    void removeRightViewIfNeeded(BlotterListItemBinding v) {
+        if (v.right != null && !isShowRunningBalance()) {
+            v.right.setVisibility(View.GONE);
+        }
     }
 
-    private void createHolder(View view) {
-        BlotterViewHolder h = new BlotterViewHolder(view);
-        view.setTag(h);
-    }
-
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        final BlotterViewHolder v = (BlotterViewHolder) view.getTag();
-        final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
-        final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
-        if (isUnchecked(id)) {
-            v.layout.setBackgroundResource(R.color.material_blue_gray);
-        } else {
-            v.layout.setBackgroundResource(R.color.holo_gray_dark);
-        }
-        bindView(v, context, cursor);
-    }
-
-    protected void bindView(final BlotterViewHolder v, Context context, Cursor cursor) {
-        long toAccountId = cursor.getLong(BlotterColumns.to_account_id.ordinal());
-        int isTemplate = cursor.getInt(BlotterColumns.is_template.ordinal());
-        TextView noteView = isTemplate == 1 ? v.bottomView : v.centerView;
-        if (toAccountId > 0) {
-            v.topView.setText(R.string.transfer);
-
-            String fromAccountTitle = cursor.getString(BlotterColumns.from_account_title.ordinal());
-            String toAccountTitle = cursor.getString(BlotterColumns.to_account_title.ordinal());
-            u.setTransferTitleText(noteView, fromAccountTitle, toAccountTitle);
-
-            long fromCurrencyId = cursor.getLong(BlotterColumns.from_account_currency_id.ordinal());
-            Currency fromCurrency = CurrencyCache.getCurrency(db, fromCurrencyId);
-            long toCurrencyId = cursor.getLong(BlotterColumns.to_account_currency_id.ordinal());
-            Currency toCurrency = CurrencyCache.getCurrency(db, toCurrencyId);
-
-            long fromAmount = cursor.getLong(BlotterColumns.from_amount.ordinal());
-            long toAmount = cursor.getLong(BlotterColumns.to_amount.ordinal());
-            long fromBalance = cursor.getLong(BlotterColumns.from_account_balance.ordinal());
-            long toBalance = cursor.getLong(BlotterColumns.to_account_balance.ordinal());
-            u.setTransferAmountText(v.rightCenterView, fromCurrency, fromAmount, toCurrency, toAmount);
-            if (v.rightView != null) {
-                u.setTransferBalanceText(v.rightView, fromCurrency, fromBalance, toCurrency, toBalance);
-            }
-            v.iconView.setImageDrawable(icBlotterTransfer);
-            v.iconView.setColorFilter(u.transferColor);
-            v.eReceiptView.setVisibility(View.GONE);
-        } else {
-            String fromAccountTitle = cursor.getString(BlotterColumns.from_account_title.ordinal());
-            v.topView.setText(fromAccountTitle);
-            setTransactionTitleText(cursor, noteView);
-            sb.setLength(0);
-            long fromCurrencyId = cursor.getLong(BlotterColumns.from_account_currency_id.ordinal());
-            Currency fromCurrency = CurrencyCache.getCurrency(db, fromCurrencyId);
-            long amount = cursor.getLong(BlotterColumns.from_amount.ordinal());
-            long originalCurrencyId = cursor.getLong(BlotterColumns.original_currency_id.ordinal());
-            if (originalCurrencyId > 0) {
-                Currency originalCurrency = CurrencyCache.getCurrency(db, originalCurrencyId);
-                long originalAmount = cursor.getLong(BlotterColumns.original_from_amount.ordinal());
-                u.setAmountText(sb, v.rightCenterView, originalCurrency, originalAmount, fromCurrency, amount, true);
-            } else {
-                u.setAmountText(sb, v.rightCenterView, fromCurrency, amount, true);
-            }
-            long categoryId = cursor.getLong(BlotterColumns.category_id.ordinal());
-            if (isSplit(categoryId)) {
-                v.iconView.setImageDrawable(icBlotterSplit);
-                v.iconView.setColorFilter(u.splitColor);
-            } else if (amount == 0) {
-                int categoryType = cursor.getInt(BlotterColumns.category_type.ordinal());
-                if (categoryType == CategoryEntity.TYPE_INCOME) {
-                    v.iconView.setImageDrawable(icBlotterIncome);
-                    v.iconView.setColorFilter(u.positiveColor);
-                } else if (categoryType == CategoryEntity.TYPE_EXPENSE) {
-                    v.iconView.setImageDrawable(icBlotterExpense);
-                    v.iconView.setColorFilter(u.negativeColor);
-                }
-            } else {
-                if (amount > 0) {
-                    v.iconView.setImageDrawable(icBlotterIncome);
-                    v.iconView.setColorFilter(u.positiveColor);
-                } else if (amount < 0) {
-                    v.iconView.setImageDrawable(icBlotterExpense);
-                    v.iconView.setColorFilter(u.negativeColor);
-                }
-            }
-            if (v.rightView != null) {
-                long balance = cursor.getLong(BlotterColumns.from_account_balance.ordinal());
-                v.rightView.setText(Utils.amountToString(fromCurrency, balance, false));
-            }
-            if (cursor.getString(BlotterColumns.e_receipt_qr_code.ordinal()) != null) {
-                String eReceiptData = cursor.getString(BlotterColumns.e_receipt_data.ordinal());
-                if (eReceiptData != null && eReceiptData.startsWith("{"))
-                    v.eReceiptView.setText("qr ok");
-                else if (eReceiptData != null) {
-                    v.eReceiptView.setText("qr err " + eReceiptData);
-                } else {
-                    v.eReceiptView.setText("qr");
-                }
-                v.eReceiptView.setVisibility(View.VISIBLE);
-            } else
-                v.eReceiptView.setVisibility(View.GONE);
-        }
-        setIndicatorColor(v, cursor);
-        if (isTemplate == 1) {
-            String templateName = cursor.getString(BlotterColumns.template_name.ordinal());
-            v.centerView.setText(templateName);
-        } else {
-            String recurrence = cursor.getString(BlotterColumns.recurrence.ordinal());
-            if (isTemplate == 2 && recurrence != null) {
-                Recurrence r = Recurrence.parse(recurrence);
-                v.bottomView.setText(r.toInfoString(context));
-                v.bottomView.setTextColor(v.topView.getTextColors().getDefaultColor());
-            } else {
-                long date = cursor.getLong(BlotterColumns.datetime.ordinal());
-                dt.setTime(date);
-                v.bottomView.setText(StringUtil.capitalize(DateUtils.formatDateTime(context, dt.getTime(),
-                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY)));
-
-                if (isTemplate == 0 && date > System.currentTimeMillis()) {
-                    u.setFutureTextColor(v.bottomView);
-                } else {
-                    v.bottomView.setTextColor(v.topView.getTextColors().getDefaultColor());
-                }
-            }
-        }
-        removeRightViewIfNeeded(v);
-    }
-
-    public void toggleSelection(long id, View layout) {
-        boolean checked = !isUnchecked(id);
-        updateCheckedState(id, checked);
-        if (checked) {
-            layout.setBackgroundResource(R.color.material_blue_gray);
-        } else {
-            layout.setBackgroundResource(R.color.holo_gray_dark);
-        }
+    void setIndicatorColor(BlotterListItemBinding v, Cursor cursor) {
+        TransactionStatus status = TransactionStatus.valueOf(cursor.getString(BlotterColumns.status.ordinal()));
+        v.indicator.setBackgroundColor(colors[status.ordinal()]);
     }
 
     private void setTransactionTitleText(Cursor cursor, TextView noteView) {
@@ -271,21 +265,6 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         return location;
     }
 
-    void removeRightViewIfNeeded(BlotterViewHolder v) {
-        if (v.rightView != null && !isShowRunningBalance()) {
-            v.rightView.setVisibility(View.GONE);
-        }
-    }
-
-    void setIndicatorColor(BlotterViewHolder v, Cursor cursor) {
-        TransactionStatus status = TransactionStatus.valueOf(cursor.getString(BlotterColumns.status.ordinal()));
-        v.indicator.setBackgroundColor(colors[status.ordinal()]);
-    }
-
-    private boolean isUnchecked(long id) {
-        return checkedItems.contains(id);
-    }
-
     private void updateCheckedState(long id, boolean checked) {
         if (checked) {
             checkedItems.add(id);
@@ -298,6 +277,20 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
         return checkedItems.size();
     }
 
+    private boolean isUnchecked(long id) {
+        return checkedItems.contains(id);
+    }
+
+    public void toggleSelection(long id, View layout) {
+        boolean checked = !isUnchecked(id);
+        updateCheckedState(id, checked);
+        if (checked) {
+            layout.setBackgroundResource(R.color.material_blue_gray);
+        } else {
+            layout.setBackgroundResource(R.color.holo_gray_dark);
+        }
+    }
+
     public void checkAll() {
         List<Long> allItems = new ArrayList<>();
         Cursor cursor = getCursor();
@@ -308,38 +301,21 @@ public class BlotterListAdapter extends ResourceCursorAdapter {
             } while (cursor.moveToNext());
         }
         checkedItems.addAll(allItems);
-        notifyDataSetInvalidated();
+        notifyDataSetChanged();
     }
 
     public void uncheckAll() {
         checkedItems.clear();
-        notifyDataSetInvalidated();
+        notifyDataSetChanged();
     }
 
-    public static class BlotterViewHolder {
+    static class BlotterListItemHolder extends RecyclerView.ViewHolder {
 
-        public final RelativeLayout layout;
-        public final TextView indicator;
-        public final TextView topView;
-        public final TextView centerView;
-        public final TextView bottomView;
-        public final TextView rightCenterView;
-        public final TextView rightView;
-        public final ImageView iconView;
-        public final CheckBox checkBox;
-        public final TextView eReceiptView;
+        private final BlotterListItemBinding mBinding;
 
-        public BlotterViewHolder(View view) {
-            layout = view.findViewById(R.id.layout);
-            indicator = view.findViewById(R.id.indicator);
-            topView = view.findViewById(R.id.top);
-            centerView = view.findViewById(R.id.center);
-            bottomView = view.findViewById(R.id.bottom);
-            rightCenterView = view.findViewById(R.id.right_center);
-            rightView = view.findViewById(R.id.right);
-            iconView = view.findViewById(R.id.right_top);
-            checkBox = view.findViewById(R.id.cb);
-            eReceiptView = view.findViewById(R.id.e_receipt);
+        BlotterListItemHolder(BlotterListItemBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
         }
 
     }

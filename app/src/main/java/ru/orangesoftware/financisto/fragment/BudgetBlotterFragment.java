@@ -7,7 +7,7 @@ import android.view.View;
 
 import java.util.Map;
 
-import ru.orangesoftware.financisto.adapter.TransactionsListAdapter;
+import ru.orangesoftware.financisto.adapter.TransactionsRecyclerAdapter;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
 import ru.orangesoftware.financisto.model.Budget;
 import ru.orangesoftware.financisto.model.Category;
@@ -21,10 +21,11 @@ public class BudgetBlotterFragment extends BlotterFragment {
     private Map<Long, Project> projects;
 
     @Override
-    protected void initUI(Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         categories = MyEntity.asMap(db.getCategoriesList(true));
         projects = MyEntity.asMap(db.getActiveProjectsList(true));
-        super.initUI(savedInstanceState);
         bFilter.setVisibility(View.GONE);
     }
 
@@ -36,12 +37,10 @@ public class BudgetBlotterFragment extends BlotterFragment {
 
     @Override
     protected void updateAdapter() {
-        if(adapter==null){
-            adapter = new TransactionsListAdapter(context, db, cursor);
-            setListAdapter(adapter);
-        }else{
-            ((TransactionsListAdapter) adapter).changeCursor(cursor);
-            ((TransactionsListAdapter) adapter).notifyDataSetChanged();
+        if (getListAdapter() == null){
+            setListAdapter(new TransactionsRecyclerAdapter(context, db, getCursor()));
+        } else {
+            ((TransactionsRecyclerAdapter) getListAdapter()).swapCursor(getCursor());
         }
     }
 
