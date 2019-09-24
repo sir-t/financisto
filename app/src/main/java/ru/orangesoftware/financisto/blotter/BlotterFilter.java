@@ -38,4 +38,6 @@ public interface BlotterFilter {
 
     String SORT_BY_TEMPLATE_NAME = BlotterColumns.template_name + " asc";
     String SORY_BY_ACCOUNT_NAME = BlotterColumns.from_account_title + " asc";
+
+    String RECEIPT_DATA = BlotterColumns.e_receipt_data.name();
 }

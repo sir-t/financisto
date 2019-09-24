@@ -1150,6 +1150,12 @@ public class DatabaseAdapter extends MyEntityManager {
         return getBlotterWithSplits(sb.toString());
     }
 
+    public Cursor getBlotterWithOnlyReceipts(WhereFilter filter) {
+        filter.isNotNull(BlotterColumns.e_receipt_qr_code.name());
+        return db().query(V_BLOTTER_FOR_ACCOUNT_WITH_SPLITS, BlotterColumns.NORMAL_PROJECTION, filter.getSelection(), filter.getSelectionArgs(), null, null,
+                BlotterColumns.datetime + " DESC");
+    }
+
     public void deleteElectronicReceiptForTransaction(long id) {
         SQLiteDatabase db = db();
         db.beginTransaction();

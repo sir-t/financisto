@@ -94,6 +94,11 @@ public class WhereFilter {
         return this;
     }
 
+    public WhereFilter isNotNull(String column) {
+		criterias.add(Criteria.isNotNull(column));
+		return this;
+	}
+
     public WhereFilter asc(String column) {
 		sorts.add(column+" asc");
 		return this;
@@ -328,7 +333,7 @@ public class WhereFilter {
 				return super.getOp(operands).replace("?", StringUtil.generateSeparated("?", ",", operands));
 			}
 		}, 
-		ISNULL("is NULL"), LIKE("LIKE ?");
+		ISNULL("is NULL"), ISNOTNULL("is not NULL"), LIKE("LIKE ?");
 		
 		private final String op;
 		private final String groupOp;

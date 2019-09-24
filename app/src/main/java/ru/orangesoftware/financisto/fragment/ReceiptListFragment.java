@@ -5,9 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -16,8 +22,11 @@ import androidx.databinding.DataBindingUtil;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.ReceiptActivity;
 import ru.orangesoftware.financisto.adapter.BlotterRecyclerAdapter;
+import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.databinding.BlotterListItemBinding;
+import ru.orangesoftware.financisto.databinding.ReceiptsListBinding;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
+import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.Transaction;
 
@@ -33,11 +42,74 @@ public class ReceiptListFragment extends BlotterFragment implements ItemClick, I
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		// Replace super class
+
+		ReceiptsListBinding binding = (ReceiptsListBinding) getBinding();
+
+		blotterFilter = new WhereFilter("receipts");
+
+		bSearch = binding.bSearch;
+		bSearch.setOnClickListener(method -> {
+			EditText searchText = binding.searchText;
+			FrameLayout searchLayout = binding.searchTextFrame;
+			InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+			searchText.setOnFocusChangeListener((v, b) -> {
+				if (!v.hasFocus()) {
+					imm.hideSoftInputFromWindow(searchLayout.getWindowToken(), 0);
+				}
+			});
+
+			binding.searchTextClear.setOnClickListener(v -> searchText.setText(""));
+
+			if (searchLayout.getVisibility() == View.VISIBLE) {
+				imm.hideSoftInputFromWindow(searchLayout.getWindowToken(), 0);
+				searchLayout.setVisibility(View.GONE);
+				return;
+			}
+
+			searchLayout.setVisibility(View.VISIBLE);
+			searchText.requestFocusFromTouch();
+			imm.showSoftInput(searchText, InputMethodManager.SHOW_IMPLICIT);
+
+			searchText.addTextChangedListener(new TextWatcher() {
+				@Override
+				public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+				}
+
+				@Override
+				public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+				}
+
+				@Override
+				public void afterTextChanged(Editable editable) {
+					ImageButton clearButton = view.findViewById(R.id.search_text_clear);
+					String text = editable.toString();
+					blotterFilter.remove(BlotterFilter.RECEIPT_DATA);
+
+					if (!text.isEmpty()) {
+						blotterFilter.contains(BlotterFilter.RECEIPT_DATA, text);
+						clearButton.setVisibility(View.VISIBLE);
+					} else {
+						clearButton.setVisibility(View.GONE);
+					}
+
+					recreateCursor();
+				}
+			});
+
+			if (blotterFilter.get(BlotterFilter.RECEIPT_DATA) != null) {
+				String searchFilterText = blotterFilter.get(BlotterFilter.RECEIPT_DATA).getStringValue();
+				if (!searchFilterText.isEmpty()) {
+					searchFilterText = searchFilterText.substring(1, searchFilterText.length() - 1);
+					searchText.setText(searchFilterText);
+				}
+			}
+		});
 	}
 
 	@Override
 	protected Cursor createCursor() {
-		return db.getBlotterWithOnlyReceipts();
+		return db.getBlotterWithOnlyReceipts(blotterFilter);
 	}
 
 	@Override

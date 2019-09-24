@@ -23,12 +23,42 @@
         android:gravity="center"
         android:text="@string/no_items" />
 
+    <FrameLayout
+        android:id="@+id/search_text_frame"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:padding="5dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/search_text"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <ImageButton
+            android:id="@+id/search_text_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@android:drawable/ic_delete"
+            android:visibility="gone" />
+    </FrameLayout>
+
     <LinearLayout style="@style/BottomBar">
         <ImageButton
             style="@style/BottomBarButton"
             android:id="@+id/bAdd"
             android:visibility="gone"
             android:src="@drawable/actionbar_add_big" />
+        <ImageButton
+            style="@style/BottomBarButton"
+            android:id="@+id/bSearch"
+            android:src="@android:drawable/ic_menu_search" />
     </LinearLayout>
 </LinearLayout>
 
