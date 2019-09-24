@@ -94,6 +94,11 @@ public class ReceiptListFragment extends BlotterFragment implements ItemClick, I
 		}
 	}
 
+	@Override
+	protected void calculateTotals() {
+		// do nothing
+	}
+
 	public class ReceiptRecyclerAdapter extends BlotterRecyclerAdapter {
 
 		private final DatabaseAdapter db;
