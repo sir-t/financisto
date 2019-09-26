@@ -158,6 +158,12 @@ public class ActivityLayout {
 		b.withButtonId(plusId, listener).withLabel(labelId).withId(id, listener).create();
 	}
 
+	public TextView addInfoNodePlus(LinearLayout layout, int id, int plusId, int labelId, String defaultValue) {
+		ListBuilder b = inflater.new ListBuilder(layout, R.layout.select_entry_simple_minus);
+		View v = b.withButtonId(plusId, listener).withLabel(labelId).withId(id, listener).withData(defaultValue).create();
+		return v.findViewById(R.id.data);
+	}
+
 	public TextView addListNodePlusWithoutDivider(LinearLayout layout, int id, int plusId, int labelId, int defaultValueResId) {
 		ListBuilder b = inflater.new ListBuilder(layout, R.layout.select_entry_plus);
 		View v = b.withButtonId(plusId, listener).withId(id, listener).withLabel(labelId).withData(defaultValueResId).withNoDivider().create();
