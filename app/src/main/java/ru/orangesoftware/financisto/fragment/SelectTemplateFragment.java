@@ -14,6 +14,7 @@ import ru.orangesoftware.financisto.activity.TemplatesListActivity;
 import ru.orangesoftware.financisto.adapter.TemplateRecyclerAdapter;
 import ru.orangesoftware.financisto.databinding.TemplatesBinding;
 import ru.orangesoftware.financisto.filter.Criteria;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemLongClick;
 import ru.orangesoftware.financisto.widget.SearchFilterTextWatcherListener;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -23,7 +24,7 @@ import static ru.orangesoftware.financisto.blotter.BlotterFilter.TEMPLATE_NAME;
 import static ru.orangesoftware.financisto.filter.WhereFilter.Operation.LIKE;
 import static ru.orangesoftware.financisto.fragment.MyEntityListFragment.FILTER_DELAY_MILLIS;
 
-public class SelectTemplateFragment extends TemplatesListFragment {
+public class SelectTemplateFragment extends TemplatesListFragment implements ItemLongClick {
 
     public static final String TEMPATE_ID = "template_id";
     public static final String MULTIPLIER = "multiplier";

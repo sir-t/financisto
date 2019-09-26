@@ -439,7 +439,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
                 break;
             case R.id.e_receipt_info:
                 if (e_receipt.response_data != null && e_receipt.response_data.startsWith("{")) {
-                    ReceiptActivity.Builder builder = new ReceiptActivity.Builder(this, e_receipt.qr_code, e_receipt.check_status, e_receipt.request_status, e_receipt.response_data);
+                    ReceiptActivity.Builder builder = new ReceiptActivity.Builder(this, e_receipt);
                     if (isDifferentCurrency() || selectedAccount != null)
                         builder.setCurrencyId(isDifferentCurrency() ? selectedOriginCurrencyId : selectedAccount.currency.id);
                     startActivityForResult(builder.build(), VIEW_RECEIPT);
@@ -524,6 +524,7 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
         split.fromAccountId = getSelectedAccountId();
         split.fromAmount = split.unsplitAmount = calculateUnsplitAmount();
         split.originalCurrencyId = selectedOriginCurrencyId;
+        split.receipt = e_receipt;
         editSplit(split, asTransfer ? SplitTransferActivity.class : SplitTransactionActivity.class);
     }
 

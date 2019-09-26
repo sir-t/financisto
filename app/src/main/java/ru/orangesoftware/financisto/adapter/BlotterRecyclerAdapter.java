@@ -36,6 +36,7 @@ import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.databinding.BlotterListItemBinding;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper.BlotterColumns;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.AdapterSelection;
 import ru.orangesoftware.financisto.model.CategoryEntity;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.TransactionStatus;
@@ -48,7 +49,7 @@ import ru.orangesoftware.financisto.utils.Utils;
 import static ru.orangesoftware.financisto.model.Category.isSplit;
 import static ru.orangesoftware.financisto.utils.TransactionTitleUtils.generateTransactionTitle;
 
-public class BlotterRecyclerAdapter extends BaseCursorRecyclerAdapter<BlotterRecyclerAdapter.BlotterListItemHolder> {
+public class BlotterRecyclerAdapter extends BaseCursorRecyclerAdapter<BlotterRecyclerAdapter.BlotterListItemHolder> implements AdapterSelection {
 
     private final Date dt = new Date();
 
@@ -93,7 +94,7 @@ public class BlotterRecyclerAdapter extends BaseCursorRecyclerAdapter<BlotterRec
 
         final long parent = cursor.getLong(BlotterColumns.parent_id.ordinal());
         final long id = parent > 0 ? parent : cursor.getLong(BlotterColumns._id.ordinal());
-        if (isUnchecked(id)) {
+        if (checkedItems.contains(id)) {
             v.rowFG.setBackgroundResource(R.color.material_blue_gray);
         } else {
             v.rowFG.setBackgroundResource(R.color.holo_gray_dark);
@@ -265,32 +266,19 @@ public class BlotterRecyclerAdapter extends BaseCursorRecyclerAdapter<BlotterRec
         return location;
     }
 
-    private void updateCheckedState(long id, boolean checked) {
+    @Override
+    public void checkItem(int position) {
+        long id = getItemId(position);
+        boolean checked = !checkedItems.contains(id);
         if (checked) {
             checkedItems.add(id);
         } else {
             checkedItems.remove(id);
         }
+        notifyItemChanged(position);
     }
 
-    public int getCheckedCount() {
-        return checkedItems.size();
-    }
-
-    private boolean isUnchecked(long id) {
-        return checkedItems.contains(id);
-    }
-
-    public void toggleSelection(long id, View layout) {
-        boolean checked = !isUnchecked(id);
-        updateCheckedState(id, checked);
-        if (checked) {
-            layout.setBackgroundResource(R.color.material_blue_gray);
-        } else {
-            layout.setBackgroundResource(R.color.holo_gray_dark);
-        }
-    }
-
+    @Override
     public void checkAll() {
         List<Long> allItems = new ArrayList<>();
         Cursor cursor = getCursor();
@@ -304,9 +292,15 @@ public class BlotterRecyclerAdapter extends BaseCursorRecyclerAdapter<BlotterRec
         notifyDataSetChanged();
     }
 
+    @Override
     public void uncheckAll() {
         checkedItems.clear();
         notifyDataSetChanged();
+    }
+
+    @Override
+    public int getCheckedCount() {
+        return checkedItems.size();
     }
 
     public static class BlotterListItemHolder extends RecyclerView.ViewHolder {

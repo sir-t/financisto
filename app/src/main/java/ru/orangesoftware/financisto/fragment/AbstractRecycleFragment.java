@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -48,6 +49,7 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
     protected Context context;
 
     protected boolean enablePin = true;
+    protected SelectionMode selectionMode = SelectionMode.OFF;
 
     protected abstract void updateAdapter();
 
@@ -163,6 +165,10 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
                             Log.e("Financisto", "onItemClick " + position);
                             listener.onItemClick(view, position);
                         }
+                        ItemSelection selection = (AbstractRecycleFragment.this instanceof ItemClick) ? ((ItemSelection) AbstractRecycleFragment.this) : null;
+                        if (selection != null && selectionMode == SelectionMode.DISPLAY || selectionMode == SelectionMode.ALWAYS_ON) {
+                            checkItem(position);
+                        }
                     }
 
                     @Override
@@ -175,6 +181,7 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
                     if (listener != null) {
                         Log.e("Financisto", "onItemLongClick " + position);
                         listener.onItemLongClick(view, position);
+                        return;
                     }
                     ItemMenuShow menuListener = (AbstractRecycleFragment.this instanceof ItemMenuShow) ? ((ItemMenuShow) AbstractRecycleFragment.this) : null;
                     if (menuListener != null) {
@@ -208,6 +215,11 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
                             mPopup.setForceShowIcon(showIcons);
                             mPopup.show();
                         }
+                        return;
+                    }
+                    ItemSelection selection = (AbstractRecycleFragment.this instanceof ItemClick) ? ((ItemSelection) AbstractRecycleFragment.this) : null;
+                    if (selection != null && selectionMode != SelectionMode.OFF) {
+                        checkItem(position);
                     }
                 });
         mList.addOnItemTouchListener(mTouchListener);
@@ -245,7 +257,6 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
     }
 
     public void setListAdapter(@Nullable RecyclerView.Adapter adapter) {
-        boolean hadAdapter = mAdapter != null;
         mAdapter = adapter;
         if (mList != null) {
             mList.setAdapter(adapter);
@@ -288,6 +299,68 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
         }
     }
 
+    protected void checkItem(int position) {
+        if (getListAdapter() instanceof AdapterSelection) {
+            ((AdapterSelection) getListAdapter()).checkItem(position);
+            if (selectionMode != SelectionMode.ALWAYS_ON) {
+                updateSelectionMode(((AdapterSelection) getListAdapter()).getCheckedCount() > 0 ? SelectionMode.DISPLAY : SelectionMode.ON);
+            }
+            updateCount();
+        }
+    }
+
+    protected void checkAll() {
+        if (getListAdapter() instanceof AdapterSelection) {
+            ((AdapterSelection) getListAdapter()).checkAll();
+            updateCount();
+        }
+    }
+
+    protected void uncheckAll() {
+        if (getListAdapter() instanceof AdapterSelection) {
+            ((AdapterSelection) getListAdapter()).uncheckAll();
+            if (selectionMode != SelectionMode.ALWAYS_ON) {
+                updateSelectionMode(SelectionMode.ON);
+            }
+            updateCount();
+        }
+    }
+
+    protected void updateSelectionMode(SelectionMode mode) {
+        if (selectionMode == mode)
+            return;
+
+        boolean toggleSelection = false;
+        boolean isShow = selectionMode == SelectionMode.DISPLAY || selectionMode == SelectionMode.ALWAYS_ON ;
+
+        switch (mode) {
+            case OFF:
+            case ON:
+                if (isShow)
+                    toggleSelection = true;
+                break;
+            case DISPLAY:
+            case ALWAYS_ON:
+                if (!isShow)
+                    toggleSelection = true;
+                break;
+        }
+        if (toggleSelection && AbstractRecycleFragment.this instanceof ItemSelection) {
+            ((ItemSelection) AbstractRecycleFragment.this).toggleSelectionMode(isShow);
+        }
+        selectionMode = mode;
+    }
+
+    protected void updateCount() {
+        int count = ((AdapterSelection) getListAdapter()).getCheckedCount();
+        if (count == 0 && selectionMode != SelectionMode.ALWAYS_ON) {
+            updateSelectionMode(SelectionMode.ON);
+        }
+        if (AbstractRecycleFragment.this instanceof ItemSelection) {
+            ((ItemSelection) AbstractRecycleFragment.this).updateCount(count);
+        }
+    }
+
     private class DragAndDropHelper implements ItemTouchHelperAdapter {
 
         @Override
@@ -313,6 +386,13 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
 
     }
 
+    public enum SelectionMode {
+        OFF,
+        ON,
+        DISPLAY,
+        ALWAYS_ON;
+    }
+
     public interface ItemDragAndDrop {
         boolean onDragAndDrop(int fromPosition, int toPosition);
     }
@@ -333,6 +413,18 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
     public interface ItemMenuShow {
         List<MenuItemInfo> getMenuContext(View view, int position);
         boolean onMenuClick(int menuID, int position);
+    }
+
+    public interface ItemSelection {
+        void toggleSelectionMode(boolean hide);
+        void updateCount(int count);
+    }
+
+    public interface AdapterSelection {
+        void checkItem(int position);
+        void checkAll();
+        void uncheckAll();
+        int getCheckedCount();
     }
 
 }

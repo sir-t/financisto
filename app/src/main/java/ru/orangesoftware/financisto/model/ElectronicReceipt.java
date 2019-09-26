@@ -13,6 +13,8 @@ package ru.orangesoftware.financisto.model;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -26,7 +28,7 @@ import static ru.orangesoftware.orb.EntityManager.DEF_ID_COL;
 
 @Entity
 @Table(name = ELECTRONIC_RECEIPTS_TABLE)
-public class ElectronicReceipt {
+public class ElectronicReceipt implements Serializable {
 
     @Id
     @Column(name = DEF_ID_COL)

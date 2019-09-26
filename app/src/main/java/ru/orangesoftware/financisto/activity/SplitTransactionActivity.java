@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ru.orangesoftware.financisto.R;
+import ru.orangesoftware.financisto.fragment.ReceiptFragment;
 import ru.orangesoftware.financisto.model.Category;
 import ru.orangesoftware.financisto.model.Currency;
 import ru.orangesoftware.financisto.model.TransactionAttribute;
@@ -18,6 +19,8 @@ import java.util.Map;
 import static ru.orangesoftware.financisto.activity.CategorySelector.SelectorType.SPLIT;
 
 public class SplitTransactionActivity extends AbstractSplitActivity implements CategorySelector.CategorySelectorListener {
+
+    private static final int VIEW_RECEIPT = 111;
 
     private TextView amountTitle;
     private AmountInput amountInput;
@@ -94,6 +97,12 @@ public class SplitTransactionActivity extends AbstractSplitActivity implements C
     protected void onClick(View v, int id) {
         super.onClick(v, id);
         categorySelector.onClick(id);
+        if (id == R.id.add_split && split.receipt.response_data != null && split.receipt.response_data.startsWith("{")) {
+            ReceiptActivity.Builder builder = new ReceiptActivity.Builder(this, split.receipt);
+            builder.setCurrencyId(getCurrency().id);
+            builder.setSelectionMode(true);
+            startActivityForResult(builder.build(), VIEW_RECEIPT);
+        }
     }
 
     @Override
@@ -106,6 +115,9 @@ public class SplitTransactionActivity extends AbstractSplitActivity implements C
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         categorySelector.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VIEW_RECEIPT && data != null) {
+            setAmount(data.getLongExtra(ReceiptFragment.RESULT_AMOUNT, 0));
+        }
     }
 
 

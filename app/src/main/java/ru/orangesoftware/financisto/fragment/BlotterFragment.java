@@ -55,7 +55,7 @@ import ru.orangesoftware.financisto.dialog.MassOperationsDialog;
 import ru.orangesoftware.financisto.dialog.TransactionInfoDialog;
 import ru.orangesoftware.financisto.filter.WhereFilter;
 import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemClick;
-import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemLongClick;
+import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemSelection;
 import ru.orangesoftware.financisto.fragment.AbstractRecycleFragment.ItemSwipeable;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.AccountType;
@@ -69,7 +69,7 @@ import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.Activity.RESULT_OK;
 import static ru.orangesoftware.financisto.utils.MyPreferences.isQuickMenuEnabledForTransaction;
 
-public class BlotterFragment extends AbstractRecycleFragment implements ItemClick, ItemLongClick, ItemSwipeable {
+public class BlotterFragment extends AbstractRecycleFragment implements ItemClick, ItemSelection, ItemSwipeable {
 
     public static final String SAVE_FILTER = "saveFilter";
     public static final String EXTRA_FILTER_ACCOUNTS = "filterAccounts";
@@ -108,7 +108,6 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
     protected boolean isAccountBlotter = false;
     protected boolean showAllBlotterButtons = true;
 
-    boolean selectionMode = false;
     private long selectedId = -1;
 
     private View defaultBottomBar;
@@ -135,17 +134,13 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
         defaultBottomBar = binding.defaultBottomBar;
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
+        selectionMode = SelectionMode.ON;
         selectionBottomBar = binding.selectionBottomBar;
-        selectionBottomBar.findViewById(R.id.bCheckAll).setOnClickListener(arg0 -> selectAll());
-        selectionBottomBar.findViewById(R.id.bUncheckAll).setOnClickListener(arg0 -> deselectAll());
+        selectionBottomBar.findViewById(R.id.bCheckAll).setOnClickListener(arg0 -> checkAll());
+        selectionBottomBar.findViewById(R.id.bUncheckAll).setOnClickListener(arg0 -> uncheckAll());
         selectionBottomBar.findViewById(R.id.bSelectionAction).setOnClickListener(arg0 -> showSelectionActionDialog());
 
         selectionCountText = binding.selectionCount;
-
-        if (selectionMode) {
-            defaultBottomBar.setVisibility(View.GONE);
-            selectionBottomBar.setVisibility(View.VISIBLE);
-        }
 
         bAdd = binding.bAdd;
         bAdd.setOnClickListener(v -> {
@@ -341,10 +336,8 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
 
     @Override
     public void onItemClick(View view, int position) {
-        long id = getListAdapter().getItemId(position);
-        if (selectionMode) {
-            selectItem(view, id);
-        } else {
+        if (selectionMode == SelectionMode.OFF || selectionMode == SelectionMode.ON) {
+            long id = getListAdapter().getItemId(position);
             if (isQuickMenuEnabledForTransaction(context)) {
                 selectedId = id;
                 transactionActionGrid.show(view);
@@ -352,12 +345,6 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
                 showTransactionInfo(id);
             }
         }
-    }
-
-    @Override
-    public void onItemLongClick(View view, int position) {
-        long id = getListAdapter().getItemId(position);
-        selectItem(view, id);
     }
 
     @Override
@@ -378,46 +365,24 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
         }
     }
 
-    private void selectAll() {
-        ((BlotterRecyclerAdapter) getListAdapter()).checkAll();
-        updateCount();
+    @Override
+    public void toggleSelectionMode(boolean hide) {
+        if (hide) {
+            crossfade(defaultBottomBar, selectionBottomBar);
+        } else {
+            crossfade(selectionBottomBar, defaultBottomBar);
+        }
+    }
+
+    @Override
+    public void updateCount(int count) {
+        selectionCountText.setText(String.valueOf(count));
     }
 
     private void showSelectionActionDialog() {
         AbstractDialogFragment massOperationsDialog = new MassOperationsDialog();
         massOperationsDialog.setTargetFragment(this, 1001);
         massOperationsDialog.show(getActivity().getSupportFragmentManager(), "MultiSelectActionsDialog");
-    }
-
-    private void deselectAll() {
-        ((BlotterRecyclerAdapter) getListAdapter()).uncheckAll();
-        updateSelectionMode(false);
-        updateCount();
-    }
-
-    private void updateCount() {
-        int count = ((BlotterRecyclerAdapter) getListAdapter()).getCheckedCount();
-        selectionCountText.setText(String.valueOf(count));
-        if (count == 0) {
-            updateSelectionMode(false);
-        }
-    }
-
-    private void selectItem(View v, long id) {
-        ((BlotterRecyclerAdapter) getListAdapter()).toggleSelection(id, v.findViewById(R.id.rowFG));
-        updateSelectionMode(((BlotterRecyclerAdapter) getListAdapter()).getCheckedCount() > 0);
-        updateCount();
-    }
-
-    private void updateSelectionMode(boolean selectionModeOn) {
-        if (selectionModeOn != selectionMode) {
-            selectionMode = selectionModeOn;
-            if (selectionModeOn) {
-                crossfade(selectionBottomBar, defaultBottomBar);
-            } else {
-                crossfade(defaultBottomBar, selectionBottomBar);
-            }
-        }
     }
 
     private void crossfade(View in, View out) {
@@ -667,7 +632,7 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
                         long[] ids = blotterAdapter.getAllCheckedIds();
                         Log.d("Financisto", "Will apply " + op + " on " + Arrays.toString(ids));
                         op.apply(db, ids);
-                            deselectAll();
+                            uncheckAll();
                         blotterAdapter.swapCursor(createCursor());
                         updateCount();
                     })
