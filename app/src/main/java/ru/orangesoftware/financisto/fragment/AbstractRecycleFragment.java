@@ -165,7 +165,7 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
                             Log.e("Financisto", "onItemClick " + position);
                             listener.onItemClick(view, position);
                         }
-                        ItemSelection selection = (AbstractRecycleFragment.this instanceof ItemClick) ? ((ItemSelection) AbstractRecycleFragment.this) : null;
+                        ItemSelection selection = (AbstractRecycleFragment.this instanceof ItemSelection) ? ((ItemSelection) AbstractRecycleFragment.this) : null;
                         if (selection != null && selectionMode == SelectionMode.DISPLAY || selectionMode == SelectionMode.ALWAYS_ON) {
                             checkItem(position);
                         }
@@ -217,7 +217,7 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
                         }
                         return;
                     }
-                    ItemSelection selection = (AbstractRecycleFragment.this instanceof ItemClick) ? ((ItemSelection) AbstractRecycleFragment.this) : null;
+                    ItemSelection selection = (AbstractRecycleFragment.this instanceof ItemSelection) ? ((ItemSelection) AbstractRecycleFragment.this) : null;
                     if (selection != null && selectionMode != SelectionMode.OFF) {
                         checkItem(position);
                     }
