@@ -25,6 +25,7 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
+import java.util.List;
 
 import greendroid.widget.QuickActionGrid;
 import greendroid.widget.QuickActionWidget;
@@ -279,7 +280,7 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
             addItem(NEW_TRANSFER_REQUEST, TransferActivity.class, data);
         }
         if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
-            calculateTotals();
+            recreateCursor();
         }
         if (requestCode == MASS_OPERATION) {
             switch (resultCode) {
@@ -632,9 +633,8 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
                         long[] ids = blotterAdapter.getAllCheckedIds();
                         Log.d("Financisto", "Will apply " + op + " on " + Arrays.toString(ids));
                         op.apply(db, ids);
-                            uncheckAll();
-                        blotterAdapter.swapCursor(createCursor());
-                        updateCount();
+                        uncheckAll();
+                        recreateCursor();
                     })
                     .setNegativeButton(R.string.no, null)
                     .show();
@@ -713,8 +713,11 @@ public class BlotterFragment extends AbstractRecycleFragment implements ItemClic
         DELETE(R.string.mass_operations_delete) {
             @Override
             public void apply(DatabaseAdapter db, long[] ids) {
+                List<Account> accounts = db.getAllAccountsForTransactionsIDs(ids);
                 db.deleteSelectedTransactions(ids);
-                db.rebuildRunningBalances();
+                for (Account account : accounts) {
+                    db.rebuildRunningBalanceForAccount(account);
+                }
             }
         };
 

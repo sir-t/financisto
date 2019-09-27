@@ -152,6 +152,22 @@ public class DatabaseAdapter extends MyEntityManager {
 
     }
 
+    public List<Account> getAllAccountsForTransactionsIDs(long[] ids) {
+        List<Account> list = new ArrayList<>();
+        Set<Long> acc_ids = new HashSet<>();
+        for (long id : ids) {
+            Transaction t = getTransaction(id);
+            if (t.fromAccountId != 0)
+                acc_ids.add(t.fromAccountId);
+            if (t.toAccountId != 0)
+                acc_ids.add(t.toAccountId);
+        }
+        for (long id : acc_ids) {
+            list.add(getAccount(id));
+        }
+        return list;
+    }
+
     // ===================================================================
     // TRANSACTION
     // ===================================================================
