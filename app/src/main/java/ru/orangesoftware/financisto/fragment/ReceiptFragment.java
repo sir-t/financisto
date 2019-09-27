@@ -53,10 +53,8 @@ public class ReceiptFragment extends AbstractRecycleFragment implements ItemSele
     private String receiptData;
     private JSONObject receiptJSON;
 
-    private View defaultBottomBar;
     private View selectionBottomBar;
     private TextView selectionCountText;
-    private int shortAnimationDuration;
     private long selectedAmount;
 
     public static class Builder {
@@ -133,15 +131,12 @@ public class ReceiptFragment extends AbstractRecycleFragment implements ItemSele
             binding.bCheckStatus.setText("Check: " + checkStatus);
             binding.bRequestStatus.setText("Request: " + requestStatus);
 
-            shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
             selectionCountText = binding.selectionCount;
-            defaultBottomBar = binding.defaultBottomBar;
             selectionBottomBar = binding.selectionBottomBar;
 
             updateSelectionMode(SelectionMode.valueOf(bundle.getString(ARG_SELECTION_MODE, "OFF")));
             if (selectionMode != SelectionMode.OFF) {
                 binding.topBar.setVisibility(View.GONE);
-                defaultBottomBar.setVisibility(View.GONE);
                 selectionBottomBar.setVisibility(View.VISIBLE);
                 binding.bCheckAll.setOnClickListener(arg0 -> checkAll());
                 binding.bUncheckAll.setOnClickListener(arg0 -> uncheckAll());

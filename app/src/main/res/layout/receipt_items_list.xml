@@ -53,27 +53,6 @@
 			android:layout_height="wrap_content">
 
 			<LinearLayout
-				android:id="@+id/defaultBottomBar"
-				style="@style/BottomBar"
-				android:layout_width="match_parent">
-
-				<Button
-					android:id="@+id/bDelete"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_weight="1"
-					android:text="@string/delete" />
-
-				<Button
-					android:id="@+id/bBack"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_weight="1"
-					android:text="@string/back" />
-
-			</LinearLayout>
-
-			<LinearLayout
 				android:id="@+id/selectionBottomBar"
 				style="@style/BottomBar"
 				android:layout_width="match_parent"
