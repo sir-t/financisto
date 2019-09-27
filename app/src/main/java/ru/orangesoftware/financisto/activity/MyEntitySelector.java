@@ -13,6 +13,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,6 +48,7 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
     private AutoCompleteTextView autoCompleteFilter;
     private SimpleCursorAdapter filterAdapter;
     private List<T> entities = Collections.emptyList();
+    private List<T> entitiesActive = Collections.emptyList();
     private ListAdapter adapter;
     private boolean multiSelect;
 
@@ -82,12 +84,17 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
 
     public void setEntities(List<T> entities) {
         this.entities = entities;
+        this.entitiesActive = new ArrayList<>();
+        for (T item : entities) {
+            if (item.isActive)
+                entitiesActive.add(item);
+        }
     }
 
     public void fetchEntities() {
-        entities = fetchEntities(em);
+        setEntities(fetchEntities(em));
         if (!multiSelect) {
-            adapter = createAdapter(activity, entities);
+            adapter = createAdapter(activity, entitiesActive);
         }
     }
 
@@ -173,9 +180,9 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
 
     private void pickEntity() {
         if (multiSelect) {
-            x.selectMultiChoice(activity, layoutId, labelResId, entities);
+            x.selectMultiChoice(activity, layoutId, labelResId, entitiesActive);
         } else {
-            int selectedEntityPos = MyEntity.indexOf(entities, selectedEntityId);
+            int selectedEntityPos = MyEntity.indexOf(entitiesActive, selectedEntityId);
             x.selectPosition(activity, layoutId, labelResId, adapter, selectedEntityPos);
         }
     }
