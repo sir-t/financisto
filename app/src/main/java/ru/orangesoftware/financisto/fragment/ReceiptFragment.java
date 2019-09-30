@@ -154,7 +154,7 @@ public class ReceiptFragment extends AbstractRecycleFragment implements ItemSele
 
     @Override
     protected void updateAdapter() {
-        if (getListAdapter() == null) {
+        if (getListAdapter() == null && this.receiptJSON != null) {
             setListAdapter(new ReceiptAdapter(this.receiptJSON));
             if (selectionMode != SelectionMode.OFF && getListAdapter() instanceof AdapterSelection) {
                 checkAll();

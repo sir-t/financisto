@@ -133,7 +133,7 @@ public class ReceiptListFragment extends BlotterFragment implements ItemClick, I
 	public void onItemClick(View view, int position) {
 		if (getCursor().moveToPosition(position)) {
 			Transaction t = Transaction.fromBlotterCursor(getCursor());
-			if (t.receipt.response_data != null && t.receipt.response_data.startsWith("{")) {
+			if (t.receipt.response_data != null) {
 				ReceiptActivity.Builder builder = new ReceiptActivity.Builder(context, t.id);
 				Account a = db.getAccount(t.fromAccountId);
 				if (a != null) {
