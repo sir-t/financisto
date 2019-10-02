@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,7 +34,7 @@ import ru.orangesoftware.financisto.helper.SimpleItemTouchHelperCallback;
 import ru.orangesoftware.financisto.utils.MenuItemInfo;
 import ru.orangesoftware.financisto.utils.PinProtection;
 
-public abstract class AbstractRecycleFragment extends Fragment implements RefreshSupportedActivity {
+public abstract class AbstractRecycleFragment extends Fragment implements RefreshSupportedActivity, BottomNavigationSupported {
 
     private final int mContentId;
     private ViewDataBinding mBinding;
@@ -115,6 +117,23 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
         mEmptyView = null;
         mBinding = null;
         super.onDestroyView();
+    }
+
+    @Override
+    public void refreshFragment() {
+        getRecyclerView().smoothScrollToPosition(0);
+    }
+
+    @Override
+    public void willBeDisplayed() {
+        Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
+        getRecyclerView().startAnimation(fadeIn);
+    }
+
+    @Override
+    public void willBeHidden() {
+        Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
+        getRecyclerView().startAnimation(fadeOut);
     }
 
     private void ensureList() {

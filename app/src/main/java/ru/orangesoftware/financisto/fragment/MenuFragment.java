@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -59,7 +61,7 @@ import static android.app.Activity.RESULT_OK;
 import static ru.orangesoftware.financisto.service.DailyAutoBackupScheduler.scheduleNextAutoBackup;
 
 @EFragment
-public class MenuFragment extends ListFragment implements HasViews, OnViewChangedListener {
+public class MenuFragment extends ListFragment implements HasViews, OnViewChangedListener, BottomNavigationSupported {
 
     private static final int RESOLVE_CONNECTION_REQUEST_CODE = 1;
 
@@ -192,6 +194,23 @@ public class MenuFragment extends ListFragment implements HasViews, OnViewChange
         super.onResume();
         PinProtection.unlock(context);
         bus.register(this);
+    }
+
+    @Override
+    public void refreshFragment() {
+        getListView().smoothScrollToPosition(0);
+    }
+
+    @Override
+    public void willBeDisplayed() {
+        Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
+        getListView().startAnimation(fadeIn);
+    }
+
+    @Override
+    public void willBeHidden() {
+        Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
+        getListView().startAnimation(fadeOut);
     }
 
     ProgressDialog progressDialog;

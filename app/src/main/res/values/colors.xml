@@ -1,6 +1,8 @@
 <resources>
     <color name="colorPrimary">@color/material_blue_gray</color>
-    <color name="main_menu_background">#000</color>
+    <color name="colorBottomNavigationBackground">#000</color>
+    <color name="colorBottomNavigationAccent">#fff</color>
+    <color name="colorBottomNavigationInactive">@color/grey</color>
     <color name="colorSurface">@color/material_orange</color>
     <color name="colorPrimaryDark">@color/material_blue_gray</color>
     <color name="colorAccent">@color/material_blue_gray</color>

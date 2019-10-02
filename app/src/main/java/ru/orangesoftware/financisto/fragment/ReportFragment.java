@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -55,7 +57,7 @@ import static ru.orangesoftware.financisto.report.ReportType.BY_PERIOD;
 import static ru.orangesoftware.financisto.report.ReportType.BY_PROJECT;
 import static ru.orangesoftware.financisto.report.ReportType.BY_SUB_CATEGORY;
 
-public class ReportFragment extends ListFragment implements RefreshSupportedActivity {
+public class ReportFragment extends ListFragment implements RefreshSupportedActivity, BottomNavigationSupported {
 
     private static final String ARG_FILTER = "filter";
     private static final String ARG_REPORT_TYPE = "report_type";
@@ -286,6 +288,23 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
                     break;
             }
         }
+    }
+
+    @Override
+    public void refreshFragment() {
+        getListView().smoothScrollToPosition(0);
+    }
+
+    @Override
+    public void willBeDisplayed() {
+        Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
+        getListView().startAnimation(fadeIn);
+    }
+
+    @Override
+    public void willBeHidden() {
+        Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
+        getListView().startAnimation(fadeOut);
     }
 
     private void applyFilter() {

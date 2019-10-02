@@ -14,12 +14,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationAdapter;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -27,7 +29,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+
+import java.util.ArrayList;
+
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.bus.GreenRobotBus;
 import ru.orangesoftware.financisto.bus.GreenRobotBus_;
@@ -38,6 +44,7 @@ import ru.orangesoftware.financisto.db.DatabaseHelper;
 import ru.orangesoftware.financisto.dialog.WebViewDialog;
 import ru.orangesoftware.financisto.fragment.AccountListFragment;
 import ru.orangesoftware.financisto.fragment.BlotterFragment;
+import ru.orangesoftware.financisto.fragment.BottomNavigationSupported;
 import ru.orangesoftware.financisto.fragment.BudgetListFragment;
 import ru.orangesoftware.financisto.fragment.MenuFragment;
 import ru.orangesoftware.financisto.fragment.ReportFragment;
@@ -45,17 +52,15 @@ import ru.orangesoftware.financisto.utils.CurrencyCache;
 import ru.orangesoftware.financisto.utils.MyPreferences;
 import ru.orangesoftware.financisto.utils.PinProtection;
 
-public class MainActivity extends FragmentActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends FragmentActivity {
 
     private GreenRobotBus greenRobotBus;
-    private Fragment accListFragment;
-    private Fragment blotterFragment;
-    private Fragment budgetsFragment;
-    private Fragment reportsFragment;
-    private Fragment menuFragment;
 
     Fragment fragment;
-    private BottomNavigationView bottomNavigationView;
+    private AHBottomNavigationViewPager viewPager;
+    private AHBottomNavigation bottomNavigationView;
+    private AHBottomNavigationAdapter navigationAdapter;
+    private ViewPagerAdapter adapter;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -74,49 +79,62 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
 
         setContentView(R.layout.main_layout);
 
-        accListFragment = new AccountListFragment();
-        blotterFragment = new BlotterFragment();
-        budgetsFragment = new BudgetListFragment();
-        reportsFragment = new ReportFragment();
-        menuFragment = new MenuFragment();
-
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(this);
+        viewPager = findViewById(R.id.main_container);
+
+        navigationAdapter = new AHBottomNavigationAdapter(this, R.menu.main_views_menu);
+        navigationAdapter.setupWithBottomNavigation(bottomNavigationView);
+        bottomNavigationView.setDefaultBackgroundResource(R.color.colorBottomNavigationBackground);
+        bottomNavigationView.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
+            @Override
+            public boolean onTabSelected(int position, boolean wasSelected) {
+                if (fragment == null) {
+                    fragment = adapter.getCurrentFragment();
+                }
+                if (wasSelected) {
+                    if (fragment instanceof BottomNavigationSupported)
+                        ((BottomNavigationSupported) fragment).refreshFragment();
+                    return true;
+                }
+                if (fragment != null && fragment instanceof BottomNavigationSupported) {
+                    ((BottomNavigationSupported) fragment).willBeHidden();
+                }
+
+                viewPager.setCurrentItem(position, false);
+
+                if (fragment == null) {
+                    return true;
+                }
+
+                fragment = adapter.getCurrentFragment();
+                if (fragment instanceof BottomNavigationSupported) {
+                    ((BottomNavigationSupported) fragment).willBeDisplayed();
+                }
+
+                return true;
+            }
+        });
+
+        viewPager.setOffscreenPageLimit(4);
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(adapter);
 
         MyPreferences.StartupScreen screen = MyPreferences.getStartupScreen(this);
         switch (screen) {
             case ACCOUNTS:
-                fragment = accListFragment;
-                bottomNavigationView.setSelectedItemId(R.id.accounts_tab);
+                bottomNavigationView.setCurrentItem(0);
                 break;
             case BUDGETS:
-                fragment = budgetsFragment;
-                bottomNavigationView.setSelectedItemId(R.id.budgets_tab);
+                bottomNavigationView.setCurrentItem(2);
                 break;
             case REPORTS:
-                fragment = reportsFragment;
-                bottomNavigationView.setSelectedItemId(R.id.reports_tab);
+                bottomNavigationView.setCurrentItem(3);
                 break;
             case BLOTTER:
             default:
-                fragment = blotterFragment;
-                bottomNavigationView.setSelectedItemId(R.id.blotter_tab);
+                bottomNavigationView.setCurrentItem(1);
                 break;
         }
-
-        refreshTab();
-    }
-
-    private void refreshTab() {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.main_container, fragment).commit();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onSwitchToMenuTab(SwitchToMenuTabEvent event) {
-        fragment = menuFragment;
-        bottomNavigationView.setSelectedItemId(R.id.menu_tab);
-        refreshTab();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -190,35 +208,9 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        item.setEnabled(true);
-        switch (item.getItemId()) {
-            case R.id.accounts_tab:
-                fragment = accListFragment;
-                break;
-            case R.id.blotter_tab:
-                fragment = blotterFragment;
-                break;
-            case R.id.budgets_tab:
-                fragment = budgetsFragment;
-                break;
-            case R.id.reports_tab:
-                fragment = reportsFragment;
-                break;
-            case R.id.menu_tab:
-                fragment = menuFragment;
-                break;
-
-        }
-        refreshTab();
-        return true;
-    }
-
-    @Override
     public void onBackPressed() {
-        View view = blotterFragment.getView();
-        if (view != null) {
-            FrameLayout searchLayout = view.findViewById(R.id.search_text_frame);
+        if (fragment instanceof BlotterFragment) {
+            FrameLayout searchLayout = fragment.getView().findViewById(R.id.search_text_frame);
             if (searchLayout != null && searchLayout.getVisibility() == View.VISIBLE) {
                 searchLayout.setVisibility(View.GONE);
             } else {
@@ -233,6 +225,45 @@ public class MainActivity extends FragmentActivity implements BottomNavigationVi
         if (fragment instanceof RefreshSupportedActivity) {
             ((RefreshSupportedActivity) fragment).recreateCursor();
             ((RefreshSupportedActivity) fragment).integrityCheck();
+        }
+    }
+
+    public class ViewPagerAdapter extends FragmentPagerAdapter {
+
+        private ArrayList<Fragment> fragments = new ArrayList<>();
+        private Fragment currentFragment;
+
+        public ViewPagerAdapter(FragmentManager fm) {
+            super(fm);
+
+            fragments.clear();
+            fragments.add(new AccountListFragment());
+            fragments.add(new BlotterFragment());
+            fragments.add(new BudgetListFragment());
+            fragments.add(new ReportFragment());
+            fragments.add(new MenuFragment());
+        }
+
+        @NonNull
+        @Override
+        public Fragment getItem(int position) {
+            return fragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return fragments.size();
+        }
+
+        @Override
+        public void setPrimaryItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+            if (getCurrentFragment() != object)
+                currentFragment = (Fragment) object;
+            super.setPrimaryItem(container, position, object);
+        }
+
+        public Fragment getCurrentFragment() {
+            return currentFragment;
         }
     }
 }
