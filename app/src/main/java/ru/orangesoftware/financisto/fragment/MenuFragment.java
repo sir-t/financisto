@@ -197,7 +197,7 @@ public class MenuFragment extends ListFragment implements HasViews, OnViewChange
     }
 
     @Override
-    public void refreshFragment() {
+    public void willBeReSelected() {
         getListView().smoothScrollToPosition(0);
     }
 

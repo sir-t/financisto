@@ -38,7 +38,6 @@ import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.bus.GreenRobotBus;
 import ru.orangesoftware.financisto.bus.GreenRobotBus_;
 import ru.orangesoftware.financisto.bus.RefreshCurrentTab;
-import ru.orangesoftware.financisto.bus.SwitchToMenuTabEvent;
 import ru.orangesoftware.financisto.db.DatabaseAdapter;
 import ru.orangesoftware.financisto.db.DatabaseHelper;
 import ru.orangesoftware.financisto.dialog.WebViewDialog;
@@ -93,7 +92,7 @@ public class MainActivity extends FragmentActivity {
                 }
                 if (wasSelected) {
                     if (fragment instanceof BottomNavigationSupported)
-                        ((BottomNavigationSupported) fragment).refreshFragment();
+                        ((BottomNavigationSupported) fragment).willBeReSelected();
                     return true;
                 }
                 if (fragment != null && fragment instanceof BottomNavigationSupported) {

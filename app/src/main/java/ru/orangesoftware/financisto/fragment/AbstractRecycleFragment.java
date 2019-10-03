@@ -120,7 +120,7 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
     }
 
     @Override
-    public void refreshFragment() {
+    public void willBeReSelected() {
         getRecyclerView().smoothScrollToPosition(0);
     }
 

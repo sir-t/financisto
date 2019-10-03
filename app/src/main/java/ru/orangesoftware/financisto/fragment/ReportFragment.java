@@ -291,7 +291,7 @@ public class ReportFragment extends ListFragment implements RefreshSupportedActi
     }
 
     @Override
-    public void refreshFragment() {
+    public void willBeReSelected() {
         getListView().smoothScrollToPosition(0);
     }
 
