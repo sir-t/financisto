@@ -22,7 +22,7 @@ public class RequestPermission {
         return ContextCompat.checkSelfPermission(ctx, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    static boolean isRequestingPermissions(Activity context, String... permissions) {
+    public static boolean isRequestingPermissions(Activity context, String... permissions) {
         for (String permission : permissions) {
             if (isRequestingPermission(context, permission)) return true;
         }

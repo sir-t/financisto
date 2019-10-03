@@ -109,7 +109,6 @@ public class DatabaseExport extends Export {
         exportPreference(bw, "boolean", "show_account_last_transaction_date", true);
         exportPreference(bw, "string", "sort_accounts", MyPreferences.AccountSortOrder.SORT_ORDER_DESC.name());
         exportPreference(bw, "boolean", "hide_closed_accounts", false);
-        exportPreference(bw, "boolean", "show_menu_button_on_accounts_screen", true);
         // Blotter
         exportPreference(bw, "boolean", "quick_menu_transaction_enabled", true);
         exportPreference(bw, "boolean", "collapse_blotter_buttons", false);

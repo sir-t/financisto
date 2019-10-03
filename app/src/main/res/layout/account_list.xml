@@ -47,11 +47,6 @@
             style="@style/BottomBarButton"
             android:src="@drawable/actionbar_add_big" />
 
-        <ImageButton
-            android:id="@+id/bMenu"
-            style="@style/BottomBarButton"
-            android:src="@drawable/actionbar_dot_menu" />
-
         <include layout="@layout/total_text" />
     </LinearLayout>
 </LinearLayout>

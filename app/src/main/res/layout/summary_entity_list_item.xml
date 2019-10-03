@@ -8,11 +8,17 @@
   Contributors:
       Denis Solonenko - initial API and implementation
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+<RelativeLayout
     android:layout_width="fill_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:paddingLeft="0dip"
-    android:paddingRight="12dip">
+    android:paddingLeft="0dp"
+    android:paddingStart="0dp"
+    android:paddingRight="12dp"
+    android:paddingEnd="12dp">
 
     <ImageView
         android:id="@+id/icon"
@@ -21,37 +27,44 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_marginLeft="11dip"
-        android:layout_marginTop="8dip"
-        android:tint="@color/holo_gray_bright"
-        />
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="8dp"
+        android:tint="@color/holo_gray_bright" />
 
     <TextView
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="8dip"
-        android:layout_marginLeft="11dip"
-        android:layout_marginTop="-10dip"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="-10dp"
         android:layout_toRightOf="@id/icon"
+        android:layout_toEndOf="@id/icon"
         android:ellipsize="marquee"
         android:singleLine="true"
-        android:text="label"
+        tools:text="label"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
-        android:id="@+id/line1"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/label"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_marginLeft="11dip"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
         android:layout_toRightOf="@id/icon"
+        android:layout_toEndOf="@id/icon"
         android:ellipsize="marquee"
         android:gravity="center_vertical"
         android:singleLine="true"
-        android:text="line1"
+        tools:text="title"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
 </RelativeLayout>
+
+</layout>

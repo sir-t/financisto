@@ -6,15 +6,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -33,7 +29,6 @@ import ru.orangesoftware.financisto.activity.AccountListTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.GenericBlotterActivity;
 import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
-import ru.orangesoftware.financisto.activity.MenuListItem;
 import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.PurgeAccountActivity;
 import ru.orangesoftware.financisto.activity.TransactionActivity;
@@ -93,22 +88,6 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
             startActivityForResult(intent, NEW_ACCOUNT_REQUEST);
         });
 
-        final ImageButton bMenu = binding.bMenu;
-        if (MyPreferences.isShowMenuButtonOnAccountsScreen(context)) {
-            bMenu.setOnClickListener(v -> {
-                PopupMenu popupMenu = new PopupMenu(context, bMenu);
-                MenuInflater inflater = getActivity().getMenuInflater();
-                inflater.inflate(R.menu.account_list_menu, popupMenu.getMenu());
-                popupMenu.setOnMenuItemClickListener(item -> {
-                    handlePopupMenu(item.getItemId());
-                    return true;
-                });
-                popupMenu.show();
-            });
-        } else {
-            bMenu.setVisibility(View.GONE);
-        }
-
         calculateTotals();
         integrityCheck();
     }
@@ -162,14 +141,6 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
     @Override
     public void integrityCheck() {
         new IntegrityCheckTask(getActivity()).execute(new IntegrityCheckAutobackup(context, TimeUnit.DAYS.toMillis(7)));
-    }
-
-    private void handlePopupMenu(int id) {
-        switch (id) {
-            case R.id.backup:
-                MenuListItem.MENU_BACKUP.call(getActivity());
-                break;
-        }
     }
 
     private void prepareAccountActionGrid() {

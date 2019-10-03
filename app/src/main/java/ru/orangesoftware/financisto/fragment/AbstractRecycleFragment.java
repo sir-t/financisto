@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -310,10 +309,12 @@ public abstract class AbstractRecycleFragment extends Fragment implements Refres
     private void setListShown(boolean shown) {
         ensureList();
         if (shown) {
-            mEmptyView.setVisibility(View.GONE);
+            if (mEmptyView != null)
+                mEmptyView.setVisibility(View.GONE);
             mList.setVisibility(View.VISIBLE);
         } else {
-            mEmptyView.setVisibility(View.VISIBLE);
+            if (mEmptyView != null)
+                mEmptyView.setVisibility(View.VISIBLE);
             mList.setVisibility(View.GONE);
         }
     }
