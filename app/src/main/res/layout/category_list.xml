@@ -53,7 +53,7 @@
         <ImageButton
             android:id="@+id/bSort"
             style="@style/BottomBarButton"
-            android:src="@drawable/actionbar_sort_2" />
+            android:src="@drawable/actionbar_sort" />
 
         <ImageButton
             android:id="@+id/bFix"
