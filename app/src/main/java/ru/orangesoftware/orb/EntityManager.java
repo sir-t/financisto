@@ -48,9 +48,11 @@ public abstract class EntityManager {
 
     // effectively immutable
     protected SQLiteOpenHelper databaseHelper;
+    private final Plugin[] plugins;
 
-    public EntityManager(SQLiteOpenHelper databaseHelper) {
+    public EntityManager(SQLiteOpenHelper databaseHelper, Plugin... plugins) {
         this.databaseHelper = databaseHelper;
+        this.plugins = plugins;
     }
 
     public SQLiteDatabase db() {
@@ -126,7 +128,7 @@ public abstract class EntityManager {
         return saveOrUpdate(obj);
     }
 
-    public  <T extends MyEntity> boolean updateEntitySortOrder(T obj, long sortOrder) {
+    public <T extends MyEntity> boolean updateEntitySortOrder(T obj, long sortOrder) {
         if (obj instanceof SortableEntity) {
             final EntityDefinition ed = getEntityDefinitionOrThrow(obj.getClass());
             try {
@@ -213,6 +215,13 @@ public abstract class EntityManager {
             } catch (Exception e) {
                 throw new PersistenceException("Unable to create content values for " + entity, e);
             }
+        }
+        return applyPlugins(ed.tableName, values);
+    }
+
+    private ContentValues applyPlugins(String tableName, ContentValues values) {
+        for (Plugin plugin : plugins) {
+            plugin.withContentValues(tableName, values);
         }
         return values;
     }

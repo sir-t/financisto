@@ -26,6 +26,7 @@ import android.widget.ToggleButton;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.model.MultiChoiceItem;
@@ -194,20 +195,21 @@ public class ActivityLayout {
 		textView.setTag(v);
 		return textView;
 	}
-	
-	public Pair<TextView, AutoCompleteTextView> addListNodeWithClearButtonAndFilter(LinearLayout layout, int id, int clearBtnId, int labelId, int defaultValueResId, int filterToggleId) {
-		return addListNodeWithButtonsAndFilter(layout, R.layout.select_entry_with_2btn_and_filter, id, -1, clearBtnId, labelId, defaultValueResId, filterToggleId);
+
+	public Pair<TextView, AutoCompleteTextView> addListNodeWithClearButtonAndFilter(LinearLayout layout, int id, int clearBtnId, int labelId, int defaultValueResId, int filterToggleId, int showListId) {
+		return addListNodeWithButtonsAndFilter(layout, R.layout.select_entry_with_2btn_and_filter, id, -1, clearBtnId, labelId, defaultValueResId, filterToggleId, showListId);
 	}
 
-	public Pair<TextView, AutoCompleteTextView> addListNodeWithButtonsAndFilter(LinearLayout layout, int id, int actBtnId, int clearBtnId, int labelId, int defaultValueResId, int filterToggleId) {
-		return addListNodeWithButtonsAndFilter(layout, R.layout.select_entry_with_2btn_and_filter, id, actBtnId, clearBtnId, labelId, defaultValueResId, filterToggleId);
+	public Pair<TextView, AutoCompleteTextView> addListNodeWithButtonsAndFilter(LinearLayout layout, int id, int actBtnId, int clearBtnId, int labelId, int defaultValueResId, int filterToggleId, int showListId) {
+		return addListNodeWithButtonsAndFilter(layout, R.layout.select_entry_with_2btn_and_filter, id, actBtnId, clearBtnId, labelId, defaultValueResId, filterToggleId, showListId);
 	}
 
-	public Pair<TextView, AutoCompleteTextView> addListNodeWithButtonsAndFilter(LinearLayout layout, int nodeLayoutId, int id, int actBtnId, int clearBtnId, int labelId, int defaultValueResId, int filterToggleId) {
+	public Pair<TextView, AutoCompleteTextView> addListNodeWithButtonsAndFilter(LinearLayout layout, int nodeLayoutId, int id, int actBtnId, int clearBtnId, int labelId, int defaultValueResId,
+																				int filterToggleId, int showListId) {
 		ListBuilder b = inflater.new ListBuilder(layout, nodeLayoutId);
 		final View v = b.withButtonId(actBtnId, listener)
 				.withClearButtonId(clearBtnId, listener)
-				.withAutoCompleteFilter(listener, filterToggleId)
+				.withAutoCompleteFilter(listener, filterToggleId, showListId)
 				.withId(id, listener)
 				.withLabel(labelId)
 				.withData(defaultValueResId)
@@ -228,24 +230,36 @@ public class ActivityLayout {
 		return Pair.create(textView, filterTxt);
 	}
 
-	public Pair<TextView, AutoCompleteTextView> addListNodeCategory(LinearLayout layout, int filterToggleId) {
+	public Pair<TextView, AutoCompleteTextView> addListNodeCategory(LinearLayout layout, int filterToggleId, int showListId) {
 		ListBuilder b = inflater.new ListBuilder(layout, R.layout.select_entry_category);
 		View v = b.withButtonId(R.id.category_add, listener)
 				.withClearButtonId(R.id.category_clear, listener)
-				.withAutoCompleteFilter(listener, filterToggleId)
-				.withId(R.id.category, listener).withLabel(R.string.category).withData(R.string.select_category)
+				.withAutoCompleteFilter(listener, filterToggleId, showListId)
+				.withId(R.id.category, listener).withLabel(R.string.category).withData(R.string.no_category)
 				.create();
 		
 		ImageView transferImageView = v.findViewById(R.id.split);
 		transferImageView.setId(R.id.category_split);
 		transferImageView.setOnClickListener(listener);
-		
-		ToggleButton toggleBtn = v.findViewById(filterToggleId);
-		AutoCompleteTextView filterTxt = v.findViewById(R.id.autocomplete_filter);
-		filterTxt.setTag(toggleBtn);
+
+		AutoCompleteTextView filterTxt = getAutoCompleteTextView(filterToggleId, showListId, v);
+
 		TextView entityNameTxt = v.findViewById(R.id.data);
 		entityNameTxt.setTag(R.id.bMinus, v.findViewById(R.id.category_clear));
 		return Pair.create(entityNameTxt, filterTxt);
+	}
+
+	@NonNull
+	private AutoCompleteTextView getAutoCompleteTextView(int filterToggleId, int showListId, View v) {
+		AutoCompleteTextView filterTxt = v.findViewById(R.id.autocomplete_filter);
+
+		View toggleBtn = v.findViewById(filterToggleId);
+		filterTxt.setTag(R.id.filterToggle, toggleBtn);
+
+		View showList = v.findViewById(showListId);
+		filterTxt.setTag(R.id.list, showList);
+
+		return filterTxt;
 	}
 
 	public View addNodeUnsplit(LinearLayout layout) {

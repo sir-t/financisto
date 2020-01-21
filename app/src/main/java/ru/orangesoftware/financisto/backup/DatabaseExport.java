@@ -177,7 +177,7 @@ public class DatabaseExport extends Export {
         exportPreference(bw, "string", "location_selector", "filter");
         exportPreference(bw, "string", "project_selector", "filter");
         // Sort Order
-        exportPreference(bw, "string", "sort_locations", MyPreferences.LocationsSortOrder.NAME.name());
+        exportPreference(bw, "string", "sort_locations", MyPreferences.LocationsSortOrder.TITLE.name());
         exportPreference(bw, "string", "sort_templates", MyPreferences.TemplatesSortOrder.DATE.name());
         exportPreference(bw, "string", "sort_budgets", MyPreferences.BudgetsSortOrder.DATE.name());
         // Other

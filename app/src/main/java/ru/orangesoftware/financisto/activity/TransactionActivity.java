@@ -283,12 +283,15 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
 
     @Override
     protected boolean onOKClicked() {
-        if (checkSelectedId(getSelectedAccountId(), R.string.select_account) &&
-                checkUnsplitAmount()) {
+        if (checkSelectedAccount() && checkUnsplitAmount() && checkSelectedEntities()) {
             updateTransactionFromUI();
             return true;
         }
         return false;
+    }
+
+    private boolean checkSelectedAccount() {
+        return checkSelectedId(getSelectedAccountId(), R.string.select_account);
     }
 
     private boolean checkUnsplitAmount() {
