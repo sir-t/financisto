@@ -219,10 +219,7 @@ public class ActivityLayout {
 			showButton(v, actBtnId);
 		}
 
-		AutoCompleteTextView filterTxt = v.findViewById(R.id.autocomplete_filter);
-		ToggleButton toggleBtn = v.findViewById(filterToggleId);
-		filterTxt.setTag(toggleBtn);
-
+		AutoCompleteTextView filterTxt = getAutoCompleteTextView(filterToggleId, showListId, v);
 
         TextView textView = v.findViewById(R.id.data);
 		textView.setTag(R.id.bMinus, v.findViewById(clearBtnId));
