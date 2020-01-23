@@ -1,13 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010 Denis Solonenko.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- *
- * Contributors:
- *     Denis Solonenko - initial API and implementation
- ******************************************************************************/
 package ru.orangesoftware.financisto.activity;
 
 import android.content.Intent;
@@ -34,8 +24,6 @@ public class BudgetActivity extends AbstractActivity {
 
     public static final String BUDGET_ID_EXTRA = "budgetId";
 
-    private static final int NEW_CATEGORY_REQUEST = 1;
-    private static final int NEW_PROJECT_REQUEST = 2;
     private static final int RECUR_REQUEST = 3;
 
     private AmountInput amountInput;
@@ -204,9 +192,6 @@ public class BudgetActivity extends AbstractActivity {
                 startActivityForResult(intent, NEW_CATEGORY_REQUEST);
             }
             break;*/
-            case R.id.category_filter_toggle:
-                categorySelector.onClick(id);
-                break;
             case R.id.project:
             case R.id.project_clear:
                 //x.selectMultiChoice(this, R.id.project, R.string.projects, projects);
