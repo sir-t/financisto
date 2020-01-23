@@ -10,16 +10,7 @@
 	a:gravity="center_vertical"
 	a:focusable="true"
 	a:clickable="true">
-<!--
-	<ToggleButton a:layout_width="wrap_content"
-				  a:id="@+id/filterToggle"
-				  a:textOn=""
-				  a:textOff=""
-				  a:layout_height="wrap_content"
-				  a:layout_gravity="center_vertical"
-				  style="@style/ListButton"
-				  a:background="@drawable/btn_toggle_filter"/>
--->
+
 	<LinearLayout a:orientation="horizontal"
 		a:layout_width="match_parent"
 		a:layout_height="wrap_content"
@@ -111,15 +102,4 @@
             a:layout_gravity="center_vertical"
             a:clickable="true"
             a:focusable="true" />
-
-        <!--
-        <ToggleButton a:layout_width="wrap_content"
-                      a:id="@+id/filterToggle"
-                      a:textOn=""
-                      a:textOff=""
-                      a:layout_height="wrap_content"
-                      a:layout_gravity="center_vertical"
-                      style="@style/ListButton"
-                      a:background="@drawable/btn_toggle_filter"/>
-    -->
 </LinearLayout>

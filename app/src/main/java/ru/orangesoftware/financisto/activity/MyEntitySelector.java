@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 import android.text.InputType;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -44,11 +43,10 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
     private final Class<T> entityClass;
     private final ActivityLayout x;
     private final boolean isShow;
-    private final int layoutId, actBtnId, clearBtnId, labelResId, defaultValueResId, filterToggleId, showListId;
+    private final int layoutId, actBtnId, clearBtnId, labelResId, defaultValueResId, showListId;
 
     private View node;
     private TextView text;
-    private AutoCompleteTextView autoCompleteFilter;
     private SimpleCursorAdapter filterAdapter;
     private List<T> entities = Collections.emptyList();
     private List<T> entitiesActive = Collections.emptyList();
@@ -68,7 +66,6 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
             int clearBtnId,
             int labelResId,
             int defaultValueResId,
-            int filterToggleId,
             int showListId) {
         this.entityClass = entityClass;
         this.activity = activity;
@@ -80,7 +77,6 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
         this.clearBtnId = clearBtnId;
         this.labelResId = labelResId;
         this.defaultValueResId = defaultValueResId;
-        this.filterToggleId = filterToggleId;
         this.showListId = showListId;
     }
 
@@ -118,31 +114,35 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
 
     public TextView createNode(LinearLayout layout, int nodeLayoutId) {
         if (isShow) {
-            final Pair<TextView, AutoCompleteTextView> views = x.addListNodeWithButtonsAndFilter(layout, nodeLayoutId, layoutId, actBtnId, clearBtnId,
-                    labelResId, defaultValueResId, filterToggleId, showListId);
-            text = views.first;
-            autoCompleteFilter = views.second;
-            node = (View) text.getTag();
+            if (isListPick()) {
+                if (isMultiSelect) {
+                    text = x.addFilterNodeMinus(layout, layoutId, clearBtnId, labelResId, defaultValueResId);
+                    node = (View) text.getTag();
+                } else {
+                    text = x.addListNodePlus(layout, layoutId, actBtnId, labelResId, defaultValueResId);
+                    node = (View) text.getTag();
+                }
+            } else {
+                AutoCompleteTextView autoCompleteView = x.addListNodeWithButtonsAndFilter(layout, nodeLayoutId, layoutId, actBtnId, clearBtnId,
+                        labelResId, defaultValueResId, showListId);
+                text = autoCompleteView;
+                node = (View) autoCompleteView.getTag();
+                initAutoCompleteFilter(autoCompleteView);
+            }
         }
         return text;
     }
 
-    private void initAutoCompleteFilter(final AutoCompleteTextView filterText) {
+    private void initAutoCompleteFilter(AutoCompleteTextView autoCompleteView) {
         filterAdapter = createFilterAdapter();
-        filterText.setInputType(InputType.TYPE_CLASS_TEXT
+        autoCompleteView.setAdapter(filterAdapter);
+        autoCompleteView.setInputType(InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_FLAG_CAP_WORDS
                 | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                 | InputType.TYPE_TEXT_VARIATION_FILTER);
-        filterText.setThreshold(1);
-        filterText.setOnFocusChangeListener((view, hasFocus) -> {
-            if (hasFocus) {
-                filterText.setAdapter(filterAdapter);
-                filterText.selectAll();
-            }
-        });
-        filterText.setOnItemClickListener((parent, view, position, id) -> {
+        autoCompleteView.setThreshold(1);
+        autoCompleteView.setOnItemClickListener((parent, view, position, id) -> {
             activity.onSelectedId(layoutId, id);
-            closeFilter();
         });
     }
 
@@ -151,57 +151,26 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
         if (id == layoutId) {
             if (/*isMultiSelect() || */isListPick()) {
                 pickEntity();
-            } else {
-                openFilter();
             }
         } else if (id == actBtnId) {
             Intent intent = new Intent(activity, getEditActivityClass());
             activity.startActivityForResult(intent, ACTION_BUTTON_REQUEST);
-        } else if (id == filterToggleId) {
-            closeFilter();
         } else if (id == showListId) {
-            closeFilter();
             pickEntity();
         } else if (id == clearBtnId) {
             clearSelection();
         }
     }
 
-    private void openFilter() {
-        initFilterAdapter();
-        setFilterVisibility(VISIBLE);
-        if (isMultiSelect || selectedEntityId <= 0) {
-            autoCompleteFilter.setText("");
-        }
-        Utils.openSoftKeyboard(autoCompleteFilter, activity);
+    protected boolean isListPick() {
+        return isMultiSelect || isListPickConfigured();
     }
 
-    private void closeFilter() {
-        setFilterVisibility(GONE);
-        Utils.closeSoftKeyboard(autoCompleteFilter, activity);
-    }
-
-    private void setFilterVisibility(int visibility) {
-        autoCompleteFilter.setVisibility(visibility);
-        setViewVisibility(R.id.filterToggle, visibility);
-        setViewVisibility(R.id.list, visibility);
-        node.findViewById(R.id.list_node_row).setVisibility(visibility == VISIBLE ? GONE : VISIBLE);
-    }
-
-    private void setViewVisibility(int id, int visibility) {
-        ((View) autoCompleteFilter.getTag(id)).setVisibility(visibility);
-    }
-
-    protected abstract boolean isListPick();
-
-    private void initFilterAdapter() {
-        if (filterAdapter == null) initAutoCompleteFilter(autoCompleteFilter);
-    }
+    protected abstract boolean isListPickConfigured();
 
     private void clearSelection() {
-        text.setText(defaultValueResId);
         selectedEntityId = 0;
-        autoCompleteFilter.setText("");
+        text.setText("");
         for (MyEntity e : getEntities()) e.setChecked(false);
         showHideMinusBtn(false);
     }
@@ -235,11 +204,11 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
     }
 
     public void fillCheckedEntitiesInUI() {
-        String selectedProjects = getCheckedTitles();
-        if (Utils.isEmpty(selectedProjects)) {
+        String selectedEntities = getCheckedTitles();
+        if (Utils.isEmpty(selectedEntities)) {
             clearSelection();
         } else {
-            text.setText(selectedProjects);
+            text.setText(selectedEntities);
             showHideMinusBtn(true);
         }
     }
@@ -315,10 +284,19 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
             if (e == null) {
                 clearSelection();
             } else {
-                autoCompleteFilter.setText(e.title);
-                text.setText(e.title);
                 selectedEntityId = e.id;
-                showHideMinusBtn(e.id > 0);
+                if (e.id > 0) {
+                    if (isListPick()) {
+                        text.setText(e.title);
+                    } else {
+                        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView)text;
+                        autoCompleteTextView.setText(e.title, false);
+                    }
+                    showHideMinusBtn(true);
+                } else {
+                    text.setText("");
+                    showHideMinusBtn(false);
+                }
             }
         }
     }
@@ -392,22 +370,19 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
     }
 
     public boolean isTyping() {
-        if (isShow() && !isListPick()) {
-            ToggleButton toggleBtn = (ToggleButton) autoCompleteFilter.getTag();
-            return toggleBtn.isChecked();
-        }
-        return false;
+        return isShow() && !isListPick();
     }
 
     public boolean askToCreateIfTyping() {
         if (isTyping()) {
-            Utils.closeSoftKeyboard(autoCompleteFilter, activity);
+            Utils.closeSoftKeyboard(text, activity);
             String entityTypeName = getEntityTypeName();
             new AlertDialog.Builder(activity)
                     .setTitle(entityTypeName)
                     .setMessage(activity.getString(R.string.create_new_entity_with_title, entityTypeName, filterText()))
                     .setPositiveButton(R.string.create, (dialog, which) -> createNewEntity())
-                    .setNegativeButton(R.string.cancel, (dialog, which) -> {})
+                    .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                    })
                     .show();
             return true;
         }
@@ -417,12 +392,11 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
     private void createNewEntity() {
         T e = em.findOrInsertEntityByTitle(entityClass, filterText());
         selectEntity(e);
-        closeFilter();
     }
 
     @NonNull
     private String filterText() {
-        return autoCompleteFilter.getText().toString();
+        return text.getText().toString();
     }
 
     protected abstract String getEntityTypeName();
