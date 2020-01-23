@@ -59,7 +59,7 @@ public class TransactionBuilder {
 
     public TransactionBuilder location(String location) {
         MyLocation myLocation = new MyLocation();
-        myLocation.name = location;
+        myLocation.title = location;
         t.locationId = db.saveLocation(myLocation);
         return this;
     }
