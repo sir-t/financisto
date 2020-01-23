@@ -14,13 +14,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.core.content.FileProvider;
 import ru.orangesoftware.financisto.BuildConfig;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.utils.PicturesUtil;
-import ru.orangesoftware.financisto.utils.Utils;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;

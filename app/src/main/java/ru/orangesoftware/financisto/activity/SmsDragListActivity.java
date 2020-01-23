@@ -94,6 +94,7 @@ public class SmsDragListActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             adapter.reloadVisibleItems();
         } else if (resultCode == RESULT_CANCELED) {

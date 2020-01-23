@@ -684,21 +684,11 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     }
 
     protected boolean checkSelectedEntities() {
-        /*
-        if (isShowPayee && payeeSelector.askToCreateIfTyping()) {
-            return false;
+        if (isShowPayee) {
+            payeeSelector.createNewEntity();
         }
-        if (categorySelector.askToCompleteIfTyping()) {
-            return false;
-        }
-        if (locationSelector.askToCreateIfTyping()) {
-            return false;
-        }
-        if (projectSelector.askToCreateIfTyping()) {
-            return false;
-        }
-
-         */
+        locationSelector.createNewEntity();
+        projectSelector.createNewEntity();
         return true;
     }
 

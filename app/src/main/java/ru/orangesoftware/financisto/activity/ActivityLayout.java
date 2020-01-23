@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.model.MultiChoiceItem;
 import ru.orangesoftware.financisto.utils.Utils;
@@ -228,7 +227,6 @@ public class ActivityLayout {
 		return textView;
 	}
 
-	@NonNull
 	private AutoCompleteTextView getAutoCompleteTextView(int showListId, View v) {
 		AutoCompleteTextView filterTxt = v.findViewById(R.id.autocomplete_filter);
 
