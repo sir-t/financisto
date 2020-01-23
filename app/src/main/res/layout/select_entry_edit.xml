@@ -12,6 +12,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="?android:attr/listChoiceBackgroundIndicator"
+    android:baselineAligned="false"
     android:gravity="center_vertical"
     android:minHeight="@dimen/select_entry_height"
     android:orientation="horizontal"

@@ -48,10 +48,4 @@ public class LocationSelector<A extends AbstractActivity> extends MyEntitySelect
     protected boolean isListPickConfigured() {
         return MyPreferences.isLocationSelectorList(activity);
     }
-
-    @Override
-    protected String getEntityTypeName() {
-        return activity.getString(R.string.location);
-    }
-
 }

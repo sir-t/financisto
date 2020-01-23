@@ -55,9 +55,4 @@ public class PayeeSelector<A extends AbstractActivity> extends MyEntitySelector<
     protected boolean isListPickConfigured() {
         return MyPreferences.isPayeeSelectorList(activity);
     }
-
-    @Override
-    protected String getEntityTypeName() {
-        return activity.getString(R.string.payee);
-    }
 }

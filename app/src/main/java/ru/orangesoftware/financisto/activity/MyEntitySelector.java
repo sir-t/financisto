@@ -1,10 +1,8 @@
 package ru.orangesoftware.financisto.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 
-import androidx.annotation.NonNull;
 import android.text.InputType;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -13,7 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,8 +25,6 @@ import ru.orangesoftware.financisto.model.MyEntity;
 import ru.orangesoftware.financisto.utils.ArrUtils;
 import ru.orangesoftware.financisto.utils.Utils;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 import static ru.orangesoftware.financisto.activity.AbstractActivity.setVisibility;
 
 
@@ -369,35 +364,14 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
         }
     }
 
-    public boolean isTyping() {
-        return isShow() && !isListPick();
-    }
 
-    public boolean askToCreateIfTyping() {
-        if (isTyping()) {
-            Utils.closeSoftKeyboard(text, activity);
-            String entityTypeName = getEntityTypeName();
-            new AlertDialog.Builder(activity)
-                    .setTitle(entityTypeName)
-                    .setMessage(activity.getString(R.string.create_new_entity_with_title, entityTypeName, filterText()))
-                    .setPositiveButton(R.string.create, (dialog, which) -> createNewEntity())
-                    .setNegativeButton(R.string.cancel, (dialog, which) -> {
-                    })
-                    .show();
-            return true;
-        }
-        return false;
-    }
-
-    private void createNewEntity() {
+    public void createNewEntity() {
         T e = em.findOrInsertEntityByTitle(entityClass, filterText());
         selectEntity(e);
     }
 
-    @NonNull
     private String filterText() {
         return text.getText().toString();
     }
 
-    protected abstract String getEntityTypeName();
 }

@@ -684,6 +684,7 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
     }
 
     protected boolean checkSelectedEntities() {
+        /*
         if (isShowPayee && payeeSelector.askToCreateIfTyping()) {
             return false;
         }
@@ -696,6 +697,8 @@ public abstract class AbstractTransactionActivity extends AbstractActivity imple
         if (projectSelector.askToCreateIfTyping()) {
             return false;
         }
+
+         */
         return true;
     }
 

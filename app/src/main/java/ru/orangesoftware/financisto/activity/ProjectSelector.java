@@ -61,9 +61,4 @@ public class ProjectSelector<A extends AbstractActivity> extends MyEntitySelecto
     protected boolean isListPickConfigured() {
         return MyPreferences.isProjectSelectorList(activity);
     }
-
-    @Override
-    protected String getEntityTypeName() {
-        return activity.getString(R.string.project);
-    }
 }

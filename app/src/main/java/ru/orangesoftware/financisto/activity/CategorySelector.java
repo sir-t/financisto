@@ -373,23 +373,6 @@ public class CategorySelector<A extends AbstractActivity> {
         return multiSelect;
     }
 
-
-    // TODO: remove duplication
-    public boolean isTyping() {
-        return false;
-        //ToggleButton toggleBtn = (ToggleButton) filterAutoCompleteTxt.getTag();
-        //return toggleBtn.isChecked();
-    }
-
-    public boolean askToCompleteIfTyping() {
-        if (isTyping()) {
-            //String filterText = filterAutoCompleteTxt.getText().toString();
-            //Toast.makeText(activity, activity.getString(R.string.complete_category_selection, filterText), Toast.LENGTH_LONG).show();
-            //return true;
-        }
-        return false;
-    }
-
     public void onDestroy() {
         if (autoCompleteAdapter != null) {
             autoCompleteAdapter.changeCursor(null);
