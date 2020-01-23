@@ -142,11 +142,17 @@ public class CategorySelector<A extends AbstractActivity> {
 
     public TextView createNode(LinearLayout layout, SelectorType type) {
         switch (type) {
-            case TRANSACTION:
+            case TRANSACTION: {
+                if (emptyResId <= 0) setEmptyResId(R.string.no_category);
+                AutoCompleteTextView filterAutoCompleteTxt = x.addCategoryNodeForTransaction(layout, emptyResId);
+                initAutoCompleteFilter(filterAutoCompleteTxt);
+                categoryText = filterAutoCompleteTxt;
+                return categoryText;
+            }
             case SPLIT:
             case TRANSFER: {
                 if (emptyResId <= 0) setEmptyResId(R.string.no_category);
-                AutoCompleteTextView filterAutoCompleteTxt = x.addListNodeWithButtonsAndFilter(layout, R.id.category, R.id.category_add, R.id.category_clear, R.string.category, emptyResId, R.id.category_show_list);
+                AutoCompleteTextView filterAutoCompleteTxt = x.addCategoryNodeForFilter(layout, emptyResId);
                 initAutoCompleteFilter(filterAutoCompleteTxt);
                 categoryText = filterAutoCompleteTxt;
                 return categoryText;
@@ -156,14 +162,14 @@ public class CategorySelector<A extends AbstractActivity> {
                 if (isMultiSelect()) {
                     categoryText = x.addFilterNodeMinus(layout, R.id.category, R.id.category_clear, R.string.category, R.string.no_category);
                 } else {
-                    AutoCompleteTextView filterAutoCompleteTxt = x.addListNodeWithClearButtonAndFilter(layout, R.id.category, R.id.category_clear, R.string.category, emptyResId, R.id.category_show_list);
+                    AutoCompleteTextView filterAutoCompleteTxt = x.addCategoryNodeForFilter(layout, emptyResId);
                     initAutoCompleteFilter(filterAutoCompleteTxt);
                     categoryText = filterAutoCompleteTxt;
                 }
                 return categoryText;
             }
             case PARENT:
-                if (emptyResId <=0) setEmptyResId(R.string.no_category);
+                if (emptyResId <= 0) setEmptyResId(R.string.no_category);
                 categoryText = x.addListNode(layout, R.id.category, R.string.parent, R.string.no_category);
                 return categoryText;
             default:
@@ -173,10 +179,10 @@ public class CategorySelector<A extends AbstractActivity> {
 
     private void initAutoCompleteFilter(final AutoCompleteTextView filterTxt) { // init only after it's toggled
         autoCompleteAdapter = TransactionUtils.createCategoryFilterAdapter(activity, db);
-        filterTxt.setInputType(InputType.TYPE_CLASS_TEXT 
-                        | InputType.TYPE_TEXT_FLAG_CAP_WORDS 
-                        | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                        | InputType.TYPE_TEXT_VARIATION_FILTER);
+        filterTxt.setInputType(InputType.TYPE_CLASS_TEXT
+               | InputType.TYPE_TEXT_FLAG_CAP_WORDS
+               | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+               | InputType.TYPE_TEXT_VARIATION_FILTER);
         filterTxt.setThreshold(1);
         filterTxt.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus) {
@@ -195,6 +201,7 @@ public class CategorySelector<A extends AbstractActivity> {
 
     public void onClick(int id) {
         switch (id) {
+            case R.id.category_show_list:
             case R.id.category: {
                 if (isMultiSelect()) {
                     x.selectMultiChoice(activity, R.id.category, R.string.categories, categories);
@@ -203,7 +210,7 @@ public class CategorySelector<A extends AbstractActivity> {
                     activity.startActivityForResult(intent, CATEGORY_PICK);
                 } else {
                     x.select(activity, R.id.category, R.string.category, categoryCursor, categoryAdapter,
-                            DatabaseHelper.CategoryViewColumns._id.name(), selectedCategoryId);
+                            DatabaseHelper.CategoryViewColumns._id.name(), selectedCategoryId);;
                 }
                 break;
             }
@@ -222,10 +229,15 @@ public class CategorySelector<A extends AbstractActivity> {
     }
 
     void clearCategory() {
-        categoryText.setText("");
+        if (isMultiSelect()) {
+            categoryText.setText(emptyResId);
+        } else {
+            categoryText.setText("");
+        }
         selectedCategoryId = NO_CATEGORY_ID;
         for (MyEntity e : categories) e.setChecked(false);
         showHideMinusBtn(false);
+        if (listener != null) listener.onCategorySelected(Category.noCategory(), false);
     }
 
     public void onSelectedId(int id, long selectedId) {
@@ -312,11 +324,11 @@ public class CategorySelector<A extends AbstractActivity> {
     protected List<TransactionAttribute> getAttributes() {
         List<TransactionAttribute> list = new LinkedList<TransactionAttribute>();
         long count = attributesLayout.getChildCount();
-        for (int i=0; i<count; i++) {
+        for (int i = 0; i < count; i++) {
             View v = attributesLayout.getChildAt(i);
             Object o = v.getTag();
             if (o instanceof AttributeView) {
-                AttributeView av = (AttributeView)o;
+                AttributeView av = (AttributeView) o;
                 TransactionAttribute ta = av.newTransactionAttribute();
                 list.add(ta);
             }
@@ -367,11 +379,13 @@ public class CategorySelector<A extends AbstractActivity> {
         return Category.isSplit(selectedCategoryId);
     }
 
-    @Deprecated // todo.mb: it seems not much sense in it, better do it in single place - activity.onSelectedId
+    @Deprecated
+    // todo.mb: it seems not much sense in it, better do it in single place - activity.onSelectedId
     public interface CategorySelectorListener {
         @Deprecated
         void onCategorySelected(Category category, boolean selectLast);
     }
+
     public boolean isMultiSelect() {
         return multiSelect || useMultiChoicePlainSelector;
     }
