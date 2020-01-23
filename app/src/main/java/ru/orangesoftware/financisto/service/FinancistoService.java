@@ -107,6 +107,7 @@ public class FinancistoService extends JobIntentService {
         }
     }
 
+
     private void processSmsTransaction(Intent intent) {
         String number = intent.getStringExtra(SMS_TRANSACTION_NUMBER);
         String body = intent.getStringExtra(SMS_TRANSACTION_BODY);
