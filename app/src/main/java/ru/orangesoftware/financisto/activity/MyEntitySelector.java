@@ -111,24 +111,14 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
 
     public TextView createNode(LinearLayout layout) {
         if (isShow) {
-//            if (isListPick()) {
-//                if (isMultiSelect) {
-//                    text = x.addFilterNodeMinus(layout, layoutId, clearBtnId, labelResId, defaultValueResId);
-//                    node = (View) text.getTag();
-//                } else {
-//                    text = x.addListNodePlus(layout, layoutId, actBtnId, labelResId, defaultValueResId);
-//                    node = (View) text.getTag();
-//                }
-//            } else {
-                filterNode = x.addFilterNode(layout, layoutId, isMultiSelect ? -1 : actBtnId, clearBtnId,
-                        labelResId, defaultValueResId, showListId, closeFilterId, showFilterId);
-                text = filterNode.textView;
-                node = filterNode.nodeLayout;
-                autoCompleteView = filterNode.autoCompleteTextView;
-//            }
-            }
-            return text;
+            filterNode = x.addFilterNode(layout, layoutId, isMultiSelect ? -1 : actBtnId, clearBtnId,
+                    labelResId, defaultValueResId, showListId, closeFilterId, showFilterId);
+            text = filterNode.textView;
+            node = filterNode.nodeLayout;
+            autoCompleteView = filterNode.autoCompleteTextView;
         }
+        return text;
+    }
 
     private void initAutoCompleteFilter() {
         if (initAutoComplete) {
@@ -156,8 +146,7 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
                 showFilter();
             }
         } else if (id == actBtnId) {
-            Intent intent = new Intent(activity, getEditActivityClass());
-            activity.startActivityForResult(intent, ACTION_BUTTON_REQUEST);
+            createEntity();
         } else if (id == showListId) {
             pickEntity();
         } else if (id == clearBtnId) {
@@ -167,6 +156,11 @@ public abstract class MyEntitySelector<T extends MyEntity, A extends AbstractAct
         } else if (id == closeFilterId) {
             filterNode.hideFilter();
         }
+    }
+
+    private void createEntity() {
+        Intent intent = new Intent(activity, getEditActivityClass());
+        activity.startActivityForResult(intent, actBtnId);
     }
 
     private void showFilter() {

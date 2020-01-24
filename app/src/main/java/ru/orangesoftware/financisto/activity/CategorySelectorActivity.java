@@ -6,7 +6,9 @@ import android.content.Intent;
 
 import androidx.fragment.app.Fragment;
 
+import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.fragment.CategorySelectorFragment;
+import ru.orangesoftware.financisto.utils.MyPreferences;
 
 public class CategorySelectorActivity extends SingleFragmentActivity implements CategorySelectorFragment.Callbacks {
 
@@ -34,12 +36,26 @@ public class CategorySelectorActivity extends SingleFragmentActivity implements 
         }
     }
 
+    /*
     public static Intent pickCategory(Context context, long selectedId, long excludingTreeId, boolean includeSplit) {
         Intent intent = new Intent(context, CategorySelectorActivity.class);
         intent.putExtra(SELECTED_CATEGORY_ID, selectedId);
         intent.putExtra(EXCLUDED_SUB_TREE_ID, excludingTreeId);
         intent.putExtra(INCLUDE_SPLIT_CATEGORY, includeSplit);
         return intent;
+    }
+    */
+
+    public static boolean pickCategory(Activity activity, boolean forceHierSelector, long selectedId, long excludingTreeId, boolean includeSplit) {
+        if (forceHierSelector || MyPreferences.isUseHierarchicalCategorySelector(activity)) {
+            Intent intent = new Intent(activity, CategorySelectorActivity.class);
+            intent.putExtra(CategorySelectorActivity.SELECTED_CATEGORY_ID, selectedId);
+            intent.putExtra(CategorySelectorActivity.EXCLUDED_SUB_TREE_ID, excludingTreeId);
+            intent.putExtra(CategorySelectorActivity.INCLUDE_SPLIT_CATEGORY, includeSplit);
+            activity.startActivityForResult(intent, R.id.category_pick);
+            return true;
+        }
+        return false;
     }
 
     @Override
