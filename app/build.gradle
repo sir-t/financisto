@@ -54,7 +54,16 @@ android {
     }
 
     testOptions {
-        unitTests.returnDefaultValues = true
+        unitTests {
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
+    }
+
+    sourceSets {
+        test {
+            resources.srcDirs += ['src/test/resources']
+        }
     }
 
     packagingOptions {
@@ -116,8 +125,6 @@ dependencies {
     implementation fileTree(include: '**/*.jar', dir: 'libs')
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.3.0-alpha02', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
 }

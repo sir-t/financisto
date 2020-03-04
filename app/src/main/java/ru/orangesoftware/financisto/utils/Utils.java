@@ -1,13 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010 Denis Solonenko.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * 
- * Contributors:
- *     Denis Solonenko - initial API and implementation
- ******************************************************************************/
 package ru.orangesoftware.financisto.utils;
 
 import android.content.Context;
@@ -38,21 +28,21 @@ public class Utils {
 	public static final BigDecimal HUNDRED = new BigDecimal(100);
     public static final String TRANSFER_DELIMITER = " \u00BB ";
 
-    private static final int zeroColor = Resources.getSystem().getColor(android.R.color.secondary_text_dark);
-
     private final Context context;
     private final StringBuilder sb = new StringBuilder();
 
-	public final int positiveColor;
+    private final int zeroColor;
+    public final int positiveColor;
     public final int negativeColor;
     public final int transferColor;
     public final int futureColor;
     public final int splitColor;
 
-	public Utils(Context context) {
-		Resources r = context.getResources();
-		this.positiveColor = r.getColor(R.color.positive_amount);
-		this.negativeColor = r.getColor(R.color.negative_amount);
+    public Utils(Context context) {
+        Resources r = context.getResources();
+        this.zeroColor = r.getColor(android.R.color.secondary_text_dark);
+        this.positiveColor = r.getColor(R.color.positive_amount);
+        this.negativeColor = r.getColor(R.color.negative_amount);
         this.transferColor = r.getColor(R.color.transfer_color);
         this.futureColor = r.getColor(R.color.future_color);
         this.splitColor = r.getColor(R.color.split_color);

@@ -1,11 +1,3 @@
-/*
- * Copyright (c) 2011 Denis Solonenko.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- */
-
 package ru.orangesoftware.financisto.activity;
 
 import android.app.AlertDialog;
@@ -25,11 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Denis Solonenko
- * Date: 6/20/11 6:40 PM
- */
 public class CurrencySelector {
 
     public static interface OnCurrencyCreatedListener {
