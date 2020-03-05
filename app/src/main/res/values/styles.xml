@@ -146,13 +146,13 @@
     </style>
 
     <style name="BottomBarButton">
-        <item name="android:background"></item>
+        <item name="android:background">@color/material_gray_dark</item>
         <item name="android:layout_width">@dimen/action_button_size</item>
         <item name="android:layout_height">@dimen/action_button_size</item>
     </style>
 
     <style name="BottomBarImageTextButton">
-        <item name="android:background"></item>
+        <item name="android:background">@color/material_gray_dark</item>
         <item name="android:spacing">2dp</item>
         <item name="android:padding">10dp</item>
         <item name="android:drawablePadding">@dimen/image_text_btn_padding</item>
