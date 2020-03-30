@@ -4,24 +4,32 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import greendroid.widget.QuickActionGrid;
-import greendroid.widget.QuickActionWidget;
 import ru.orangesoftware.financisto.R;
 import ru.orangesoftware.financisto.activity.AbstractTransactionActivity;
 import ru.orangesoftware.financisto.activity.AccountActivity;
@@ -29,11 +37,11 @@ import ru.orangesoftware.financisto.activity.AccountListTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.GenericBlotterActivity;
 import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
-import ru.orangesoftware.financisto.activity.MyQuickAction;
 import ru.orangesoftware.financisto.activity.PurgeAccountActivity;
 import ru.orangesoftware.financisto.activity.TransactionActivity;
 import ru.orangesoftware.financisto.activity.TransferActivity;
 import ru.orangesoftware.financisto.adapter.BaseCursorRecyclerAdapter;
+import ru.orangesoftware.financisto.adapter.BottomListAdapter;
 import ru.orangesoftware.financisto.blotter.BlotterFilter;
 import ru.orangesoftware.financisto.blotter.TotalCalculationTask;
 import ru.orangesoftware.financisto.databinding.AccountListBinding;
@@ -44,6 +52,7 @@ import ru.orangesoftware.financisto.dialog.AccountInfoDialog;
 import ru.orangesoftware.financisto.filter.Criteria;
 import ru.orangesoftware.financisto.model.Account;
 import ru.orangesoftware.financisto.model.AccountType;
+import ru.orangesoftware.financisto.model.Action;
 import ru.orangesoftware.financisto.model.CardIssuer;
 import ru.orangesoftware.financisto.model.ElectronicPaymentType;
 import ru.orangesoftware.financisto.model.Total;
@@ -65,9 +74,12 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
     private static final int VIEW_ACCOUNT_REQUEST = 3;
     private static final int PURGE_ACCOUNT_REQUEST = 4;
 
-    private QuickActionWidget accountActionGrid;
     private long selectedId = -1;
-
+    private ConstraintLayout accountBottomSheet;
+    private BottomSheetBehavior accountBottomSheetBehavior;
+    private TextView accountTitle;
+    private ListView accountListView;
+    private ImageView accountInfo;
     private AccountTotalsCalculationTask totalCalculationTask;
 
     public AccountListFragment(){
@@ -88,9 +100,17 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
             startActivityForResult(intent, NEW_ACCOUNT_REQUEST);
         });
 
+        accountBottomSheet = view.findViewById(R.id.account_bottom_sheet);
+        accountBottomSheetBehavior = BottomSheetBehavior.from(accountBottomSheet);
+        accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        accountTitle = new TextView(context);
+        accountListView = new ListView(context);
+        accountInfo = new ImageView(context);
+
         calculateTotals();
         integrityCheck();
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -102,15 +122,26 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
 
     @Override
     public void onItemClick(View view, int position) {
-        long id = getListAdapter().getItemId(position);
-        showAccountTransactions(id);
+        if (accountBottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+            accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+        selectedId = getListAdapter().getItemId(position);
+        if (MyPreferences.isQuickMenuEnabledForAccount(getContext())){
+            setAccountActionGrid();
+            accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        } else {
+            showAccountTransactions(selectedId);
+        }
     }
 
     @Override
     public void onItemLongClick(View view, int position) {
+        if (accountBottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+            accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
         selectedId = getListAdapter().getItemId(position);
-        prepareAccountActionGrid();
-        accountActionGrid.show(view);
+        setAccountActionGrid();
+        accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     @Override
@@ -143,54 +174,104 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
         new IntegrityCheckTask(getActivity()).execute(new IntegrityCheckAutobackup(context, TimeUnit.DAYS.toMillis(7)));
     }
 
-    private void prepareAccountActionGrid() {
+    private void setAccountActionGrid() {
         Account a = db.getAccount(selectedId);
-        accountActionGrid = new QuickActionGrid(context);
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_info, R.string.info));
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_list, R.string.blotter));
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_edit, R.string.edit));
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_add, R.string.transaction));
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_transfer, R.string.transfer));
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_tick, R.string.balance));
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_flash, R.string.delete_old_transactions));
+        View v = getView();
+
+        accountBottomSheet.removeAllViews();
+        accountBottomSheet.addView(accountTitle);
+        accountBottomSheet.addView(accountListView);
+        accountBottomSheet.addView(accountInfo);
+
+        accountTitle.setTextColor(Color.BLACK);
+        accountTitle.setText(a.title);
+        accountTitle.setId(R.id.account_title);
+        accountTitle.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        accountInfo.setId(R.id.account_info);
+        accountInfo.setLayoutParams(new ConstraintLayout.LayoutParams(60,60));
+        accountInfo.setImageResource(R.drawable.ic_action_info);
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.activatedBackgroundIndicator, outValue, true);
+        accountInfo.setBackgroundResource(outValue.resourceId);
+
+        accountListView.setId(R.id.account_list_view);
+        accountListView.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        accountListView.setPadding(0,20,0,0);
+
+        ConstraintSet accountBottomSheetSet = new ConstraintSet();
+        accountBottomSheetSet.clone(accountBottomSheet);
+        accountBottomSheetSet.connect(accountTitle.getId(),ConstraintSet.START,accountBottomSheet.getId(),ConstraintSet.START);
+        accountBottomSheetSet.connect(accountTitle.getId(),ConstraintSet.TOP,accountBottomSheet.getId(),ConstraintSet.TOP);
+        accountBottomSheetSet.connect(accountInfo.getId(),ConstraintSet.END,accountBottomSheet.getId(),ConstraintSet.END);
+        accountBottomSheetSet.connect(accountInfo.getId(),ConstraintSet.TOP,accountBottomSheet.getId(),ConstraintSet.TOP);
+        accountBottomSheetSet.connect(accountListView.getId(),ConstraintSet.TOP,accountTitle.getId(),ConstraintSet.BOTTOM);
+        accountBottomSheetSet.applyTo(accountBottomSheet);
+
+        ArrayList<Action> accountActionsLst = new ArrayList<>();
+        accountActionsLst.add(new Action(R.string.transaction,R.drawable.ic_action_add_small));
+        accountActionsLst.add(new Action(R.string.transfer,R.drawable.ic_action_transfer));
+        accountActionsLst.add(new Action(R.string.blotter,R.drawable.ic_action_list));
+        accountActionsLst.add(new Action(R.string.edit,R.drawable.ic_action_edit));
+        accountActionsLst.add(new Action(R.string.more_actions,R.drawable.ic_action_download));
+        accountActionsLst.add(new Action(R.string.balance,R.drawable.ic_action_tick));
+        accountActionsLst.add(new Action(R.string.delete_old_transactions,R.drawable.ic_action_flash));
         if (a.isActive) {
-            accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_lock_closed, R.string.close_account));
+            accountActionsLst.add(new Action(R.string.close_account,R.drawable.ic_action_lock_closed));
         } else {
-            accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_lock_open, R.string.reopen_account));
+            accountActionsLst.add(new Action(R.string.reopen_account,R.drawable.ic_action_lock_open));
         }
-        accountActionGrid.addQuickAction(new MyQuickAction(context, R.drawable.ic_action_trash, R.string.delete_account));
-        accountActionGrid.setOnQuickActionClickListener(accountActionListener);
+        accountActionsLst.add(new Action(R.string.delete_account,R.drawable.ic_action_trash));
+
+        Action[] accountActions = new Action[accountActionsLst.size()];
+        accountActionsLst.toArray(accountActions);
+        BottomListAdapter accountActionAdapter = new BottomListAdapter(getContext(), accountActions);
+        accountListView.setAdapter(accountActionAdapter);
+
+        accountListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        addTransaction(selectedId, TransactionActivity.class);
+                        break;
+                    case 1:
+                        addTransaction(selectedId, TransferActivity.class);
+                        break;
+                    case 2:
+                        showAccountTransactions(selectedId);
+                        break;
+                    case 3:
+                        editAccount(selectedId);
+                        break;
+                    case 4:
+                        accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                        break;
+                    case 5:
+                        updateAccountBalance(selectedId);
+                        break;
+                    case 6:
+                        purgeAccount();
+                        break;
+                    case 7:
+                        closeOrOpenAccount();
+                        break;
+                    case 8:
+                        deleteAccount();
+                        break;
+                }
+                if (position != 4) {
+                    accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+            }
+        });
+
+        accountInfo.setOnClickListener(accountInfoListener);
     }
 
-    private QuickActionWidget.OnQuickActionClickListener accountActionListener = (widget, position) -> {
-        switch (position) {
-            case 0:
-                showAccountInfo(selectedId);
-                break;
-            case 1:
-                showAccountTransactions(selectedId);
-                break;
-            case 2:
-                editAccount(selectedId);
-                break;
-            case 3:
-                addTransaction(selectedId, TransactionActivity.class);
-                break;
-            case 4:
-                addTransaction(selectedId, TransferActivity.class);
-                break;
-            case 5:
-                updateAccountBalance(selectedId);
-                break;
-            case 6:
-                purgeAccount();
-                break;
-            case 7:
-                closeOrOpenAccount();
-                break;
-            case 8:
-                deleteAccount();
-                break;
+    private View.OnClickListener accountInfoListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            showAccountInfo(selectedId);
+            accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
     };
 

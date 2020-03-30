@@ -102,4 +102,7 @@
     <item name="attached_picture" type="id" />
     <item name="e_receipt_info" type="id" />
     <item name="e_receipt_get" type="id" />
+    <item name="account_title" type="id" />
+    <item name="account_list_view" type="id" />
+    <item name="account_info" type="id" />
 </resources>

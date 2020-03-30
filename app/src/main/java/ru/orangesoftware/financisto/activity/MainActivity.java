@@ -1,13 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010 Denis Solonenko.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * <p/>
- * Contributors:
- * Denis Solonenko - initial API and implementation
- ******************************************************************************/
 package ru.orangesoftware.financisto.activity;
 
 import android.content.Context;
@@ -22,11 +12,13 @@ import android.widget.FrameLayout;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationAdapter;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -59,6 +51,7 @@ public class MainActivity extends FragmentActivity {
     private AHBottomNavigationViewPager viewPager;
     private AHBottomNavigation bottomNavigationView;
     private AHBottomNavigationAdapter navigationAdapter;
+
     private ViewPagerAdapter adapter;
 
     @Override
@@ -91,8 +84,9 @@ public class MainActivity extends FragmentActivity {
                     fragment = adapter.getCurrentFragment();
                 }
                 if (wasSelected) {
-                    if (fragment instanceof BottomNavigationSupported)
+                    if (fragment instanceof BottomNavigationSupported) {
                         ((BottomNavigationSupported) fragment).willBeReSelected();
+                    }
                     return true;
                 }
                 if (fragment != null && fragment instanceof BottomNavigationSupported) {
@@ -208,10 +202,22 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
+        if (fragment == null) {
+            fragment = adapter.getCurrentFragment();
+        }
+
         if (fragment instanceof BlotterFragment) {
             FrameLayout searchLayout = fragment.getView().findViewById(R.id.search_text_frame);
             if (searchLayout != null && searchLayout.getVisibility() == View.VISIBLE) {
                 searchLayout.setVisibility(View.GONE);
+            } else {
+                super.onBackPressed();
+            }
+        } else if (fragment instanceof AccountListFragment) {
+            ConstraintLayout accountBottomSheet = fragment.getView().findViewById(R.id.account_bottom_sheet);
+            BottomSheetBehavior accountBottomSheetBehavior = BottomSheetBehavior.from(accountBottomSheet);
+            if (accountBottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             } else {
                 super.onBackPressed();
             }
