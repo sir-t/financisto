@@ -312,7 +312,8 @@ public class TransactionActivity extends AbstractTransactionActivity implements 
         selectCurrency(transaction);
         fetchSplits();
         selectPayee(transaction.payeeId);
-        selectElectronicReceipt(e_receipt);
+        if (MyPreferences.isShowElectronicReceipt(this))
+            selectElectronicReceipt(e_receipt);
     }
 
     private void selectCurrency(Transaction transaction) {
