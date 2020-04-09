@@ -4,9 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +15,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -37,6 +34,7 @@ import ru.orangesoftware.financisto.activity.AccountListTotalsDetailsActivity;
 import ru.orangesoftware.financisto.activity.BlotterFilterActivity;
 import ru.orangesoftware.financisto.activity.GenericBlotterActivity;
 import ru.orangesoftware.financisto.activity.IntegrityCheckTask;
+import ru.orangesoftware.financisto.activity.MonthlyViewActivity;
 import ru.orangesoftware.financisto.activity.PurgeAccountActivity;
 import ru.orangesoftware.financisto.activity.TransactionActivity;
 import ru.orangesoftware.financisto.activity.TransferActivity;
@@ -73,13 +71,13 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
     private static final int EDIT_ACCOUNT_REQUEST = 2;
     private static final int VIEW_ACCOUNT_REQUEST = 3;
     private static final int PURGE_ACCOUNT_REQUEST = 4;
+    private static final int MONTHLY_VIEW_REQUEST = 6;
+    private static final int BILL_PREVIEW_REQUEST = 7;
 
     private long selectedId = -1;
     private ConstraintLayout accountBottomSheet;
     private BottomSheetBehavior accountBottomSheetBehavior;
-    private TextView accountTitle;
-    private ListView accountListView;
-    private ImageView accountInfo;
+
     private AccountTotalsCalculationTask totalCalculationTask;
 
     public AccountListFragment(){
@@ -103,9 +101,6 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
         accountBottomSheet = view.findViewById(R.id.account_bottom_sheet);
         accountBottomSheetBehavior = BottomSheetBehavior.from(accountBottomSheet);
         accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        accountTitle = new TextView(context);
-        accountListView = new ListView(context);
-        accountInfo = new ImageView(context);
 
         calculateTotals();
         integrityCheck();
@@ -128,7 +123,6 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
         selectedId = getListAdapter().getItemId(position);
         if (MyPreferences.isQuickMenuEnabledForAccount(getContext())){
             setAccountActionGrid();
-            accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else {
             showAccountTransactions(selectedId);
         }
@@ -141,7 +135,6 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
         }
         selectedId = getListAdapter().getItemId(position);
         setAccountActionGrid();
-        accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     @Override
@@ -178,43 +171,33 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
         Account a = db.getAccount(selectedId);
         View v = getView();
 
-        accountBottomSheet.removeAllViews();
-        accountBottomSheet.addView(accountTitle);
-        accountBottomSheet.addView(accountListView);
-        accountBottomSheet.addView(accountInfo);
-
-        accountTitle.setTextColor(Color.BLACK);
+        TextView accountTitle = v.findViewById(R.id.account_title);
         accountTitle.setText(a.title);
-        accountTitle.setId(R.id.account_title);
-        accountTitle.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        int width = ((ConstraintLayout)accountTitle.getParent()).getWidth();
+        accountTitle.setMaxWidth(width/2);
 
-        accountInfo.setId(R.id.account_info);
-        accountInfo.setLayoutParams(new ConstraintLayout.LayoutParams(60,60));
-        accountInfo.setImageResource(R.drawable.ic_action_info);
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.activatedBackgroundIndicator, outValue, true);
-        accountInfo.setBackgroundResource(outValue.resourceId);
+        ImageView accountMore = v.findViewById(R.id.account_more);
 
-        accountListView.setId(R.id.account_list_view);
-        accountListView.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        accountListView.setPadding(0,20,0,0);
+        TextView accountNote = v.findViewById(R.id.account_note);
+        accountNote.setText(a.note);
+        accountNote.setMaxWidth(width/2);
 
-        ConstraintSet accountBottomSheetSet = new ConstraintSet();
-        accountBottomSheetSet.clone(accountBottomSheet);
-        accountBottomSheetSet.connect(accountTitle.getId(),ConstraintSet.START,accountBottomSheet.getId(),ConstraintSet.START);
-        accountBottomSheetSet.connect(accountTitle.getId(),ConstraintSet.TOP,accountBottomSheet.getId(),ConstraintSet.TOP);
-        accountBottomSheetSet.connect(accountInfo.getId(),ConstraintSet.END,accountBottomSheet.getId(),ConstraintSet.END);
-        accountBottomSheetSet.connect(accountInfo.getId(),ConstraintSet.TOP,accountBottomSheet.getId(),ConstraintSet.TOP);
-        accountBottomSheetSet.connect(accountListView.getId(),ConstraintSet.TOP,accountTitle.getId(),ConstraintSet.BOTTOM);
-        accountBottomSheetSet.applyTo(accountBottomSheet);
+        TextView accountBalance = v.findViewById(R.id.account_balance);
+        Utils u = new Utils(getContext());
+        u.setAmountText(accountBalance,a.currency,getBalance(a),false);
+        accountBalance.setMaxWidth(width/8*3);
 
+        TextView accountCurrency = v.findViewById(R.id.account_currency);
+        accountCurrency.setText(a.currency.title);
+        accountCurrency.setMaxWidth(width/8*3);
+
+        ListView accountListView = v.findViewById(R.id.account_list_view);
         ArrayList<Action> accountActionsLst = new ArrayList<>();
         accountActionsLst.add(new Action(R.string.transaction,R.drawable.ic_action_add_small));
         accountActionsLst.add(new Action(R.string.transfer,R.drawable.ic_action_transfer));
         accountActionsLst.add(new Action(R.string.blotter,R.drawable.ic_action_list));
-        accountActionsLst.add(new Action(R.string.edit,R.drawable.ic_action_edit));
-        accountActionsLst.add(new Action(R.string.more_actions,R.drawable.ic_action_download));
         accountActionsLst.add(new Action(R.string.balance,R.drawable.ic_action_tick));
+        accountActionsLst.add(new Action(R.string.edit,R.drawable.ic_action_edit));
         accountActionsLst.add(new Action(R.string.delete_old_transactions,R.drawable.ic_action_flash));
         if (a.isActive) {
             accountActionsLst.add(new Action(R.string.close_account,R.drawable.ic_action_lock_closed));
@@ -222,56 +205,91 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
             accountActionsLst.add(new Action(R.string.reopen_account,R.drawable.ic_action_lock_open));
         }
         accountActionsLst.add(new Action(R.string.delete_account,R.drawable.ic_action_trash));
+        accountActionsLst.add(new Action(R.string.monthly_view,R.drawable.ic_action_month));
+        AccountType type = AccountType.valueOf(a.type);
+        if (type.isCreditCard)
+            accountActionsLst.add(new Action(R.string.ccard_statement,R.drawable.ic_action_credit_card));
 
         Action[] accountActions = new Action[accountActionsLst.size()];
         accountActionsLst.toArray(accountActions);
         BottomListAdapter accountActionAdapter = new BottomListAdapter(getContext(), accountActions);
         accountListView.setAdapter(accountActionAdapter);
-
-        accountListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0:
-                        addTransaction(selectedId, TransactionActivity.class);
-                        break;
-                    case 1:
-                        addTransaction(selectedId, TransferActivity.class);
-                        break;
-                    case 2:
-                        showAccountTransactions(selectedId);
-                        break;
-                    case 3:
-                        editAccount(selectedId);
-                        break;
-                    case 4:
-                        accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        break;
-                    case 5:
-                        updateAccountBalance(selectedId);
-                        break;
-                    case 6:
-                        purgeAccount();
-                        break;
-                    case 7:
-                        closeOrOpenAccount();
-                        break;
-                    case 8:
-                        deleteAccount();
-                        break;
-                }
-                if (position != 4) {
-                    accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
+        accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        accountListView.setOnItemClickListener((parent, view, position, id) -> {
+            switch (position) {
+                case 0:
+                    addTransaction(selectedId, TransactionActivity.class);
+                    break;
+                case 1:
+                    addTransaction(selectedId, TransferActivity.class);
+                    break;
+                case 2:
+                    showAccountTransactions(selectedId);
+                    break;
+                case 3:
+                    updateAccountBalance(selectedId);
+                    break;
+                case 4:
+                    editAccount(selectedId);
+                    break;
+                case 5:
+                    purgeAccount();
+                    break;
+                case 6:
+                    closeOrOpenAccount();
+                    break;
+                case 7:
+                    deleteAccount();
+                    break;
+                case 8:
+                    monthlyView(a.id);
+                    break;
+                case 9:
+                    ccardStatement(a.id);
+                    break;
             }
+            accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         });
 
-        accountInfo.setOnClickListener(accountInfoListener);
+        accountMore.setOnClickListener(accountMoreListener);
     }
 
-    private View.OnClickListener accountInfoListener = new View.OnClickListener() {
+    private void monthlyView (long accountId) {
+        Intent intent = new Intent(getContext(), MonthlyViewActivity.class);
+        intent.putExtra(MonthlyViewActivity.ACCOUNT_EXTRA, accountId);
+        intent.putExtra(MonthlyViewActivity.BILL_PREVIEW_EXTRA, false);
+        startActivityForResult(intent, MONTHLY_VIEW_REQUEST);
+    }
+
+    private void ccardStatement (long accountId) {
+        Intent intent = new Intent(context, MonthlyViewActivity.class);
+        intent.putExtra(MonthlyViewActivity.ACCOUNT_EXTRA, accountId);
+
+        if (accountId != -1) {
+            Account account = db.getAccount(accountId);
+            // call credit card bill activity sending account id
+            if (account.paymentDay > 0 && account.closingDay > 0) {
+                intent.putExtra(MonthlyViewActivity.BILL_PREVIEW_EXTRA, true);
+                startActivityForResult(intent, BILL_PREVIEW_REQUEST);
+            } else {
+                // display message: need payment and closing day
+                AlertDialog.Builder dlgAlert = new AlertDialog.Builder(context);
+                dlgAlert.setMessage(R.string.statement_error);
+                dlgAlert.setTitle(R.string.ccard_statement);
+                dlgAlert.setPositiveButton(R.string.ok, null);
+                dlgAlert.setCancelable(true);
+                dlgAlert.create().show();
+            }
+        }
+    }
+
+    private View.OnClickListener accountMoreListener = new View.OnClickListener() {
         public void onClick(View v) {
-            showAccountInfo(selectedId);
-            accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            if (accountBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            } else {
+                accountBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
         }
     };
 
@@ -481,6 +499,17 @@ public class AccountListFragment extends AbstractRecycleFragment implements Item
             }
         }
 
+    }
+
+    private long getBalance (Account a) {
+        AccountType type = AccountType.valueOf(a.type);
+        long amount = a.totalAmount;
+        if (type == AccountType.CREDIT_CARD && a.limitAmount != 0) {
+            long limitAmount = Math.abs(a.limitAmount);
+            return limitAmount + amount;
+        } else {
+            return amount;
+        }
     }
 
     public class AccountRecyclerAdapter extends BaseCursorRecyclerAdapter<AccountRecyclerItemHolder> {

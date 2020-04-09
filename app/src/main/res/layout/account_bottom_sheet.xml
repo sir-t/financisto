@@ -1,13 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/AppModalStyle"
     android:id="@+id/account_bottom_sheet"
+    style="@style/AppModalStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="20dp"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="260dp"
+    app:behavior_peekHeight="280dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/account_title"
+        android:textColor="@android:color/black"
+        android:maxLines="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageView
+        android:id="@+id/account_more"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="220dp"
+        android:src="@drawable/ic_action_download"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/account_note"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:maxLines="2"
+        android:textColor="@color/holo_gray_bright"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/account_title"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/account_balance"
+        android:textColor="@android:color/black"
+        android:maxLines="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/account_currency"
+        android:textColor="@color/holo_gray_bright"
+        android:maxLines="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/account_balance"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/account_list_view"
+        android:layout_marginEnd="40dp"
+        android:paddingTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/account_currency"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
